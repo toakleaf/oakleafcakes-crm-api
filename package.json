@@ -1,0 +1,26 @@
+{
+  "name": "oakleafcakes-crm-api",
+  "version": "1.0.0",
+  "description": "CRM API for Oakleaf Cakes Bake Shop",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toakleaf/oakleafcakes-crm-api.git"
+  },
+  "author": "Tyler Oakleaf",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/toakleaf/oakleafcakes-crm-api/issues"
+  },
+  "homepage": "https://github.com/toakleaf/oakleafcakes-crm-api#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.8"
+  }
+}

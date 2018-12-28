@@ -1,0 +1,16 @@
+version: '3.7'
+
+services:
+  oakleafcakes-crm-api:
+    container_name: backend
+    # image: node:11.6
+    build: .
+    command: nodemon
+    working_dir: /usr/src/oakleafcakes-crm-api
+    environment:
+      TEST_VAR: '$TEST_VAR'
+      TESTING: '$TESTING'
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./:/usr/src/oakleafcakes-crm-api

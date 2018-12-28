@@ -4,6 +4,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const helmet = require('helmet');
+const knex = require('knex');
 
 const indexRouter = require('./routes/index');
 const userRouter = require('./routes/user');

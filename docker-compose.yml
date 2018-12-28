@@ -8,7 +8,6 @@ services:
     command: nodemon
     working_dir: /usr/src/oakleafcakes-crm-api
     environment:
-      TEST_VAR: '$TEST_VAR'
       TESTING: '$TESTING'
     ports:
       - '3000:3000'

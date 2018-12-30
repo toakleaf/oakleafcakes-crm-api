@@ -31,13 +31,13 @@ router
             })
             .catch(err => res.status(400).json('unable to get user'));
         } else {
-          res.status(401).json('bad credentials');
+          res.status(401).json('bad credentials 1');
         }
       })
-      .catch(err => res.status(401).json('bad credentials'));
+      .catch(err => res.status(401).json('bad credentials 2'));
   })
   .all((req, res) => {
-    res.status(405).send();
+    res.status(405).send('request method not supported for this page');
   });
 
 module.exports = router;

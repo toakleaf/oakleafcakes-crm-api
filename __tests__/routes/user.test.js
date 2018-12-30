@@ -23,8 +23,8 @@ describe('user', () => {
     });
     it('should return 401 if incomplete credentials', async () => {
       const res = await request(server)
-        .post('/users')
-        .send({ name: 'john' })
+        .post('/user/login')
+        .send({ email: 'none' })
         .expect(401);
     });
   });

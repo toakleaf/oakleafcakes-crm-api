@@ -6,7 +6,7 @@ COPY ./ ./
 
 RUN npm install
 
-RUN npm i -g nodemon
+RUN npm i -g nodemon jest
 
 CMD ["/bin/bash"]
 

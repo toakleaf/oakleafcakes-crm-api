@@ -21,11 +21,23 @@ describe('user', () => {
       const res = await request(server).get('/user/login');
       expect(res.status).toBe(405);
     });
-    it('should return 401 if incomplete credentials', async () => {
+    it('should return 401 if email not found', async () => {
       const res = await request(server)
         .post('/user/login')
         .send({ email: 'none' })
         .expect(401);
+    });
+    it('should return 401 if password hash not matched', async () => {
+      const res = await request(server)
+        .post('/user/login')
+        .send({ email: 'a@a.com', password: 'wrong' })
+        .expect(401);
+    });
+    it('should return 200 if good credentials', async () => {
+      const res = await request(server)
+        .post('/user/login')
+        .send({ email: 'a@a.com', password: 'a' })
+        .expect(200);
     });
   });
 });

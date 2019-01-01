@@ -24,7 +24,7 @@ describe('user', () => {
     it('should return 401 if email not found', async () => {
       const res = await request(server)
         .post('/user/login')
-        .send({ email: 'none' })
+        .send({ email: 'jibberish' })
         .expect(401);
     });
     it('should return 401 if password hash not matched', async () => {

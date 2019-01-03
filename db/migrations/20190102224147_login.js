@@ -11,6 +11,12 @@ exports.up = function(knex, Promise) {
       .boolean('is_admin')
       .notNullable()
       .defaultTo(false);
+    table
+      .bigInteger('user_id')
+      .notNullable()
+      .references('id')
+      .inTable('users')
+      .onDelete('CASCADE');
     table.timestamps(false, true);
   });
 };

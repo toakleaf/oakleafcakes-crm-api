@@ -1,12 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const knex = require('knex');
+const db = require('../db/db');
 const bcrypt = require('bcryptjs');
-
-const db = knex({
-  client: 'pg',
-  connection: process.env.POSTGRES_URI
-});
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {

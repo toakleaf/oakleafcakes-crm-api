@@ -1,4 +1,5 @@
 const request = require('supertest');
+const db = require('../../db/db');
 let server;
 
 describe('user', () => {
@@ -7,6 +8,9 @@ describe('user', () => {
   });
   afterEach(() => {
     server.close();
+  });
+  afterAll(() => {
+    db.destroy();
   });
 
   describe('GET /user', () => {

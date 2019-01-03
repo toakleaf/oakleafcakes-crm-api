@@ -8,17 +8,20 @@ services:
     # env_file should contain all of the below enviroment variables
     # When in production switch out env_file for bash env variables
     # environment:
-    #   - POSTGRES_USER=${POSTGRES_USER}
-    #   - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    #   - POSTGRES_USER=${POSTGRES_USER}
-    #   - POSTGRES_DB=${POSTGRES_DB}
-    #   - POSTGRES_HOST=${POSTGRES_HOST}
+    # - ENVIRONMENT=${ENVIRONMENT}
+    # - POSTGRES_USER=${POSTGRES_USER}
+    # - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    # - POSTGRES_USER=${POSTGRES_USER}
+    # - POSTGRES_DB=${POSTGRES_DB}
+    # - POSTGRES_HOST=${POSTGRES_HOST}
     ports:
       - '5432:5432'
     # command: printenv
 
   # Backend
   node_api:
+    depends_on:
+      - postgres
     container_name: backend
     # image: node:11.6
     build: ./
@@ -27,9 +30,14 @@ services:
     # env_file should contain all of the below enviroment variables
     # When in production switch out env_file for bash env variables
     # environment:
-    #   - POSTGRES_URI=${POSTGRES_URI}
+    # - ENVIRONMENT=${ENVIRONMENT}
+    # - POSTGRES_DEVELOPMENT_URL=${POSTGRES_DEVELOPMENT_URL}
+    # - POSTGRES_STAGING_URL=${POSTGRES_STAGING_URL}
+    # - POSTGRES_PRODUCTION_URL=${POSTGRES_PRODUCTION_URL}
     ports:
       - '3000:3000'
     volumes:
       - ./:/usr/src/oakleafcakes-crm-api
+    command: knex migrate:latest
+    command: knex seed:run
     command: tail -F anything

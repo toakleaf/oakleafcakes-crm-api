@@ -6,7 +6,11 @@ COPY ./ ./
 
 RUN npm install
 
-RUN npm i -g nodemon jest
+RUN npm i -g nodemon jest knex
+
+# RUN knex migrate:latest
+
+# RUN knex seed:run
 
 CMD ["/bin/bash"]
 

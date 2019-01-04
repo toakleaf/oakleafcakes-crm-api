@@ -1,0 +1,8 @@
+module.exports = {
+  NODE_ENV: process.env.NODE_ENV || 'development',
+  JWT_KEY: process.env.JWT_KEY || 'secret',
+  API_KEY: process.env.API_KEY || 'secret',
+  POSTGRES_DEVELOPMENT_URL: process.env.POSTGRES_DEVELOPMENT_URL,
+  POSTGRES_STAGING_URL: process.env.POSTGRES_STAGING_URL,
+  POSTGRES_PRODUCTION_URL: process.env.POSTGRES_PRODUCTION_URL
+};

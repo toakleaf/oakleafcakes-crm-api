@@ -1,18 +1,18 @@
-const handleLogin = (req, res, db, bcrypt) => {
-  db.select('email', 'hash')
+const handleLogin = (req, res, db, bcrypt, jwt, config) => {
+  db.select('email', 'hash', 'user_id', 'is_admin')
     .from('login')
     .where('email', '=', req.body.email)
     .then(data => {
       bcrypt.compare(req.body.password, data[0].hash, (err, isValid) => {
         if (isValid) {
-          return db
-            .select('*')
-            .from('users')
-            .where('email', '=', req.body.email)
-            .then(user => {
-              res.json(user[0]);
-            })
-            .catch(err => res.status(400).json('unable to get user'));
+          const jwtPayload = {
+            user_id: data[0].user_id,
+            is_admin: data[0].is_admin
+          };
+          const token = jwt.sign(jwtPayload, config.JWT_KEY, {
+            expiresIn: '1h'
+          });
+          return res.header('x-auth-token', token).json('success');
         } else {
           res.status(401).json('bad credentials');
         }

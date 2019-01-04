@@ -1,5 +1,7 @@
 const request = require('supertest');
 const db = require('../../db/db');
+const jwt = require('jsonwebtoken');
+const config = require('../../config');
 let server;
 
 describe('user', () => {
@@ -14,8 +16,23 @@ describe('user', () => {
   });
 
   describe('GET /user', () => {
-    it('should return 200', async () => {
+    const token1 = jwt.sign({ user_id: 1, is_admin: true }, config.JWT_KEY, {
+      expiresIn: '1h'
+    });
+    it('should return 401 with no token', async () => {
       const res = await request(server).get('/user');
+      expect(res.status).toBe(401);
+    });
+    it('should return 400 with an invalid token', async () => {
+      const res = await request(server)
+        .get('/user')
+        .set('Authorization', `Bearer gibberish`);
+      expect(res.status).toBe(400);
+    });
+    it('should return 200 with valid token', async () => {
+      const res = await request(server)
+        .get('/user')
+        .set('Authorization', `Bearer ${token1}`);
       expect(res.status).toBe(200);
     });
   });

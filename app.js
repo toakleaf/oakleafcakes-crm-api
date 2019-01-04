@@ -4,6 +4,8 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const helmet = require('helmet');
+const key = require('./middleware/key');
+const config = require('./config');
 
 const indexRouter = require('./routes/index');
 const userRouter = require('./routes/user');
@@ -24,6 +26,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+//in production, all requests need to come from authorized sources
+if (config.NODE_ENV !== 'development') app.use(key);
 
 app.use('/', indexRouter);
 app.use('/user', userRouter);

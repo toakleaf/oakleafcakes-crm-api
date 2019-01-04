@@ -6,9 +6,17 @@ let server;
 
 describe('user', () => {
   const token1 = signToken(INITIAL_USER.user_id, INITIAL_USER.is_admin);
-  let newUserID = null;
-  let token2 = null;
   const random_number = Math.floor(Math.random() * 10000000);
+  let newUserID = null;
+  const newUser = {
+    email: `${random_number}@z.com`,
+    password: 'z',
+    is_admin: false,
+    first_name: 'John',
+    last_name: 'Doe',
+    display_name: 'jdoe'
+  };
+  let token2 = null;
   beforeEach(() => {
     server = require('../../bin/www');
   });
@@ -86,11 +94,7 @@ describe('user', () => {
       const res = await request(server)
         .post('/user/register')
         .set('Authorization', `Bearer ${token1}`)
-        .send({
-          email: `${random_number}@z.com`,
-          password: 'z',
-          is_admin: false
-        });
+        .send(newUser);
       expect(res.status).toBe(200);
       newUserID = res.get('x-created-user-id');
       token2 = signToken(newUserID, false);
@@ -105,6 +109,18 @@ describe('user', () => {
           is_admin: false
         });
       expect(res.status).toBe(403);
+    });
+    it('new user should exist in db', async () => {
+      await db
+        .select('*')
+        .from('user')
+        .where({ id: newUserID })
+        .then(data => {
+          expect(data[0].first_name).not.toBe(null);
+          expect(data[0].last_name).not.toBe(null);
+          expect(data[0].email).not.toBe(null);
+          expect(data[0].display_name).not.toBe(null);
+        });
     });
   });
 });

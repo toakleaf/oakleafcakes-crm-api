@@ -6,5 +6,13 @@ module.exports = {
   POSTGRES_STAGING_URL: process.env.POSTGRES_STAGING_URL,
   POSTGRES_PRODUCTION_URL: process.env.POSTGRES_PRODUCTION_URL,
   JWT_EXPIRATION: '12h',
-  INITIAL_USER: { email: 'a@a.com', password: 'a', is_admin: true, user_id: 1 }
+  INITIAL_USER: {
+    email: 'a@a.com',
+    password: 'a',
+    is_admin: true,
+    user_id: 1,
+    first_name: 'Adam',
+    last_name: 'Zeus',
+    display_name: 'azeus'
+  }
 };

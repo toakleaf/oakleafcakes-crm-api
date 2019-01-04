@@ -1,11 +1,21 @@
 //Only admins can register new users.
 
 const handleRegister = (req, res, db, bcrypt) => {
-  const { email, password, is_admin } = req.body;
+  const {
+    email,
+    password,
+    is_admin,
+    first_name,
+    last_name,
+    display_name
+  } = req.body;
   db('user')
     .returning('id')
     .insert({
-      email: email
+      email: email,
+      first_name: first_name,
+      last_name: last_name,
+      display_name: display_name
     })
     .then(id => {
       bcrypt.hash(password, 10).then(hash => {

@@ -28,7 +28,7 @@ const handleRegister = (req, res, db, bcrypt) => {
             is_admin: is_admin
           })
           .then(data =>
-            res.header('x-created-user-id', data[0].user_id).json(data[0])
+            res.header('X-Created-User', data[0].user_id).json(data[0])
           );
       });
     })
@@ -39,7 +39,7 @@ const handleRegister = (req, res, db, bcrypt) => {
           .send(
             'Failed to create new user. User account with this email already exists.'
           );
-      else res.status(503).send('Failed to create user.' + err);
+      else res.status(503).send('Failed to create user. ' + err);
     });
 };
 

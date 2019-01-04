@@ -96,7 +96,7 @@ describe('user', () => {
         .set('Authorization', `Bearer ${token1}`)
         .send(newUser);
       expect(res.status).toBe(200);
-      newUserID = res.get('x-created-user-id');
+      newUserID = res.get('X-Created-User');
       token2 = signToken(newUserID, false);
     });
     it('should return 403 if is_admin = false', async () => {
@@ -110,16 +110,60 @@ describe('user', () => {
         });
       expect(res.status).toBe(403);
     });
-    it('new user should exist in db', async () => {
+    it('newUser should exist in db', async () => {
       await db
         .select('*')
         .from('user')
         .where({ id: newUserID })
         .then(data => {
-          expect(data[0].first_name).not.toBe(null);
-          expect(data[0].last_name).not.toBe(null);
-          expect(data[0].email).not.toBe(null);
-          expect(data[0].display_name).not.toBe(null);
+          expect(data[0].first_name).toBe(newUser.first_name);
+          expect(data[0].last_name).toBe(newUser.last_name);
+          expect(data[0].email).toBe(newUser.email);
+          expect(data[0].display_name).toBe(newUser.display_name);
+        });
+    });
+  });
+
+  describe('DELETE /user/delete/:id', () => {
+    it('should return 405 if not a DELETE', async () => {
+      const res = await request(server).get('/user/delete/blah');
+      expect(res.status).toBe(405);
+    });
+    it('should return 401 with no token', async () => {
+      const res = await request(server).delete('/user/delete/blah');
+      expect(res.status).toBe(401);
+    });
+    it('should return 400 with an invalid token', async () => {
+      const res = await request(server)
+        .delete('/user/delete/blah')
+        .set('Authorization', `Bearer gibberish`);
+      expect(res.status).toBe(400);
+    });
+    it('should return 403 if is_admin = false and current user !== params.id', async () => {
+      const res = await request(server)
+        .delete('/user/delete/blah')
+        .set('Authorization', `Bearer ${token2}`)
+        .send({
+          email: `${random_number + 1}@z.com`,
+          password: 'z',
+          is_admin: false
+        });
+      expect(res.status).toBe(403);
+    });
+    it('should return 200 with valid token and current user === params.id', async () => {
+      const res = await request(server)
+        .delete(`/user/delete/${newUserID}`)
+        .set('Authorization', `Bearer ${token2}`)
+        .send(newUser);
+      expect(res.status).toBe(200);
+    });
+    it('newUser should NOT exist in db', async () => {
+      await db
+        .select('*')
+        .from('user')
+        .where({ id: newUserID })
+        .then(data => {
+          expect(data).toHaveLength(0);
         });
     });
   });

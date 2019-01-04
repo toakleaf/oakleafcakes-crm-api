@@ -1,9 +1,12 @@
+// INSERTING A VALUE INTO AN AUTOINCREMENT (PRIMARY KEY)
+// COLUMN WILL CAUSE AUTOINCREMENTING TO CEASE!
+
 exports.seed = function(knex, Promise) {
   // Deletes ALL existing entries
-  return knex('users')
+  return knex('user')
     .del()
     .then(function() {
       // Inserts seed entries
-      return knex('users').insert([{ id: 1, email: 'a@a.com' }]);
+      return knex('user').insert([{ email: 'a@a.com' }]);
     });
 };

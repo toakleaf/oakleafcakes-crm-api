@@ -10,7 +10,7 @@ const handleLogin = (req, res, db, bcrypt, jwt, config) => {
             is_admin: data[0].is_admin
           };
           const token = jwt.sign(jwtPayload, config.JWT_KEY, {
-            expiresIn: '1h'
+            expiresIn: config.JWT_EXPIRATION
           });
           return res.header('x-auth-token', token).json('success');
         } else {

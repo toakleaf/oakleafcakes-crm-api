@@ -15,7 +15,7 @@ exports.up = function(knex, Promise) {
       .bigInteger('user_id')
       .notNullable()
       .references('id')
-      .inTable('users')
+      .inTable('user')
       .onDelete('CASCADE');
     table.timestamps(false, true);
   });

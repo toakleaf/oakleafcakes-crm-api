@@ -8,7 +8,7 @@ describe('database', () => {
   it('should be able to retrieve data from db', async () => {
     await db
       .select('*')
-      .from('users')
+      .from('user')
       .then(data => {
         expect(JSON.stringify(data[0].email).length).toBeGreaterThan(0);
       });

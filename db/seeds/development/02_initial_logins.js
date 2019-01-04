@@ -1,5 +1,6 @@
 // INSERTING A VALUE INTO AN AUTOINCREMENT (PRIMARY KEY)
 // COLUMN WILL CAUSE AUTOINCREMENTING TO CEASE!
+const { INITIAL_USER } = require('../../../config');
 
 exports.seed = function(knex, Promise) {
   // Deletes ALL existing entries
@@ -10,9 +11,9 @@ exports.seed = function(knex, Promise) {
       return knex('login').insert([
         {
           hash: '$2a$10$WAK21U0LWl7C//jJ.DOB2uPP1DJQh7KUDgasdyQeGzkop2Pzl8W7u',
-          email: 'a@a.com',
-          is_admin: 'TRUE',
-          user_id: 1
+          email: INITIAL_USER.email,
+          is_admin: INITIAL_USER.is_admin,
+          user_id: INITIAL_USER.user_id
         }
       ]);
     });

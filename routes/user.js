@@ -9,10 +9,12 @@ const config = require('../config');
 const handleLogin = require('../controllers/handleLogin');
 const handleRegister = require('../controllers/handleRegister');
 
-/* GET users listing. */
-router.get('/', auth, function(req, res, next) {
-  res.send('respond with a resource');
-});
+router
+  .route('/')
+  .get(auth, (req, res) => res.send('respond with a resource'))
+  .all((req, res) => {
+    res.status(405).send('request method not supported for this page');
+  });
 
 router
   .route('/login')

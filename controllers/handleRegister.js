@@ -17,7 +17,9 @@ const handleRegister = (req, res, db, bcrypt) => {
             hash: hash,
             is_admin: is_admin
           })
-          .then(data => res.json(data[0]));
+          .then(data =>
+            res.header('x-created-user-id', data[0].user_id).json(data[0])
+          );
       });
     })
     .catch(err => {

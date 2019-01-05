@@ -130,7 +130,7 @@ describe('user', () => {
         });
       expect(res.status).toBe(403);
     });
-    it('newUser should exist in db', async () => {
+    it('newUser should exist in user table', async () => {
       expect.assertions(4);
       const data = await db
         .select('*')
@@ -140,6 +140,16 @@ describe('user', () => {
       expect(data[0].last_name).toBe(newUser.last_name);
       expect(data[0].email).toBe(newUser.email);
       expect(data[0].display_name).toBe(newUser.display_name);
+    });
+    it('newUser should exist in login table', async () => {
+      expect.assertions(3);
+      const data = await db
+        .select('*')
+        .from('login')
+        .where({ user_id: newUserID });
+      expect(data[0]).toHaveProperty('id');
+      expect(data[0]).toHaveProperty('hash');
+      expect(data[0]).toHaveProperty('email');
     });
   });
 
@@ -181,12 +191,20 @@ describe('user', () => {
         .send(newUser);
       expect(res.status).toBe(200);
     });
-    it('newUser should NOT exist in db', async () => {
+    it('newUser should have been deleted from user table', async () => {
       expect.assertions(1);
       const data = await db
         .select('*')
         .from('user')
         .where({ id: newUserID });
+      expect(data).toHaveLength(0);
+    });
+    it('newUser should have been deleted (via cascade) from login table', async () => {
+      expect.assertions(1);
+      const data = await db
+        .select('*')
+        .from('login')
+        .where({ user_id: newUserID });
       expect(data).toHaveLength(0);
     });
   });

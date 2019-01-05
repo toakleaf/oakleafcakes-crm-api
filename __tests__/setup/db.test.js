@@ -6,11 +6,8 @@ describe('database', () => {
   });
 
   it('should be able to retrieve data from db', async () => {
-    await db
-      .select('*')
-      .from('user')
-      .then(data => {
-        expect(JSON.stringify(data[0].email).length).toBeGreaterThan(0);
-      });
+    expect.assertions(1);
+    const data = await db.select('*').from('user');
+    expect(JSON.stringify(data[0].email).length).toBeGreaterThan(0);
   });
 });

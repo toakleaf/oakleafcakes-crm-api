@@ -7,8 +7,8 @@ module.exports = {
   POSTGRES_PRODUCTION_URL: process.env.POSTGRES_PRODUCTION_URL,
   JWT_EXPIRATION: '12h',
   INITIAL_USER: {
-    email: 'a@a.com',
-    password: 'a',
+    email: 'a@google.com',
+    password: '1234567890',
     is_admin: true,
     user_id: 1,
     first_name: 'Adam',

@@ -10,6 +10,7 @@ describe('customer', () => {
   });
   describe('GET /customer', () => {
     it('should return 200', async () => {
+      expect.assertions(1);
       const res = await request(server).get('/customer');
       expect(res.status).toBe(200);
     });

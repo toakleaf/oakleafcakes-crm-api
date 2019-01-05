@@ -10,6 +10,7 @@ describe('index', () => {
   });
   describe('GET /', () => {
     it('should return 200', async () => {
+      expect.assertions(1);
       const res = await request(server).get('/');
       expect(res.status).toBe(200);
     });

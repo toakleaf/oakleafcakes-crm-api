@@ -10,6 +10,7 @@ describe('app', () => {
   });
   describe('Negative Cases', () => {
     it('should return 404', async () => {
+      expect.assertions(1);
       const res = await request(server).get('/asdgasdgasddg');
       expect(res.status).toBe(404);
     });

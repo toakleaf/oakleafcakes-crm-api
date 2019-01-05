@@ -10,7 +10,7 @@ exports.seed = function(knex, Promise) {
       // Inserts seed entries
       return knex('login').insert([
         {
-          hash: '$2a$10$WAK21U0LWl7C//jJ.DOB2uPP1DJQh7KUDgasdyQeGzkop2Pzl8W7u',
+          hash: '$2a$10$2ESF8u/2KPoSSLSl/s613uodlSyMtqgkmZRkRuodX7vQE6o4VnTHu',
           email: INITIAL_USER.email,
           is_admin: INITIAL_USER.is_admin,
           user_id: INITIAL_USER.user_id

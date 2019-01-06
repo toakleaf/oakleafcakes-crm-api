@@ -1,4 +1,4 @@
-const handleLogin = (req, res, db, bcrypt, jwt, signToken, config) => {
+module.exports = (req, res, db, bcrypt, jwt, signToken, config) => {
   db.select('email', 'hash', 'user_id', 'is_admin')
     .from('login')
     .where('email', '=', req.body.email)
@@ -14,5 +14,3 @@ const handleLogin = (req, res, db, bcrypt, jwt, signToken, config) => {
     })
     .catch(err => res.status(401).json('bad credentials'));
 };
-
-module.exports = handleLogin;

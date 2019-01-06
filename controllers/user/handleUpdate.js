@@ -1,8 +1,7 @@
-//Current user can update their own user account. Admins can update anyone.
-
-const handleUpdate = async (req, res, db, bcrypt) => {
+module.exports = async (req, res, db, bcrypt) => {
   if (req.params.id !== req.user.user_id && !req.user.is_admin) {
-    return res.status(403).send('Access denied.');
+    //Current user can update their own user account. Admins can update anyone.
+    return res.status(403).send('Not authorized to update this account.');
   }
   const {
     email,
@@ -71,5 +70,3 @@ const handleUpdate = async (req, res, db, bcrypt) => {
     }
   } else runUpdates();
 };
-
-module.exports = handleUpdate;

@@ -1,6 +1,4 @@
-//Only admins can register new users.
-
-const handleRegister = async (req, res, db, bcrypt) => {
+module.exports = async (req, res, db, bcrypt) => {
   const {
     email,
     password,
@@ -43,5 +41,3 @@ const handleRegister = async (req, res, db, bcrypt) => {
     res.status(503).send('Failed to create user.');
   }
 };
-
-module.exports = handleRegister;

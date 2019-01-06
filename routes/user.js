@@ -9,6 +9,7 @@ const db = require('../db/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('../config');
+const handleGet = require('../controllers/user/handleGet');
 const handleLogin = require('../controllers/user/handleLogin');
 const handleRegister = require('../controllers/user/handleRegister');
 const handleDelete = require('../controllers/user/handleDelete');
@@ -18,7 +19,7 @@ const signToken = require('../controllers/user/signToken');
 //Try to use dependency injection where possible.
 router
   .route('/')
-  .get(auth, (req, res) => res.send('respond with a resource'))
+  .get(auth, (req, res) => handleGet(req, res, db))
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');
   });

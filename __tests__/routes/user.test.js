@@ -48,12 +48,13 @@ describe('user', () => {
         .set('Authorization', `Bearer gibberish`);
       expect(res.status).toBe(400);
     });
-    it('should return 200 with valid token', async () => {
-      expect.assertions(1);
+    it('should return 200 and valid json with valid token', async () => {
+      expect.assertions(2);
       const res = await request(server)
         .get('/user')
         .set('Authorization', `Bearer ${token1}`);
       expect(res.status).toBe(200);
+      expect(res.body.id).not.toBeNull();
     });
   });
 

@@ -1,4 +1,4 @@
-const signToken = require('../../controllers/signToken');
+const signToken = require('../../controllers/user/signToken');
 const config = require('../../config');
 const jwt = require('jsonwebtoken');
 

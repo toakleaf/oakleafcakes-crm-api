@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const config = require('../config');
+const config = require('../../config');
 
 module.exports = (user_id, is_admin, expiresIn = '12h') => {
   const token = jwt.sign(

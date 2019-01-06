@@ -3,7 +3,6 @@
 const config = require('../config.js');
 
 module.exports = function(req, res, next) {
-  //must be called after middleware/auth to get req.user data
   const apiKey = req.header('x-api-key');
   if (!apiKey) return res.status(401).json('Access denied. Missing API Key.');
   if (apiKey !== config.API_KEY)

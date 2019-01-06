@@ -1,6 +1,6 @@
 //Only admins can register new users.
 
-const handleRegister = (req, res, db, bcrypt) => {
+const handleRegister = async (req, res, db, bcrypt) => {
   const {
     email,
     password,
@@ -9,30 +9,28 @@ const handleRegister = (req, res, db, bcrypt) => {
     last_name,
     display_name
   } = req.body;
-  db('user')
-    .returning('id')
-    .insert({
-      email: email,
-      first_name: first_name,
-      last_name: last_name,
-      display_name: display_name
-    })
-    .then(id => {
-      bcrypt.hash(password, 10).then(hash => {
-        db('login')
-          .returning(['user_id', 'email', 'is_admin'])
-          .insert({
-            user_id: parseInt(id),
-            email: email,
-            hash: hash,
-            is_admin: is_admin
-          })
-          .then(data =>
-            res.header('X-Created-User', data[0].user_id).json(data[0])
-          );
-      });
-    })
-    .catch(err => {
+
+  try {
+    const hash = await bcrypt.hash(password, 10);
+    db.transaction(trx => {
+      trx('user')
+        .returning('*')
+        .insert({ email, first_name, last_name, display_name })
+        .then(userData => {
+          return trx('login')
+            .insert({
+              user_id: userData[0].id,
+              email,
+              hash,
+              is_admin
+            })
+            .then(() => {
+              res.json(userData[0]);
+            });
+        })
+        .then(trx.commit)
+        .catch(trx.rollback);
+    }).catch(err => {
       if (err.message.includes('duplicate key'))
         res
           .status(503)
@@ -41,6 +39,9 @@ const handleRegister = (req, res, db, bcrypt) => {
           );
       else res.status(503).send('Failed to create user. ' + err);
     });
+  } catch (err) {
+    res.status(503).send('Failed to create user.');
+  }
 };
 
 module.exports = handleRegister;

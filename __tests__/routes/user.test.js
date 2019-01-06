@@ -115,7 +115,7 @@ describe('user', () => {
         .set('Authorization', `Bearer ${token1}`)
         .send(newUser);
       expect(res.status).toBe(200);
-      newUserID = res.get('X-Created-User');
+      newUserID = res.body.id;
       token2 = signToken(newUserID, false);
     });
     it('should return 403 if is_admin = false', async () => {

@@ -217,6 +217,48 @@ describe('user', () => {
     });
   });
 
+  // GET user/list/?querystring
+  describe('GET /user/list', () => {
+    it('should return 405 if not a GET', async () => {
+      expect.assertions(1);
+      const res = await request(server).put('/user/list');
+      expect(res.status).toBe(405);
+    });
+    it('should return 400 with an invalid token', async () => {
+      expect.assertions(1);
+      const res = await request(server)
+        .get('/user/list')
+        .set('Authorization', `Bearer gibberish`);
+      expect(res.status).toBe(400);
+    });
+    it('should return 403 if is_admin = false', async () => {
+      expect.assertions(1);
+      const res = await request(server)
+        .get('/user/list')
+        .set('Authorization', `Bearer ${token2}`)
+        .send({
+          first_name: 'blah'
+        });
+      expect(res.status).toBe(403);
+    });
+    it('should return 400 with an invalid query string', async () => {
+      expect.assertions(1);
+      const res = await request(server)
+        .get('/user/list/?orderby=gibberish')
+        .set('Authorization', `Bearer ${token1}`);
+      expect(res.status).toBe(400);
+    });
+    it('should return 200 with an valid query string', async () => {
+      expect.assertions(2);
+      const res = await request(server)
+        .get('/user/list/?orderby=id&order=desc')
+        .set('Authorization', `Bearer ${token1}`);
+      expect(res.status).toBe(200);
+      expect(res.body.length).toBeGreaterThanOrEqual(2);
+      // 2 because original user + test created user
+    });
+  });
+
   // DELETE user/:id
   describe('DELETE /user/:id', () => {
     it('should return 401 with no token', async () => {

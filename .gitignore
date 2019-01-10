@@ -13,6 +13,7 @@
 /.private
 
 # misc
+sandbox.js
 .DS_Store
 .env
 .env.local

@@ -1,5 +1,6 @@
 const message = require('../email/messages/passwordReset');
-const { COMPANY_NAME, COMPANY_SITE } = require('../../config');
+// const { COMPANY_NAME, COMPANY_SITE } = require('../../config');
+
 module.exports = async (req, res, db, bcrypt, crypto, sendMail, config) => {
   try {
     const MINUTES_TO_EXPIRATION = 45;
@@ -20,20 +21,17 @@ module.exports = async (req, res, db, bcrypt, crypto, sendMail, config) => {
       });
     if (!id[0]) throw new Error('email not found');
     const resetMessage = message(id, token);
-    await sendMail(
-      {
-        ...resetMessage,
-        to: req.body.email,
-        from: `${COMPANY_NAME} Password Reset <noreply@${COMPANY_SITE}>`
-      },
-      err => {
-        if (err) throw new Error(err);
-      }
-    );
+    const sent = await sendMail({
+      ...resetMessage,
+      to: req.body.email,
+      from: `${config.COMPANY_NAME} Password Reset <noreply@${
+        config.COMPANY_SITE
+      }>`
+    });
     res.send('ok');
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     //Don't reveal error to end user
-    res.send('ok');
+    res.send('ok' + err);
   }
 };

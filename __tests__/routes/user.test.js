@@ -212,9 +212,45 @@ describe('user', () => {
       const data = await db
         .select(['created_at', 'updated_at'])
         .from('login')
-        .where({ user_id: newUserID });
+        .where('user_id', newUserID);
       expect(data[0].updated_at).not.toBe(data[0].created_at);
     });
+  });
+
+  // POST user/forgot
+  describe('POST user/forgot', () => {
+    it('should return 400 if email is invalid', async () => {
+      expect.assertions(1);
+      const res = await request(server)
+        .post('/user/forgot')
+        .send({ email: 'a' });
+      expect(res.status).toBe(400);
+    });
+    it('should return 200, but not update the login table if email not found', async () => {
+      expect.assertions(2);
+      const res = await request(server)
+        .post('/user/forgot')
+        .send({ email: 'nope@nope.com' });
+      expect(res.status).toBe(200);
+      const data = await db
+        .select('reset_token_hash')
+        .from('login')
+        .where('user_id', newUserID);
+      expect(data[0].reset_token_hash).toBeNull();
+    });
+    // it('should return 200', async () => {
+    //   expect.assertions(3);
+    //   const res = await request(server)
+    //     .post('/user/forgot')
+    //     .send({ email: newUser.email });
+    //   expect(res.status).toBe(200);
+    //   const data = await db
+    //     .select(['reset_token_hash', 'reset_token_expiration'])
+    //     .from('login')
+    //     .where('user_id', newUserID);
+    //   expect(data[0].reset_token_hash).not.toBeNull();
+    //   expect(data[0].reset_token_expiration).not.toBeNull();
+    // });
   });
 
   // GET user/list/?querystring

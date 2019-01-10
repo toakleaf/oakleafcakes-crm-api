@@ -2,7 +2,7 @@ module.exports = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   COMPANY_NAME: process.env.COMPANY_NAME || 'Test CRM',
   COMPANY_SITE: process.env.COMPANY_SITE || 'test.com',
-  COMPANY_EMAIL: process.env.COMPANY_EMAIL || 'test@test.com'
+  COMPANY_EMAIL: process.env.COMPANY_EMAIL || 'test@test.com',
   JWT_KEY: process.env.JWT_KEY || 'secret',
   API_KEY: process.env.API_KEY || 'secret',
   POSTGRES_DEVELOPMENT_URL: process.env.POSTGRES_DEVELOPMENT_URL,

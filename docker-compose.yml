@@ -47,6 +47,7 @@ services:
       - '3000:3000'
     volumes:
       - ./:/usr/src/oakleafcakes-crm-api
-    command: knex migrate:latest
-    command: knex seed:run
+      - /usr/src/oakleafcakes-crm-api/node_modules
+    # command: knex migrate:latest
+    # command: knex seed:run
     command: tail -F anything

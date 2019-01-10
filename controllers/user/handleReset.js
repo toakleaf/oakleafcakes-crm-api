@@ -31,11 +31,12 @@ module.exports = async (req, res, db, bcrypt, signToken, config) => {
         hash: hash,
         reset_token_hash: null,
         updated_at: now
-      });
+      })
+      .then(data => data[0]);
 
-    if (!data[0].user_id) throw new Error('failed to update login');
+    if (!data.user_id) throw new Error('failed to update login');
 
-    const token = signToken(data[0].user_id, data[0].is_admin);
+    const token = signToken(data.user_id, data.is_admin);
     return res.header('x-auth-token', token).json('success');
   } catch (err) {
     res.status(401).json('bad credentials ');

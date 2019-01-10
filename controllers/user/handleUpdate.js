@@ -8,7 +8,7 @@ module.exports = async (req, res, db, bcrypt, config) => {
     display_name
   } = req.body;
 
-  const now = db.fn.now();
+  const now = new Date(Date.now());
 
   const userUpdates = {
     ...(email ? { email } : {}),

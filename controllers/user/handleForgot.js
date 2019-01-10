@@ -15,7 +15,8 @@ module.exports = async (req, res, db, bcrypt, crypto, sendMail, config) => {
       .returning('id')
       .update({
         reset_token_hash: hash,
-        reset_token_expiration: expiration.toISOString()
+        reset_token_expiration: expiration.toISOString(),
+        updated_at: new Date(Date.now())
       });
     if (!id[0]) throw new Error('email not found');
     const resetMessage = message(id, token);

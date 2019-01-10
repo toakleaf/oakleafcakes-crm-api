@@ -61,7 +61,9 @@ router
 
 router
   .route('/reset/:id/:token')
-  .post(valReset, (req, res) => handleReset(req, res, db, bcrypt, config))
+  .post(valReset, (req, res) =>
+    handleReset(req, res, db, bcrypt, signToken, config)
+  )
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');
   });

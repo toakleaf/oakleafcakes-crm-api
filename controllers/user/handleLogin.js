@@ -4,12 +4,9 @@ module.exports = (req, res, db, bcrypt, jwt, signToken, config) => {
     .where('email', '=', req.body.email)
     .then(data => {
       bcrypt.compare(req.body.password, data[0].hash, (err, isValid) => {
-        if (isValid) {
-          const token = signToken(data[0].user_id, data[0].is_admin);
-          return res.header('x-auth-token', token).json('success');
-        } else {
-          res.status(401).json('bad credentials');
-        }
+        if (!isValid) return res.status(401).json('bad credentials');
+        const token = signToken(data[0].user_id, data[0].is_admin);
+        return res.header('x-auth-token', token).json('success');
       });
     })
     .catch(err => res.status(401).json('bad credentials'));

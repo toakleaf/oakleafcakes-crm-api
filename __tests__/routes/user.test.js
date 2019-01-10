@@ -10,7 +10,7 @@ describe('user', () => {
   let newUserID = null;
   const newUser = {
     email: `${random_number}@google.com`,
-    password: 'abcdefghij',
+    password: 'abcdefghijklmnopqrstuvwxyz',
     is_admin: false,
     first_name: 'John',
     last_name: 'Doe',
@@ -18,7 +18,7 @@ describe('user', () => {
   };
   let token2 = null;
   const updated_name = 'Freddy';
-  const updated_pw = '0987654321';
+  const updated_pw = '1098765432109876543210';
   beforeEach(() => {
     server = require('../../bin/www');
   });
@@ -122,12 +122,12 @@ describe('user', () => {
         .send({ email: 'a', password: 'a' });
       expect(res.status).toBe(400);
     });
-    it('should return 200 with valid token and data', async () => {
+    it('should return 200 with valid token and data, even if email is uppercase', async () => {
       expect.assertions(1);
       const res = await request(server)
         .post('/user/register')
         .set('Authorization', `Bearer ${token1}`)
-        .send(newUser);
+        .send({ ...newUser, email: newUser.email.toUpperCase() });
       expect(res.status).toBe(200);
       newUserID = res.body.id;
       token2 = signToken(newUserID, false);
@@ -144,7 +144,7 @@ describe('user', () => {
         });
       expect(res.status).toBe(403);
     });
-    it('newUser should exist in user table', async () => {
+    it('newUser should exist in user table, even if email case is different', async () => {
       expect.assertions(4);
       const data = await db
         .select('*')
@@ -155,7 +155,7 @@ describe('user', () => {
       expect(data[0].email).toBe(newUser.email);
       expect(data[0].display_name).toBe(newUser.display_name);
     });
-    it('newUser should exist in login table', async () => {
+    it('newUser should exist in login table, even if email case is different', async () => {
       expect.assertions(3);
       const data = await db
         .select('*')
@@ -163,7 +163,7 @@ describe('user', () => {
         .where({ user_id: newUserID });
       expect(data[0]).toHaveProperty('id');
       expect(data[0]).toHaveProperty('hash');
-      expect(data[0]).toHaveProperty('email');
+      expect(data[0].email).toBe(newUser.email);
     });
   });
 

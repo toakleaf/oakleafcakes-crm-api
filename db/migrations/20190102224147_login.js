@@ -17,6 +17,8 @@ exports.up = function(knex, Promise) {
       .references('id')
       .inTable('user')
       .onDelete('CASCADE');
+    table.string('reset_token_hash');
+    table.datetime('reset_token_expiration');
     table.timestamps(false, true);
   });
 };

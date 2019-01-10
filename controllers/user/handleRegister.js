@@ -1,4 +1,4 @@
-module.exports = async (req, res, db, bcrypt) => {
+module.exports = async (req, res, db, bcrypt, config) => {
   const {
     email,
     password,
@@ -9,7 +9,7 @@ module.exports = async (req, res, db, bcrypt) => {
   } = req.body;
 
   try {
-    const hash = await bcrypt.hash(password, 10);
+    const hash = await bcrypt.hash(password, config.BCRYPT_COST_FACTOR);
     db.transaction(trx => {
       trx('user')
         .returning('*')

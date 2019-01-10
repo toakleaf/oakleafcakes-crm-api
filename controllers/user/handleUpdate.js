@@ -1,8 +1,4 @@
-module.exports = async (req, res, db, bcrypt) => {
-  if (req.params.id !== req.user.user_id && !req.user.is_admin) {
-    //Current user can update their own user account. Admins can update anyone.
-    return res.status(403).send('Not authorized to update this account.');
-  }
+module.exports = async (req, res, db, bcrypt, config) => {
   const {
     email,
     password,
@@ -11,20 +7,9 @@ module.exports = async (req, res, db, bcrypt) => {
     last_name,
     display_name
   } = req.body;
-  if (!req.user.is_admin && is_admin) {
-    return res.status(403).send('Only admins can create admin accounts');
-  }
-  if (
-    !email &&
-    !password &&
-    !is_admin &&
-    !first_name &&
-    !last_name &&
-    !display_name
-  ) {
-    return res.status(400).send('No update request information given.');
-  }
+
   const now = db.fn.now();
+
   const userUpdates = {
     ...(email ? { email } : {}),
     ...(first_name ? { first_name } : {}),
@@ -32,6 +17,7 @@ module.exports = async (req, res, db, bcrypt) => {
     ...(display_name ? { display_name } : {}),
     updated_at: now
   };
+
   const loginUpdates = {
     ...(email ? { email } : {}),
     ...(is_admin ? { is_admin } : {}),
@@ -63,7 +49,7 @@ module.exports = async (req, res, db, bcrypt) => {
 
   if (password) {
     try {
-      const hash = await bcrypt.hash(password, 10);
+      const hash = await bcrypt.hash(password, config.BCRYPT_COST_FACTOR);
       runUpdates(hash);
     } catch (err) {
       return res.status(503).send('Failed to update user. ' + err);

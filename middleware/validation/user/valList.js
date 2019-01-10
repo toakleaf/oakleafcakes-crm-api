@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-module.exports = function(req, res, next) {
+module.exports = (req, res, next) => {
   const schema = Joi.object().keys({
     orderby: Joi.valid([
       'id',

@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-const { GMAIL } = require('../../config');
+const { GMAIL, COMPANY_NAME, COMPANY_EMAIL } = require('../../config');
 
 const transport = {
   service: 'gmail',
@@ -13,7 +13,7 @@ const transport = {
 };
 
 const transporter = nodemailer.createTransport(transport, {
-  from: 'Oakleaf Cakes <orders@oakleafcakes.com>'
+  from: `${COMPANY_NAME} <${COMPANY_EMAIL}>`
 });
 
 module.exports = (message, callback) => transporter.sendMail(message, callback);

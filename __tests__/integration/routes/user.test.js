@@ -1,28 +1,28 @@
 const request = require('supertest');
-const db = require('../../db/db');
-const signToken = require('../../controllers/user/signToken');
-const { INITIAL_USER } = require('../../config');
+const db = require('../../../db/db');
+const signToken = require('../../../controllers/user/signToken');
+const { INITIAL_USER } = require('../../../config');
 let server;
 
 describe('user', () => {
-  const token1 = signToken(INITIAL_USER.user_id, INITIAL_USER.is_admin);
-  const random_number = Math.floor(Math.random() * 10000000);
-  let newUserID = null;
-  let newUserLoginID = null;
-  const newUser = {
-    email: `${random_number}@google.com`,
-    password: 'abcdefghijklmnopqrstuvwxyz',
-    is_admin: false,
-    first_name: 'John',
-    last_name: 'Doe',
-    display_name: 'jdoe'
+  const session = {
+    initialToken: signToken(INITIAL_USER.user_id, INITIAL_USER.is_admin),
+    newUser: {
+      email: `stub@dfassdf.com`,
+      password: 'abcdefghijklmnopqrstuvwxyz',
+      is_admin: false,
+      first_name: 'John',
+      last_name: 'Doe',
+      display_name: 'jdoe'
+    },
+    newUserLoginID: null,
+    newUserID: null,
+    newUserToken: null,
+    pwResetToken: null
   };
-  let token2 = null;
-  const updated_name = 'Freddy';
-  const updated_pw = '10987654321098765432102';
-  let resetToken;
+
   beforeEach(() => {
-    server = require('../../bin/www');
+    server = require('../../../bin/www');
   });
   afterEach(() => {
     server.close();
@@ -54,9 +54,85 @@ describe('user', () => {
       expect.assertions(2);
       const res = await request(server)
         .get('/user')
-        .set('Authorization', `Bearer ${token1}`);
+        .set('Authorization', `Bearer ${session.initialToken}`);
       expect(res.status).toBe(200);
       expect(res.body.id).not.toBeNull();
+    });
+  });
+
+  // POST /user/register
+  describe('POST /user/register', () => {
+    it('should return 405 if not a POST', async () => {
+      expect.assertions(1);
+      const res = await request(server).get('/user/register');
+      expect(res.status).toBe(405);
+    });
+    it('should return 401 with no token', async () => {
+      expect.assertions(1);
+      const res = await request(server).post('/user/register');
+      expect(res.status).toBe(401);
+    });
+    it('should return 400 with an invalid token', async () => {
+      expect.assertions(1);
+      const res = await request(server)
+        .post('/user/register')
+        .set('Authorization', `Bearer gibberish`);
+      expect(res.status).toBe(400);
+    });
+    it('should return 400 if email or password invalid', async () => {
+      expect.assertions(1);
+      const res = await request(server)
+        .post('/user/register')
+        .set('Authorization', `Bearer ${session.initialToken}`)
+        .send({ email: 'a', password: 'a' });
+      expect(res.status).toBe(400);
+    });
+    it('should return 200 with valid token and data, even if email is uppercase', async () => {
+      expect.assertions(1);
+      const res = await request(server)
+        .post('/user/register')
+        .set('Authorization', `Bearer ${session.initialToken}`)
+        .send({
+          ...session.newUser,
+          email: session.newUser.email.toUpperCase()
+        });
+      expect(res.status).toBe(200);
+      session.newUserID = res.body.id;
+      session.newUserToken = signToken(session.newUserID, false);
+    });
+    it('should return 403 if is_admin = false', async () => {
+      expect.assertions(1);
+      const res = await request(server)
+        .post('/user/register')
+        .set('Authorization', `Bearer ${session.newUserToken}`)
+        .send({
+          email: `$adfasd@sdfsdfsd.com`,
+          password: 'z',
+          is_admin: false
+        });
+      expect(res.status).toBe(403);
+    });
+    it('session.newUser should exist in user table, even if email case is different', async () => {
+      expect.assertions(4);
+      const data = await db
+        .select('*')
+        .from('user')
+        .where({ id: session.newUserID });
+      expect(data[0].first_name).toBe(session.newUser.first_name);
+      expect(data[0].last_name).toBe(session.newUser.last_name);
+      expect(data[0].email).toBe(session.newUser.email);
+      expect(data[0].display_name).toBe(session.newUser.display_name);
+    });
+    it('session.newUser should exist in login table, even if email case is different', async () => {
+      expect.assertions(3);
+      const data = await db
+        .select('*')
+        .from('login')
+        .where({ user_id: session.newUserID });
+      session.newUserLoginID = data[0].id;
+      expect(data[0]).toHaveProperty('id');
+      expect(data[0]).toHaveProperty('hash');
+      expect(data[0].email).toBe(session.newUser.email);
     });
   });
 
@@ -85,88 +161,15 @@ describe('user', () => {
       expect.assertions(1);
       const res = await request(server)
         .post('/user/login')
-        .send({ ...INITIAL_USER, password: 'VERYWRONG!!!' });
+        .send({ ...session.newUser, password: 'VERYWRONG!!!' });
       expect(res.status).toBe(401);
     });
     it('should return 200 if good credentials', async () => {
       expect.assertions(1);
       const res = await request(server)
         .post('/user/login')
-        .send(INITIAL_USER);
+        .send(session.newUser);
       expect(res.status).toBe(200);
-    });
-  });
-
-  // POST /user/register
-  describe('POST /user/register', () => {
-    it('should return 405 if not a POST', async () => {
-      expect.assertions(1);
-      const res = await request(server).get('/user/register');
-      expect(res.status).toBe(405);
-    });
-    it('should return 401 with no token', async () => {
-      expect.assertions(1);
-      const res = await request(server).post('/user/register');
-      expect(res.status).toBe(401);
-    });
-    it('should return 400 with an invalid token', async () => {
-      expect.assertions(1);
-      const res = await request(server)
-        .post('/user/register')
-        .set('Authorization', `Bearer gibberish`);
-      expect(res.status).toBe(400);
-    });
-    it('should return 400 if email or password invalid', async () => {
-      expect.assertions(1);
-      const res = await request(server)
-        .post('/user/register')
-        .set('Authorization', `Bearer ${token1}`)
-        .send({ email: 'a', password: 'a' });
-      expect(res.status).toBe(400);
-    });
-    it('should return 200 with valid token and data, even if email is uppercase', async () => {
-      expect.assertions(1);
-      const res = await request(server)
-        .post('/user/register')
-        .set('Authorization', `Bearer ${token1}`)
-        .send({ ...newUser, email: newUser.email.toUpperCase() });
-      expect(res.status).toBe(200);
-      newUserID = res.body.id;
-      token2 = signToken(newUserID, false);
-    });
-    it('should return 403 if is_admin = false', async () => {
-      expect.assertions(1);
-      const res = await request(server)
-        .post('/user/register')
-        .set('Authorization', `Bearer ${token2}`)
-        .send({
-          email: `${random_number + 1}@z.com`,
-          password: 'z',
-          is_admin: false
-        });
-      expect(res.status).toBe(403);
-    });
-    it('newUser should exist in user table, even if email case is different', async () => {
-      expect.assertions(4);
-      const data = await db
-        .select('*')
-        .from('user')
-        .where({ id: newUserID });
-      expect(data[0].first_name).toBe(newUser.first_name);
-      expect(data[0].last_name).toBe(newUser.last_name);
-      expect(data[0].email).toBe(newUser.email);
-      expect(data[0].display_name).toBe(newUser.display_name);
-    });
-    it('newUser should exist in login table, even if email case is different', async () => {
-      expect.assertions(3);
-      const data = await db
-        .select('*')
-        .from('login')
-        .where({ user_id: newUserID });
-      newUserLoginID = data[0].id;
-      expect(data[0]).toHaveProperty('id');
-      expect(data[0]).toHaveProperty('hash');
-      expect(data[0].email).toBe(newUser.email);
     });
   });
 
@@ -188,7 +191,7 @@ describe('user', () => {
       expect.assertions(1);
       const res = await request(server)
         .put('/user/blah')
-        .set('Authorization', `Bearer ${token2}`)
+        .set('Authorization', `Bearer ${session.newUserToken}`)
         .send({
           first_name: 'blah'
         });
@@ -197,33 +200,33 @@ describe('user', () => {
     it('should return 200 with valid token and current user === params.id', async () => {
       expect.assertions(1);
       const res = await request(server)
-        .put(`/user/${newUserID}`)
-        .set('Authorization', `Bearer ${token2}`)
-        .send({ first_name: updated_name, password: updated_pw });
+        .put(`/user/${session.newUserID}`)
+        .set('Authorization', `Bearer ${session.newUserToken}`)
+        .send({ first_name: 'updated_name', password: 'updated_password' });
       expect(res.status).toBe(200);
     });
-    it('newUser should have been updated in user table', async () => {
+    it('session.newUser should have been updated in user table', async () => {
       expect.assertions(1);
       const data = await db
         .select('*')
         .from('user')
-        .where({ id: newUserID });
-      expect(data[0].first_name).toBe(updated_name);
+        .where({ id: session.newUserID });
+      expect(data[0].first_name).not.toBe(session.newUser.first_name);
     });
-    it('newUser should have been updated in login table', async () => {
+    it('session.newUser should have been updated in login table', async () => {
       expect.assertions(1);
       const data = await db
         .select(['created_at', 'updated_at'])
         .from('login')
-        .where('user_id', newUserID);
+        .where('user_id', session.newUserID);
       expect(data[0].updated_at).not.toBe(data[0].created_at);
     });
   });
 
   // POST user/forgot
   describe('POST user/forgot', () => {
-    jest.mock('../../controllers/email/sendMail');
-    const sendMail = require('../../controllers/email/sendMail');
+    jest.mock('../../../controllers/email/sendMail');
+    const sendMail = require('../../../controllers/email/sendMail');
     sendMail.mockResolvedValue({
       accepted: ['97891@google.com'],
       rejected: [],
@@ -234,8 +237,8 @@ describe('user', () => {
       envelope: { from: 'noreply@test.com', to: ['97891@google.com'] },
       messageId: '<17e409d6-958c-a77e-e63f-40358ae29266@test.com>'
     });
-    jest.mock('../../controllers/email/messages/passwordReset');
-    const message = require('../../controllers/email/messages/passwordReset');
+    jest.mock('../../../controllers/email/messages/passwordReset');
+    const message = require('../../../controllers/email/messages/passwordReset');
 
     it('should return 400 if email is invalid', async () => {
       expect.assertions(1);
@@ -253,20 +256,20 @@ describe('user', () => {
       const data = await db
         .select('reset_token_hash')
         .from('login')
-        .where('user_id', newUserID);
+        .where('user_id', session.newUserID);
       expect(data[0].reset_token_hash).toBeNull();
     });
     it('should return 200, with updates to login table if all is well', async () => {
       expect.assertions(4);
       const res = await request(server)
         .post('/user/forgot')
-        .send({ email: newUser.email });
+        .send({ email: session.newUser.email });
       expect(res.status).toBe(200);
-      resetToken = message.mock.calls[0][1];
+      session.pwResetToken = message.mock.calls[0][1];
       const data = await db
         .select('*')
         .from('login')
-        .where('user_id', newUserID);
+        .where('user_id', session.newUserID);
       expect(data[0].reset_token_hash).not.toBeNull();
       expect(data[0].reset_token_expiration).not.toBeNull();
       expect(data[0].reset_token_expiration.getTime()).toBeGreaterThan(
@@ -292,7 +295,7 @@ describe('user', () => {
     it('should return 401 if id is wrong', async () => {
       expect.assertions(1);
       const res = await request(server)
-        .post(`/user/reset/9999/${resetToken}`)
+        .post(`/user/reset/9999/${session.pwResetToken}`)
         .send({ password: 'newpasswordoflength' });
       expect(res.status).toBe(401);
     });
@@ -306,7 +309,7 @@ describe('user', () => {
     it('should return 200 if password reset', async () => {
       expect.assertions(1);
       const res = await request(server)
-        .post(`/user/reset/${newUserLoginID}/${resetToken}`)
+        .post(`/user/reset/${session.newUserLoginID}/${session.pwResetToken}`)
         .send({ password: 'newpasswordoflength' });
       expect(res.status).toBe(200);
     });
@@ -315,7 +318,7 @@ describe('user', () => {
       const data = await db
         .select('*')
         .from('login')
-        .where('user_id', newUserID);
+        .where('user_id', session.newUserID);
       expect(data[0].reset_token_hash).toBe('');
       expect(data[0].reset_token_expiration).toEqual(data[0].updated_at);
     });
@@ -339,7 +342,7 @@ describe('user', () => {
       expect.assertions(1);
       const res = await request(server)
         .get('/user/list')
-        .set('Authorization', `Bearer ${token2}`)
+        .set('Authorization', `Bearer ${session.newUserToken}`)
         .send({
           first_name: 'blah'
         });
@@ -349,14 +352,14 @@ describe('user', () => {
       expect.assertions(1);
       const res = await request(server)
         .get('/user/list/?orderby=gibberish')
-        .set('Authorization', `Bearer ${token1}`);
+        .set('Authorization', `Bearer ${session.initialToken}`);
       expect(res.status).toBe(400);
     });
     it('should return 200 with an valid query string', async () => {
       expect.assertions(2);
       const res = await request(server)
         .get('/user/list/?orderby=id&order=desc')
-        .set('Authorization', `Bearer ${token1}`);
+        .set('Authorization', `Bearer ${session.initialToken}`);
       expect(res.status).toBe(200);
       expect(res.body.length).toBeGreaterThanOrEqual(2);
       // 2 because original user + test created user
@@ -381,30 +384,30 @@ describe('user', () => {
       expect.assertions(1);
       const res = await request(server)
         .delete('/user/blah')
-        .set('Authorization', `Bearer ${token2}`);
+        .set('Authorization', `Bearer ${session.newUserToken}`);
       expect(res.status).toBe(403);
     });
     it('should return 200 with valid token and current user === params.id', async () => {
       expect.assertions(1);
       const res = await request(server)
-        .delete(`/user/${newUserID}`)
-        .set('Authorization', `Bearer ${token2}`);
+        .delete(`/user/${session.newUserID}`)
+        .set('Authorization', `Bearer ${session.newUserToken}`);
       expect(res.status).toBe(200);
     });
-    it('newUser should have been deleted from user table', async () => {
+    it('session.newUser should have been deleted from user table', async () => {
       expect.assertions(1);
       const data = await db
         .select('*')
         .from('user')
-        .where({ id: newUserID });
+        .where({ id: session.newUserID });
       expect(data).toHaveLength(0);
     });
-    it('newUser should have been deleted (via cascade) from login table', async () => {
+    it('session.newUser should have been deleted (via cascade) from login table', async () => {
       expect.assertions(1);
       const data = await db
         .select('*')
         .from('login')
-        .where({ user_id: newUserID });
+        .where({ user_id: session.newUserID });
       expect(data).toHaveLength(0);
     });
   });

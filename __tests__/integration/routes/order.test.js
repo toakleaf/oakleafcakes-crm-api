@@ -1,17 +1,17 @@
 const request = require('supertest');
 let server;
 
-describe('search', () => {
+describe('order', () => {
   beforeEach(() => {
-    server = require('../../bin/www');
+    server = require('../../../bin/www');
   });
   afterEach(() => {
     server.close();
   });
-  describe('GET /search', () => {
+  describe('GET /order', () => {
     it('should return 200', async () => {
       expect.assertions(1);
-      const res = await request(server).get('/search');
+      const res = await request(server).get('/order');
       expect(res.status).toBe(200);
     });
   });

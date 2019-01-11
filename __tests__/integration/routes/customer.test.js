@@ -3,7 +3,7 @@ let server;
 
 describe('customer', () => {
   beforeEach(() => {
-    server = require('../../bin/www');
+    server = require('../../../bin/www');
   });
   afterEach(() => {
     server.close();

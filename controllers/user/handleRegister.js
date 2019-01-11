@@ -1,4 +1,4 @@
-module.exports = async (req, res, db, bcrypt, config) => {
+module.exports = async (req, res, db, bcrypt, signToken, config) => {
   const {
     email,
     password,
@@ -23,7 +23,8 @@ module.exports = async (req, res, db, bcrypt, config) => {
               is_admin
             })
             .then(() => {
-              res.json(userData[0]);
+              const token = signToken(userData[0].id, is_admin);
+              res.header('x-auth-token', token).json(userData[0]);
             });
         })
         .then(trx.commit)

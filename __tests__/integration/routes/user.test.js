@@ -98,7 +98,7 @@ describe('user', () => {
         });
       expect(res.status).toBe(200);
       session.newUserID = res.body.id;
-      session.newUserToken = signToken(session.newUserID, false);
+      session.newUserToken = res.get('x-auth-token');
     });
     it('should return 403 if is_admin = false', async () => {
       expect.assertions(1);

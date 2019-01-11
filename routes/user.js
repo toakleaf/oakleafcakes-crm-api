@@ -44,7 +44,7 @@ router
 router
   .route('/register')
   .post([auth, admin, valRegister], (req, res) =>
-    handleRegister(req, res, db, bcrypt, config)
+    handleRegister(req, res, db, bcrypt, signToken, config)
   )
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');

@@ -18,7 +18,7 @@ describe('user', () => {
   };
   let token2 = null;
   const updated_name = 'Freddy';
-  const updated_pw = '1098765432109876543210';
+  const updated_pw = '10987654321098765432102';
   beforeEach(() => {
     server = require('../../bin/www');
   });
@@ -251,7 +251,7 @@ describe('user', () => {
         .where('user_id', newUserID);
       expect(data[0].reset_token_hash).toBeNull();
     });
-    it('should return 200', async () => {
+    it('should return 200, with updates to login table if all is well', async () => {
       expect.assertions(3);
       const res = await request(server)
         .post('/user/forgot')

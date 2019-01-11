@@ -8,6 +8,7 @@ describe('user', () => {
   const token1 = signToken(INITIAL_USER.user_id, INITIAL_USER.is_admin);
   const random_number = Math.floor(Math.random() * 10000000);
   let newUserID = null;
+  let newUserLoginID = null;
   const newUser = {
     email: `${random_number}@google.com`,
     password: 'abcdefghijklmnopqrstuvwxyz',
@@ -19,6 +20,7 @@ describe('user', () => {
   let token2 = null;
   const updated_name = 'Freddy';
   const updated_pw = '10987654321098765432102';
+  let resetToken;
   beforeEach(() => {
     server = require('../../bin/www');
   });
@@ -161,6 +163,7 @@ describe('user', () => {
         .select('*')
         .from('login')
         .where({ user_id: newUserID });
+      newUserLoginID = data[0].id;
       expect(data[0]).toHaveProperty('id');
       expect(data[0]).toHaveProperty('hash');
       expect(data[0].email).toBe(newUser.email);
@@ -231,6 +234,8 @@ describe('user', () => {
       envelope: { from: 'noreply@test.com', to: ['97891@google.com'] },
       messageId: '<17e409d6-958c-a77e-e63f-40358ae29266@test.com>'
     });
+    jest.mock('../../controllers/email/messages/passwordReset');
+    const message = require('../../controllers/email/messages/passwordReset');
 
     it('should return 400 if email is invalid', async () => {
       expect.assertions(1);
@@ -252,17 +257,67 @@ describe('user', () => {
       expect(data[0].reset_token_hash).toBeNull();
     });
     it('should return 200, with updates to login table if all is well', async () => {
-      expect.assertions(3);
+      expect.assertions(4);
       const res = await request(server)
         .post('/user/forgot')
         .send({ email: newUser.email });
       expect(res.status).toBe(200);
+      resetToken = message.mock.calls[0][1];
       const data = await db
-        .select(['reset_token_hash', 'reset_token_expiration'])
+        .select('*')
         .from('login')
         .where('user_id', newUserID);
       expect(data[0].reset_token_hash).not.toBeNull();
       expect(data[0].reset_token_expiration).not.toBeNull();
+      expect(data[0].reset_token_expiration.getTime()).toBeGreaterThan(
+        data[0].updated_at.getTime()
+      );
+    });
+  });
+
+  // POST user/reset/:id/:token
+  describe('POST user/reset/:id/:token', () => {
+    it('should return 405 if not a POST', async () => {
+      expect.assertions(1);
+      const res = await request(server).put('/user/reset/:id/:token');
+      expect(res.status).toBe(405);
+    });
+    it('should return 400 if password is missing of invalid', async () => {
+      expect.assertions(1);
+      const res = await request(server)
+        .post(`/user/reset/9999/whatever`)
+        .send({ password: 'a' });
+      expect(res.status).toBe(400);
+    });
+    it('should return 401 if id is wrong', async () => {
+      expect.assertions(1);
+      const res = await request(server)
+        .post(`/user/reset/9999/${resetToken}`)
+        .send({ password: 'newpasswordoflength' });
+      expect(res.status).toBe(401);
+    });
+    it('should return 401 if token is wrong', async () => {
+      expect.assertions(1);
+      const res = await request(server)
+        .post(`/user/reset/1/wrong`)
+        .send({ password: 'newpasswordoflength' });
+      expect(res.status).toBe(401);
+    });
+    it('should return 200 if password reset', async () => {
+      expect.assertions(1);
+      const res = await request(server)
+        .post(`/user/reset/${newUserLoginID}/${resetToken}`)
+        .send({ password: 'newpasswordoflength' });
+      expect(res.status).toBe(200);
+    });
+    it('should clear token hash from login table after first call', async () => {
+      expect.assertions(2);
+      const data = await db
+        .select('*')
+        .from('login')
+        .where('user_id', newUserID);
+      expect(data[0].reset_token_hash).toBe('');
+      expect(data[0].reset_token_expiration).toEqual(data[0].updated_at);
     });
   });
 

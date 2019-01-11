@@ -19,6 +19,8 @@ module.exports = async (req, res, db, bcrypt, signToken, config) => {
       login.reset_token_hash
     );
 
+    if (!isValid) throw new Error('bad credentials');
+
     const hash = await bcrypt.hash(
       req.body.password,
       config.BCRYPT_COST_FACTOR
@@ -29,8 +31,9 @@ module.exports = async (req, res, db, bcrypt, signToken, config) => {
       .returning(['user_id', 'is_admin'])
       .update({
         hash: hash,
-        reset_token_hash: null,
-        updated_at: now
+        reset_token_hash: '',
+        updated_at: now,
+        reset_token_expiration: now
       })
       .then(data => data[0]);
 

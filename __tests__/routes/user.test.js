@@ -219,6 +219,19 @@ describe('user', () => {
 
   // POST user/forgot
   describe('POST user/forgot', () => {
+    jest.mock('../../controllers/email/sendMail');
+    const sendMail = require('../../controllers/email/sendMail');
+    sendMail.mockResolvedValue({
+      accepted: ['97891@google.com'],
+      rejected: [],
+      envelopeTime: 160,
+      messageTime: 553,
+      messageSize: 10782,
+      response: '250 2.0.0 OK 1547171720 y2sm44725669qtb.88 - gsmtp',
+      envelope: { from: 'noreply@test.com', to: ['97891@google.com'] },
+      messageId: '<17e409d6-958c-a77e-e63f-40358ae29266@test.com>'
+    });
+
     it('should return 400 if email is invalid', async () => {
       expect.assertions(1);
       const res = await request(server)
@@ -238,19 +251,19 @@ describe('user', () => {
         .where('user_id', newUserID);
       expect(data[0].reset_token_hash).toBeNull();
     });
-    // it('should return 200', async () => {
-    //   expect.assertions(3);
-    //   const res = await request(server)
-    //     .post('/user/forgot')
-    //     .send({ email: newUser.email });
-    //   expect(res.status).toBe(200);
-    //   const data = await db
-    //     .select(['reset_token_hash', 'reset_token_expiration'])
-    //     .from('login')
-    //     .where('user_id', newUserID);
-    //   expect(data[0].reset_token_hash).not.toBeNull();
-    //   expect(data[0].reset_token_expiration).not.toBeNull();
-    // });
+    it('should return 200', async () => {
+      expect.assertions(3);
+      const res = await request(server)
+        .post('/user/forgot')
+        .send({ email: newUser.email });
+      expect(res.status).toBe(200);
+      const data = await db
+        .select(['reset_token_hash', 'reset_token_expiration'])
+        .from('login')
+        .where('user_id', newUserID);
+      expect(data[0].reset_token_hash).not.toBeNull();
+      expect(data[0].reset_token_expiration).not.toBeNull();
+    });
   });
 
   // GET user/list/?querystring

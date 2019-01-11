@@ -28,6 +28,7 @@ module.exports = async (req, res, db, bcrypt, crypto, sendMail, config) => {
         config.COMPANY_SITE
       }>`
     });
+    console.log(sent);
     res.send('ok');
   } catch (err) {
     // console.error(err);

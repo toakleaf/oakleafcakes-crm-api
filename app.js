@@ -4,7 +4,6 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const helmet = require('helmet');
-const key = require('./middleware/key');
 const https = require('./middleware/https');
 const config = require('./config');
 
@@ -26,7 +25,6 @@ app.use(logger('dev'));
 //in production, all requests need to come from authorized sources
 if (config.NODE_ENV !== 'development') {
   app.use(https);
-  app.use(key);
 }
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

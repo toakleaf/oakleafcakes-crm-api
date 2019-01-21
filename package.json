@@ -3,9 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "test": "jest --verbose",
-    "coverage": "jest --coverage",
-    "watch": "jest --watchAll",
+    "test": "jest --verbose --runInBand",
+    "coverage": "jest --coverage --runInBand",
     "start": "node ./bin/www",
     "migrate": "knex migrate:latest && knex seed:run"
   },

@@ -4,6 +4,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const helmet = require('helmet');
+const cors = require('cors');
 const https = require('./middleware/https');
 const config = require('./config');
 
@@ -15,6 +16,11 @@ const orderRouter = require('./routes/order');
 const statsRouter = require('./routes/stats');
 
 const app = express();
+
+var corsOptions = {
+  exposedHeaders: ['x-auth-token']
+};
+app.use(cors(corsOptions));
 app.use(helmet());
 
 // view engine setup

@@ -15,9 +15,9 @@ module.exports = {
     password: '1234567891011',
     is_admin: true,
     user_id: 1,
-    first_name: 'Adam',
-    last_name: 'Zeus',
-    display_name: 'azeus'
+    first_name: 'Tyler',
+    last_name: 'Oakleaf',
+    display_name: 'TOakleaf'
   },
   TEST_EMAIL_RECIPIENT:
     process.env.TEST_EMAIL_RECIPIENT || process.env.GMAIL_CLIENT_USER,

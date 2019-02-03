@@ -182,14 +182,21 @@ describe('user', () => {
     it('should return 400 with an invalid token', async () => {
       expect.assertions(1);
       const res = await request(server)
-        .put('/user/blah')
+        .put('/user/1')
         .set('Authorization', `Bearer gibberish`);
+      expect(res.status).toBe(400);
+    });
+    it('should return 400 with an invalid id', async () => {
+      expect.assertions(1);
+      const res = await request(server)
+        .put('/user/blah')
+        .set('Authorization', `Bearer ${session.newUserToken}`);
       expect(res.status).toBe(400);
     });
     it('should return 403 if role !== ADMIN and current user !== params.id', async () => {
       expect.assertions(1);
       const res = await request(server)
-        .put('/user/999999999')
+        .put('/user/1')
         .set('Authorization', `Bearer ${session.newUserToken}`)
         .send({
           first_name: 'blah'

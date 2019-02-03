@@ -66,8 +66,14 @@ module.exports = (req, res, next) => {
       .where('login_id', req.params.id)
       .select('role')
       .then(role => {
-        if (req.user.role === role[0]) return next();
-        else
+        if (
+          role[0].role &&
+          req.user.role === 'EMPLOYEE' &&
+          role[0].role !== 'ADMIN' &&
+          role[0].role !== 'EMPLOYEE'
+        ) {
+          return next();
+        } else
           return res.status(403).send('Not authorized to update this account.');
       });
   }

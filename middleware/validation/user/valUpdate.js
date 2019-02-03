@@ -1,15 +1,18 @@
 const Joi = require('joi');
+const db = require('../../../db/db');
 const { MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH } = require('../../../config');
 
 module.exports = (req, res, next) => {
   if (
-    !req.body.email &&
+    !req.body.new_email &&
+    !req.body.old_email &&
     !req.body.password &&
     !req.body.role &&
     !req.body.first_name &&
     !req.body.last_name &&
     !req.body.company_name &&
-    !req.body.phone &&
+    !req.body.new_phone &&
+    !req.body.old_phone &&
     !req.body.phone_type
   ) {
     return res.status(400).send('No update request information given.');
@@ -25,18 +28,22 @@ module.exports = (req, res, next) => {
     last_name: Joi.string().max(100),
     company_name: Joi.string().max(100),
     phone: Joi.string().max(20),
-    phone_type: Joi.string().max(20)
+    phone_type: Joi.string().max(20),
+    id: Joi.number().integer()
   });
   const { error } = Joi.validate(
     {
-      email: req.body.email,
+      email: req.body.new_email,
+      email: req.body.old_email,
       password: req.body.password,
       role: req.body.role,
       first_name: req.body.first_name,
       last_name: req.body.last_name,
       company_name: req.body.company_name,
-      phone: req.body.phone,
-      phone_type: req.body.phone_type
+      phone: req.body.new_phone,
+      phone: req.body.old_phone,
+      phone_type: req.body.phone_type,
+      id: req.params.id
     },
     schema
   );
@@ -50,15 +57,18 @@ module.exports = (req, res, next) => {
   if (req.body.phone_type)
     req.body.phone_type = req.body.phone_type.toLowerCase();
 
-  if (
-    req.params.id === req.user.user_id ||
-    req.user.role === 'ADMIN' ||
-    (req.params.role !== 'ADMIN' &&
-      req.params.role !== 'EMPLOYEE' &&
-      req.user.role === 'EMPLOYEE')
-  ) {
+  if (req.params.id === req.user.user_id || req.user.role === 'ADMIN') {
     //Current user can update their own user account. Admins can update anyone.
     //Employees can update non-admin and non-employee accounts
-    next();
-  } else return res.status(403).send('Not authorized to update this account.');
+    return next();
+  } else {
+    db('login_role')
+      .where('login_id', req.params.id)
+      .select('role')
+      .then(role => {
+        if (req.user.role === role[0]) return next();
+        else
+          return res.status(403).send('Not authorized to update this account.');
+      });
+  }
 };

@@ -173,7 +173,7 @@ describe('user', () => {
   });
 
   // PUT user/:id
-  describe.skip('PUT /user/:id', () => {
+  describe('PUT /user/:id', () => {
     it('should return 405 if not a PUT', async () => {
       expect.assertions(1);
       const res = await request(server).post('/user/blah');
@@ -189,7 +189,7 @@ describe('user', () => {
     it('should return 403 if role !== ADMIN and current user !== params.id', async () => {
       expect.assertions(1);
       const res = await request(server)
-        .put('/user/blah')
+        .put('/user/999999999')
         .set('Authorization', `Bearer ${session.newUserToken}`)
         .send({
           first_name: 'blah'
@@ -204,28 +204,33 @@ describe('user', () => {
         .send({
           first_name: 'updated_name',
           password: 'updated_password',
-          email: '123@gg.com',
-          phone: '987-654-3210',
+          new_email: '123@gg.com',
+          old_email: session.newUser.email,
+          new_phone: '987-654-3210',
+          old_phone: session.newUser.phone,
           phone_type: 'home'
         });
       expect(res.status).toBe(200);
     });
-    it('session.newUser should have been updated in user table', async () => {
-      expect.assertions(3);
+    it('session.newUser should have been updated in db', async () => {
+      expect.assertions(6);
       const data = await db
         .select('*')
         .from('user')
         .where({ id: session.newUserID });
+      expect(data[0].first_name).not.toBeNull();
       expect(data[0].first_name).not.toBe(session.newUser.first_name);
       const data2 = await db
         .select('*')
         .from('email')
         .where({ user_id: session.newUserID });
+      expect(data2[0].email).not.toBeNull();
       expect(data2[0].email).not.toBe(session.newUser.email);
       const data3 = await db
         .select('*')
         .from('phone')
         .where({ user_id: session.newUserID });
+      expect(data3[0].phone).not.toBeNull();
       expect(data3[0].phone).not.toBe(session.newUser.phone);
     });
     it('session.newUser should have been updated in login table', async () => {

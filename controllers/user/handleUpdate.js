@@ -1,12 +1,14 @@
 module.exports = async (req, res, db, bcrypt, config) => {
   const {
-    email,
+    new_email,
+    old_email,
     password,
     role,
     first_name,
     last_name,
     company_name,
-    phone,
+    new_phone,
+    old_phone,
     phone_type
   } = req.body;
 
@@ -19,16 +21,16 @@ module.exports = async (req, res, db, bcrypt, config) => {
     updated_at: now
   };
   const emailUpdates = {
-    ...(email ? { email } : {}),
+    ...(new_email ? { email: new_email } : {}),
     updated_at: now
   };
   const phoneUpdates = {
-    ...(phone ? { phone } : {}),
+    ...(new_phone ? { phone: new_phone } : {}),
     ...(phone_type ? { phone_type } : {}),
     updated_at: now
   };
   const loginUpdates = {
-    ...(email ? { email } : {}),
+    ...(new_email ? { email: new_email } : {}),
     ...(role ? { role } : {}),
     updated_at: now
   };
@@ -53,17 +55,18 @@ module.exports = async (req, res, db, bcrypt, config) => {
               return;
             })
             .then(() => {
-              if (email) {
+              if (new_email && old_email) {
+                console.log('hi');
                 return trx('email')
-                  .where({ user_id: req.params.id, email })
+                  .where({ user_id: req.params.id, email: old_email })
                   .update(emailUpdates);
               }
               return;
             })
             .then(() => {
-              if (phone) {
+              if (new_phone && old_phone) {
                 return trx('phone')
-                  .where({ user_id: req.params.id, phone })
+                  .where({ user_id: req.params.id, phone: old_phone })
                   .update(phoneUpdates);
               }
               return;

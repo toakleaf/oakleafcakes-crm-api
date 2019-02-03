@@ -233,6 +233,8 @@ describe('account', () => {
         .where({ account_id: session.newAccountID });
       expect(data2[0].email).not.toBeNull();
       expect(data2[0].email).not.toBe(session.newAccount.email);
+      //reset email for next test
+      session.newAccount.email = data2[0].email;
       const data3 = await db
         .select('*')
         .from('phone')
@@ -251,7 +253,7 @@ describe('account', () => {
   });
 
   // POST account/forgot
-  describe.skip('POST account/forgot', () => {
+  describe('POST account/forgot', () => {
     jest.mock('../../../controllers/email/sendMail');
     const sendMail = require('../../../controllers/email/sendMail');
     sendMail.mockResolvedValue({

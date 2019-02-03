@@ -1,7 +1,7 @@
 //Current user can delete their own user account. Admins can delete anyone.
 
 module.exports = (req, res, db) => {
-  if (req.params.id !== req.user.user_id && !req.user.is_admin) {
+  if (req.params.id !== req.user.user_id && req.user.role !== 'ADMIN') {
     return res.status(403).send('Access denied.');
   }
   db('user')

@@ -13,11 +13,13 @@ module.exports = {
   INITIAL_USER: {
     email: process.env.TEST_EMAIL_RECIPIENT || 'test@test.com',
     password: '1234567891011',
-    is_admin: true,
+    hash: '$2y$10$jUF/52IihR9kuCP4t47bZeIidt5F/S2ZCvHj80TDI7ELTJJTBK6Ei',
     user_id: 1,
+    roll: 'ADMIN',
     first_name: 'Tyler',
     last_name: 'Oakleaf',
-    display_name: 'TOakleaf'
+    phone: '999-999-9999',
+    company_name: 'Fake Corp'
   },
   TEST_EMAIL_RECIPIENT:
     process.env.TEST_EMAIL_RECIPIENT || process.env.GMAIL_CLIENT_USER,

@@ -1,11 +1,13 @@
 module.exports = async (req, res, db, bcrypt, signToken, config) => {
-  const {
+  let {
     email,
     password,
-    is_admin,
+    role,
     first_name,
     last_name,
-    display_name
+    company_name,
+    phone,
+    phone_type
   } = req.body;
 
   try {
@@ -13,18 +15,54 @@ module.exports = async (req, res, db, bcrypt, signToken, config) => {
     db.transaction(trx => {
       trx('user')
         .returning('*')
-        .insert({ email, first_name, last_name, display_name })
+        .insert({ first_name, last_name, company_name })
         .then(userData => {
+          if (!email) throw new Error('Email is required.');
+          email = email.toLowerCase();
           return trx('login')
+            .returning('*')
             .insert({
               user_id: userData[0].id,
               email,
-              hash,
-              is_admin
+              hash
+            })
+            .then(loginData => {
+              if (!role) throw new Error('User role must be specified.');
+              role = role.toUpperCase();
+              return trx('login_role')
+                .insert({
+                  login_id: loginData[0].id,
+                  user_id: loginData[0].user_id,
+                  role
+                })
+                .then(() => {
+                  return trx('email').insert({
+                    email,
+                    is_primary: true,
+                    user_id: loginData[0].user_id
+                  });
+                })
+                .then(() => {
+                  if (phone) {
+                    phone_type = phone_type ? phone_type.toLowerCase() : null;
+                    return trx('phone').insert({
+                      phone,
+                      phone_type,
+                      is_primary: true,
+                      user_id: loginData[0].user_id
+                    });
+                  }
+                });
             })
             .then(() => {
-              const token = signToken(userData[0].id, is_admin);
-              res.header('x-auth-token', token).json(userData[0]);
+              const token = signToken(userData[0].id, role);
+              res.header('x-auth-token', token).json({
+                ...userData[0],
+                email,
+                phone,
+                phone_type,
+                role
+              });
             });
         })
         .then(trx.commit)
@@ -34,8 +72,10 @@ module.exports = async (req, res, db, bcrypt, signToken, config) => {
         res
           .status(503)
           .send(
-            'Failed to create new user. User account with this email already exists.'
+            'Failed to create new user. User account with this email or phone number already exists.'
           );
+      else if (err.message.includes('foreign key'))
+        res.status(503).send('Failed to create new user. Invalid user role.');
       else res.status(503).send('Failed to create user. ' + err);
     });
   } catch (err) {

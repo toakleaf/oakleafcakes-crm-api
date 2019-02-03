@@ -2,25 +2,34 @@ module.exports = async (req, res, db, bcrypt, config) => {
   const {
     email,
     password,
-    is_admin,
+    role,
     first_name,
     last_name,
-    display_name
+    company_name,
+    phone,
+    phone_type
   } = req.body;
 
   const now = new Date(Date.now());
 
   const userUpdates = {
-    ...(email ? { email } : {}),
     ...(first_name ? { first_name } : {}),
     ...(last_name ? { last_name } : {}),
-    ...(display_name ? { display_name } : {}),
+    ...(company_name ? { company_name } : {}),
     updated_at: now
   };
-
+  const emailUpdates = {
+    ...(email ? { email } : {}),
+    updated_at: now
+  };
+  const phoneUpdates = {
+    ...(phone ? { phone } : {}),
+    ...(phone_type ? { phone_type } : {}),
+    updated_at: now
+  };
   const loginUpdates = {
     ...(email ? { email } : {}),
-    ...(is_admin ? { is_admin } : {}),
+    ...(role ? { role } : {}),
     updated_at: now
   };
 
@@ -33,11 +42,34 @@ module.exports = async (req, res, db, bcrypt, config) => {
         .then(userData => {
           if (userData.length == 0) throw new Error('Invalid id');
           return trx('login')
-            .where('id', req.params.id)
-            .returning('is_admin')
-            .update({ ...loginUpdates, hash: hash })
-            .then(loginData => {
-              res.json({ ...userData[0], is_admin: loginData[0] });
+            .where('user_id', req.params.id)
+            .update(loginUpdates)
+            .then(() => {
+              if (password) {
+                return trx('login')
+                  .where('user_id', req.params.id)
+                  .update({ hash });
+              }
+              return;
+            })
+            .then(() => {
+              if (email) {
+                return trx('email')
+                  .where({ user_id: req.params.id, email })
+                  .update(emailUpdates);
+              }
+              return;
+            })
+            .then(() => {
+              if (phone) {
+                return trx('phone')
+                  .where({ user_id: req.params.id, phone })
+                  .update(phoneUpdates);
+              }
+              return;
+            })
+            .then(() => {
+              res.send(`User #${req.params.id} updated successfully.`);
             });
         })
         .then(trx.commit)

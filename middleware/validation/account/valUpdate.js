@@ -29,7 +29,9 @@ module.exports = (req, res, next) => {
     company_name: Joi.string().max(100),
     phone: Joi.string().max(20),
     phone_type: Joi.string().max(20),
-    id: Joi.number().integer()
+    id: Joi.number()
+      .integer()
+      .positive()
   });
   const { error } = Joi.validate(
     {

@@ -28,18 +28,23 @@ module.exports = async (req, res, db, bcrypt, signToken, config) => {
 
     const data = await db('login')
       .where('id', req.params.id)
-      .returning(['account_id', 'is_admin'])
+      .returning('id')
       .update({
-        hash: hash,
+        hash,
         reset_token_hash: '',
         updated_at: now,
         reset_token_expiration: now
+      })
+      .then(id => {
+        return db('login_role')
+          .where('login_id', id[0])
+          .select(['role', 'account_id']);
       })
       .then(data => data[0]);
 
     if (!data.account_id) throw new Error('failed to update login');
 
-    const token = signToken(data.account_id, data.is_admin);
+    const token = signToken(data.account_id, data.role);
     return res.header('x-auth-token', token).json('success');
   } catch (err) {
     res.status(401).json('bad credentials ');

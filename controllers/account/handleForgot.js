@@ -10,9 +10,6 @@ module.exports = async (req, res, db, bcrypt, crypto, sendMail, config) => {
     const hash = await bcrypt.hash(token, config.BCRYPT_COST_FACTOR);
     const expiration = new Date(Date.now());
     expiration.setMinutes(expiration.getMinutes() + MINUTES_TO_EXPIRATION);
-    const id1 = await db('login')
-      .where('email', req.body.email)
-      .select('id');
     const id = await db('login')
       .where('email', req.body.email)
       .returning('id')

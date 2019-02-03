@@ -308,7 +308,7 @@ describe('account', () => {
   });
 
   // POST account/reset/:id/:token
-  describe.skip('POST account/reset/:id/:token', () => {
+  describe('POST account/reset/:id/:token', () => {
     it('should return 405 if not a POST', async () => {
       expect.assertions(1);
       const res = await request(server).put('/account/reset/:id/:token');

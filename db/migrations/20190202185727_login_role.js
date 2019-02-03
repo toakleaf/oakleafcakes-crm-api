@@ -14,10 +14,10 @@ exports.up = function(knex, Promise) {
       .inTable('login')
       .onDelete('CASCADE');
     table
-      .bigInteger('user_id')
+      .bigInteger('account_id')
       .notNullable()
       .references('id')
-      .inTable('user')
+      .inTable('account')
       .onDelete('CASCADE');
     table.timestamps(false, true);
   });

@@ -1,7 +1,7 @@
 module.exports = (req, res, db) => {
   db.select('*')
-    .from('user')
-    .where('id', '=', req.user.user_id)
+    .from('account')
+    .where('id', '=', req.account.account_id)
     .then(data => {
       res.json(data[0]);
     })

@@ -57,8 +57,11 @@ module.exports = (req, res, next) => {
   if (req.body.phone_type)
     req.body.phone_type = req.body.phone_type.toLowerCase();
 
-  if (req.params.id === req.user.user_id || req.user.role === 'ADMIN') {
-    //Current user can update their own user account. Admins can update anyone.
+  if (
+    req.params.id === req.account.account_id ||
+    req.account.role === 'ADMIN'
+  ) {
+    //Current account can update their own account account. Admins can update anyone.
     //Employees can update non-admin and non-employee accounts
     return next();
   } else {
@@ -68,7 +71,7 @@ module.exports = (req, res, next) => {
       .then(role => {
         if (
           role[0].role &&
-          req.user.role === 'EMPLOYEE' &&
+          req.account.role === 'EMPLOYEE' &&
           role[0].role !== 'ADMIN' &&
           role[0].role !== 'EMPLOYEE'
         ) {

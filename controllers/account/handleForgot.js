@@ -31,7 +31,7 @@ module.exports = async (req, res, db, bcrypt, crypto, sendMail, config) => {
     res.send('ok');
   } catch (err) {
     // console.error(err);
-    //Don't reveal error to end user
+    //Don't reveal error to end account
     res.send('ok' + err);
   }
 };

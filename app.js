@@ -9,9 +9,8 @@ const https = require('./middleware/https');
 const config = require('./config');
 
 const indexRouter = require('./routes/index');
-const userRouter = require('./routes/user');
+const accountRouter = require('./routes/account');
 const searchRouter = require('./routes/search');
-const customerRouter = require('./routes/customer');
 const orderRouter = require('./routes/order');
 const statsRouter = require('./routes/stats');
 
@@ -38,8 +37,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/user', userRouter);
-app.use('/customer', customerRouter);
+app.use('/account', accountRouter);
 app.use('/order', orderRouter);
 app.use('/search', searchRouter);
 app.use('/stats', statsRouter);

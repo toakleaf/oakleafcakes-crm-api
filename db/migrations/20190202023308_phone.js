@@ -10,10 +10,10 @@ exports.up = (knex, Promise) => {
       .notNullable()
       .defaultTo(false);
     table
-      .bigInteger('user_id')
+      .bigInteger('account_id')
       .notNullable()
       .references('id')
-      .inTable('user')
+      .inTable('account')
       .onDelete('CASCADE');
     table.string('phone_type').nullable();
     table.timestamps(false, true);

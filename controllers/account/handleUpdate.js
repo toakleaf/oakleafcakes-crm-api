@@ -14,7 +14,7 @@ module.exports = async (req, res, db, bcrypt, config) => {
 
   const now = new Date(Date.now());
 
-  const userUpdates = {
+  const accountUpdates = {
     ...(first_name ? { first_name } : {}),
     ...(last_name ? { last_name } : {}),
     ...(company_name ? { company_name } : {}),
@@ -37,28 +37,27 @@ module.exports = async (req, res, db, bcrypt, config) => {
 
   const runUpdates = hash => {
     db.transaction(trx => {
-      trx('user')
+      trx('account')
         .where('id', req.params.id)
         .returning('*')
-        .update(userUpdates)
-        .then(userData => {
-          if (userData.length == 0) throw new Error('Invalid id');
+        .update(accountUpdates)
+        .then(accountData => {
+          if (accountData.length == 0) throw new Error('Invalid id');
           return trx('login')
-            .where('user_id', req.params.id)
+            .where('account_id', req.params.id)
             .update(loginUpdates)
             .then(() => {
               if (password) {
                 return trx('login')
-                  .where('user_id', req.params.id)
+                  .where('account_id', req.params.id)
                   .update({ hash });
               }
               return;
             })
             .then(() => {
               if (new_email && old_email) {
-                console.log('hi');
                 return trx('email')
-                  .where({ user_id: req.params.id, email: old_email })
+                  .where({ account_id: req.params.id, email: old_email })
                   .update(emailUpdates);
               }
               return;
@@ -66,19 +65,19 @@ module.exports = async (req, res, db, bcrypt, config) => {
             .then(() => {
               if (new_phone && old_phone) {
                 return trx('phone')
-                  .where({ user_id: req.params.id, phone: old_phone })
+                  .where({ account_id: req.params.id, phone: old_phone })
                   .update(phoneUpdates);
               }
               return;
             })
             .then(() => {
-              res.send(`User #${req.params.id} updated successfully.`);
+              res.send(`account #${req.params.id} updated successfully.`);
             });
         })
         .then(trx.commit)
         .catch(trx.rollback);
     }).catch(err => {
-      res.status(503).send('Failed to update user. ' + err);
+      res.status(503).send('Failed to update account. ' + err);
     });
   };
 
@@ -87,7 +86,7 @@ module.exports = async (req, res, db, bcrypt, config) => {
       const hash = await bcrypt.hash(password, config.BCRYPT_COST_FACTOR);
       runUpdates(hash);
     } catch (err) {
-      return res.status(503).send('Failed to update user. ' + err);
+      return res.status(503).send('Failed to update account. ' + err);
     }
   } else runUpdates();
 };

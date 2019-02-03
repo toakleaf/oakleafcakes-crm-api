@@ -1,12 +1,12 @@
 // INSERTING A VALUE INTO AN AUTOINCREMENT (PRIMARY KEY)
 // COLUMN WILL CAUSE AUTOINCREMENTING TO CEASE!
-const { INITIAL_USER } = require('../../../config');
+const { INITIAL_ACCOUNT } = require('../../../config');
 
 exports.seed = function(knex, Promise) {
   let roles;
-  let users;
+  let accounts;
   let logins;
-  return knex('user')
+  return knex('account')
     .del()
     .then(() => knex('login').del())
     .then(() => knex('role').del())
@@ -24,25 +24,25 @@ exports.seed = function(knex, Promise) {
     })
     .then(role_ids => {
       roles = role_ids;
-      return knex('user')
+      return knex('account')
         .returning('id')
         .insert([
           {
-            first_name: INITIAL_USER.first_name,
-            last_name: INITIAL_USER.last_name,
-            company_name: INITIAL_USER.company_name
+            first_name: INITIAL_ACCOUNT.first_name,
+            last_name: INITIAL_ACCOUNT.last_name,
+            company_name: INITIAL_ACCOUNT.company_name
           }
         ]);
     })
-    .then(user_ids => {
-      users = user_ids;
+    .then(account_ids => {
+      accounts = account_ids;
       return knex('login')
         .returning('id')
         .insert([
           {
-            hash: INITIAL_USER.hash,
-            email: INITIAL_USER.email,
-            user_id: user_ids[0]
+            hash: INITIAL_ACCOUNT.hash,
+            email: INITIAL_ACCOUNT.email,
+            account_id: account_ids[0]
           }
         ]);
     })
@@ -52,25 +52,25 @@ exports.seed = function(knex, Promise) {
         {
           role: roles[0],
           login_id: logins[0],
-          user_id: users[0]
+          account_id: accounts[0]
         }
       ]);
     })
     .then(() => {
       return knex('email').insert([
         {
-          email: INITIAL_USER.email,
+          email: INITIAL_ACCOUNT.email,
           is_primary: true,
-          user_id: users[0]
+          account_id: accounts[0]
         }
       ]);
     })
     .then(() => {
       return knex('phone').insert([
         {
-          phone: INITIAL_USER.phone,
+          phone: INITIAL_ACCOUNT.phone,
           is_primary: true,
-          user_id: users[0]
+          account_id: accounts[0]
         }
       ]);
     });

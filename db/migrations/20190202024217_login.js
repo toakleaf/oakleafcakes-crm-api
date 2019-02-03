@@ -8,10 +8,10 @@ exports.up = function(knex, Promise) {
       .unique()
       .index();
     table
-      .bigInteger('user_id')
+      .bigInteger('account_id')
       .notNullable()
       .references('id')
-      .inTable('user')
+      .inTable('account')
       .onDelete('CASCADE');
     table
       .string('reset_token_hash')

@@ -1,5 +1,5 @@
 module.exports = (req, res, db, bcrypt, jwt, signToken, config) => {
-  db.select('id', 'email', 'hash', 'user_id')
+  db.select('id', 'email', 'hash', 'account_id')
     .from('login')
     .where('email', '=', req.body.email)
     .then(data => {
@@ -9,7 +9,7 @@ module.exports = (req, res, db, bcrypt, jwt, signToken, config) => {
           .from('login_role')
           .where('login_id', '=', data[0].id)
           .then(role => {
-            const token = signToken(data[0].user_id, role[0]);
+            const token = signToken(data[0].account_id, role[0]);
             return res.header('x-auth-token', token).json('success');
           });
       });

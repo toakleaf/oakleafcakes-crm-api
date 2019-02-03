@@ -2,7 +2,7 @@ module.exports = (req, res, db) => {
   const { orderby, order, count, page } = req.query;
   const offset = page * count - count;
   db.select('*')
-    .from('user')
+    .from('account')
     .limit(count ? count : 100)
     .offset(offset > 0 ? offset : 0)
     .orderBy(orderby ? orderby : 'id', order ? order : 'asc')

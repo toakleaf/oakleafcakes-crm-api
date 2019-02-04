@@ -15,7 +15,10 @@ exports.up = (knex, Promise) => {
       .references('id')
       .inTable('account')
       .onDelete('CASCADE');
-    table.string('phone_type').nullable();
+    table
+      .string('phone_type')
+      .nullable()
+      .defaultTo('mobile');
     table.timestamps(false, true);
   });
 };

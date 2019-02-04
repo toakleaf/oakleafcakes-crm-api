@@ -356,7 +356,7 @@ describe('account', () => {
   });
 
   // GET account/list/?querystring
-  describe.skip('GET /account/list', () => {
+  describe('GET /account/list', () => {
     it('should return 405 if not a GET', async () => {
       expect.assertions(1);
       const res = await request(server).put('/account/list');

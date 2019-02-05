@@ -10,7 +10,6 @@ const config = require('./config');
 
 const indexRouter = require('./routes/index');
 const accountRouter = require('./routes/account');
-const searchRouter = require('./routes/search');
 const orderRouter = require('./routes/order');
 const statsRouter = require('./routes/stats');
 
@@ -39,7 +38,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/account', accountRouter);
 app.use('/order', orderRouter);
-app.use('/search', searchRouter);
 app.use('/stats', statsRouter);
 
 // catch 404 and forward to error handler

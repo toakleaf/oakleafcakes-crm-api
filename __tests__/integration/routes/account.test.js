@@ -355,24 +355,24 @@ describe('account', () => {
     });
   });
 
-  // GET account/list/?querystring
-  describe('GET /account/list', () => {
+  // GET account/search/?querystring
+  describe('GET /account/search', () => {
     it('should return 405 if not a GET', async () => {
       expect.assertions(1);
-      const res = await request(server).put('/account/list');
+      const res = await request(server).put('/account/search');
       expect(res.status).toBe(405);
     });
     it('should return 400 with an invalid token', async () => {
       expect.assertions(1);
       const res = await request(server)
-        .get('/account/list')
+        .get('/account/search')
         .set('Authorization', `Bearer gibberish`);
       expect(res.status).toBe(400);
     });
     it('should return 403 if is_admin = false', async () => {
       expect.assertions(1);
       const res = await request(server)
-        .get('/account/list')
+        .get('/account/search')
         .set('Authorization', `Bearer ${session.newAccountToken}`)
         .send({
           first_name: 'blah'
@@ -382,14 +382,14 @@ describe('account', () => {
     it('should return 400 with an invalid query string', async () => {
       expect.assertions(1);
       const res = await request(server)
-        .get('/account/list/?orderby=gibberish')
+        .get('/account/search/?orderby=gibberish')
         .set('Authorization', `Bearer ${session.initialToken}`);
       expect(res.status).toBe(400);
     });
     it('should return 200 with an valid query string', async () => {
       expect.assertions(2);
       const res = await request(server)
-        .get('/account/list/?orderby=id&order=desc')
+        .get('/account/search/?orderby=id&order=desc&field=email&query=com')
         .set('Authorization', `Bearer ${session.initialToken}`);
       expect(res.status).toBe(200);
       expect(res.body.length).toBeGreaterThanOrEqual(2);

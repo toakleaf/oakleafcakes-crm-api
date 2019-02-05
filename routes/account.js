@@ -5,7 +5,7 @@ const admin = require('../middleware/admin');
 const valLogin = require('../middleware/validation/account/valLogin');
 const valRegister = require('../middleware/validation/account/valRegister');
 const valUpdate = require('../middleware/validation/account/valUpdate');
-const valList = require('../middleware/validation/account/valList');
+const valSearch = require('../middleware/validation/account/valSearch');
 const valForgot = require('../middleware/validation/account/valForgot');
 const valReset = require('../middleware/validation/account/valReset');
 const db = require('../db/db');
@@ -20,7 +20,7 @@ const handleDelete = require('../controllers/account/handleDelete');
 const handleUpdate = require('../controllers/account/handleUpdate');
 const handleForgot = require('../controllers/account/handleForgot');
 const handleReset = require('../controllers/account/handleReset');
-const handleList = require('../controllers/account/handleList');
+const handleSearch = require('../controllers/account/handleSearch');
 const signToken = require('../controllers/account/signToken');
 const sendMail = require('../controllers/email/sendMail');
 
@@ -69,8 +69,10 @@ router
   });
 
 router
-  .route('/list')
-  .get([auth, admin, valList], (req, res) => handleList(req, res, db, config))
+  .route('/search')
+  .get([auth, admin, valSearch], (req, res) =>
+    handleSearch(req, res, db, config)
+  )
   .all((req, res) => {
     res.status(405).send('request method not supported for this page1');
   });

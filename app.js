@@ -26,8 +26,8 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(logger('dev'));
-//in production, all requests need to come from authorized sources
-if (config.NODE_ENV !== 'development') {
+
+if (config.NODE_ENV === 'production') {
   app.use(https);
 }
 app.use(express.json());

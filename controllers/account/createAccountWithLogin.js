@@ -65,6 +65,9 @@ module.exports = async (req, res, db, bcrypt, signToken, config) => {
             });
         })
         .then(trx.commit)
+        // .then(
+        //   //send verify email.
+        // )
         .catch(trx.rollback);
     }).catch(err => {
       if (err.message.includes('duplicate key'))

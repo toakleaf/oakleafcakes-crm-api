@@ -1,7 +1,7 @@
 const { COMPANY_NAME, COMPANY_SITE } = require('../../../config.js');
 
-module.exports = (id, token) => {
-  const greeting = `Hi there,`;
+module.exports = (id, token, name = 'there') => {
+  const greeting = `Hi ${name},`;
   const now = new Date(Date.now());
   const paragraph1 = `Earlier today (${now.toDateString()}) you requested to reset the  password  for your ${COMPANY_NAME} account. Please use the link below to create a new password.`;
   const button_text = `Click here to restore password`;

@@ -10,16 +10,20 @@ module.exports = async (req, res, db, bcrypt, crypto, sendMail, config) => {
     const hash = await bcrypt.hash(token, config.BCRYPT_COST_FACTOR);
     const expiration = new Date(Date.now());
     expiration.setMinutes(expiration.getMinutes() + MINUTES_TO_EXPIRATION);
-    const id = await db('login')
+    const ids = await db('login')
       .where('email', req.body.email)
-      .returning('id')
+      .returning(['id', 'account_id'])
       .update({
         reset_token_hash: hash,
         reset_token_expiration: expiration.toISOString(),
         updated_at: new Date(Date.now())
       });
-    if (!id[0]) throw new Error('email not found');
-    const resetMessage = message(id, token);
+    if (!ids[0].id) throw new Error('email not found');
+    const names = await db('account')
+      .select(['first_name', 'last_name', 'company_name'])
+      .where('id', ids[0].account_id);
+
+    const resetMessage = message(ids[0].id, token, names[0].first_name);
     const sent = await sendMail({
       ...resetMessage,
       to: req.body.email,
@@ -31,6 +35,6 @@ module.exports = async (req, res, db, bcrypt, crypto, sendMail, config) => {
   } catch (err) {
     // console.error(err);
     //Don't reveal error to end account
-    res.send('ok' + err);
+    res.send('ok');
   }
 };

@@ -67,8 +67,8 @@ module.exports = (req, res, next) => {
     //Employees can update non-admin and non-employee accounts
     return next();
   } else {
-    db('login_role')
-      .where('login_id', req.params.id)
+    db('account_role')
+      .where('account_id', req.params.id)
       .select('role')
       .then(role => {
         if (

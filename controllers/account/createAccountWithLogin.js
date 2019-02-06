@@ -29,9 +29,8 @@ module.exports = async (req, res, db, bcrypt, signToken, config) => {
             .then(loginData => {
               if (!role) throw new Error('Account role must be specified.');
               role = role.toUpperCase();
-              return trx('login_role')
+              return trx('account_role')
                 .insert({
-                  login_id: loginData[0].id,
                   account_id: loginData[0].account_id,
                   role
                 })

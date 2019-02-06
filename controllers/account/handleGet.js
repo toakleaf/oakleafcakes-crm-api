@@ -6,7 +6,7 @@ module.exports = (req, res, db) => {
     'account.company_name',
     'email.email',
     'email.is_primary as email_is_primary',
-    'login_role.role',
+    'account_role.role',
     'phone.phone',
     'phone.is_primary as phone_is_primary',
     'phone.phone_type',
@@ -15,7 +15,7 @@ module.exports = (req, res, db) => {
   )
     .from('account')
     .leftJoin('email', 'email.account_id', 'account.id')
-    .leftJoin('login_role', 'account.id', 'login_role.account_id')
+    .leftJoin('account_role', 'account.id', 'account_role.account_id')
     .leftJoin('phone', 'account.id', 'phone.account_id')
     .where(qb =>
       //return record if true/true or null/true or true/null

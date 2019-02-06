@@ -3,7 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 const valLogin = require('../middleware/validation/account/valLogin');
-const valRegister = require('../middleware/validation/account/valRegister');
+const valCreateAccount = require('../middleware/validation/account/valCreateAccount');
 const valUpdate = require('../middleware/validation/account/valUpdate');
 const valSearch = require('../middleware/validation/account/valSearch');
 const valForgot = require('../middleware/validation/account/valForgot');
@@ -15,7 +15,8 @@ const jwt = require('jsonwebtoken');
 const config = require('../config');
 const handleGet = require('../controllers/account/handleGet');
 const handleLogin = require('../controllers/account/handleLogin');
-const handleRegister = require('../controllers/account/handleRegister');
+const createAccountWithLogin = require('../controllers/account/createAccountWithLogin');
+const createAccount = require('../controllers/account/createAccount');
 const handleDelete = require('../controllers/account/handleDelete');
 const handleUpdate = require('../controllers/account/handleUpdate');
 const handleForgot = require('../controllers/account/handleForgot');
@@ -42,9 +43,20 @@ router
   });
 
 router
-  .route('/register')
-  .post([auth, admin, valRegister], (req, res) =>
-    handleRegister(req, res, db, bcrypt, signToken, config)
+  .route('/register') //private internal route
+  .post([auth, admin, valCreateAccount], (req, res) => {
+    if (req.body.password)
+      createAccountWithLogin(req, res, db, bcrypt, signToken, config);
+    else createAccount(req, res, db);
+  })
+  .all((req, res) => {
+    res.status(405).send('request method not supported for this page');
+  });
+
+router
+  .route('/signup') //public route
+  .post([valCreateAccount], (req, res) =>
+    createAccountWithLogin(req, res, db, bcrypt, signToken, config)
   )
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');

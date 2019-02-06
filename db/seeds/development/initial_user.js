@@ -37,7 +37,7 @@ exports.seed = function(knex, Promise) {
     .then(account_ids => {
       accounts = account_ids;
       return knex('login')
-        .returning('id')
+        .returning('account_id')
         .insert([
           {
             hash: INITIAL_ACCOUNT.hash,
@@ -46,12 +46,11 @@ exports.seed = function(knex, Promise) {
           }
         ]);
     })
-    .then(login_ids => {
-      logins = login_ids;
-      return knex('login_role').insert([
+    .then(account_ids => {
+      accounts = account_ids;
+      return knex('account_role').insert([
         {
           role: roles[0],
-          login_id: logins[0],
           account_id: accounts[0]
         }
       ]);

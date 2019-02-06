@@ -28,7 +28,7 @@ module.exports = async (req, res, db, bcrypt, signToken, config) => {
 
     const data = await db('login')
       .where('id', req.params.id)
-      .returning('id')
+      .returning('account_id')
       .update({
         hash,
         reset_token_hash: '',
@@ -36,8 +36,8 @@ module.exports = async (req, res, db, bcrypt, signToken, config) => {
         reset_token_expiration: now
       })
       .then(id => {
-        return db('login_role')
-          .where('login_id', id[0])
+        return db('account_role')
+          .where('account_id', id[0])
           .select(['role', 'account_id']);
       })
       .then(data => data[0]);

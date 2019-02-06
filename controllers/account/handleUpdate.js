@@ -31,7 +31,6 @@ module.exports = async (req, res, db, bcrypt, config) => {
   };
   const loginUpdates = {
     ...(new_email ? { email: new_email } : {}),
-    ...(role ? { role } : {}),
     updated_at: now
   };
 
@@ -50,9 +49,14 @@ module.exports = async (req, res, db, bcrypt, config) => {
               if (password) {
                 return trx('login')
                   .where('account_id', req.params.id)
-                  .update({ hash });
+                  .update({ hash, updated_at: now });
               }
               return;
+            })
+            .then(() => {
+              return trx('account_role')
+                .where('account_id', req.params.id)
+                .update({ role, updated_at: now });
             })
             .then(() => {
               if (new_email && old_email) {

@@ -14,6 +14,10 @@ exports.up = function(knex, Promise) {
       .inTable('account')
       .onDelete('CASCADE');
     table
+      .boolean('is_active')
+      .notNullable()
+      .defaultTo(false);
+    table
       .string('reset_token_hash')
       .nullable()
       .defaultTo(null);

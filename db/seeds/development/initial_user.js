@@ -42,7 +42,8 @@ exports.seed = function(knex, Promise) {
           {
             hash: INITIAL_ACCOUNT.hash,
             email: INITIAL_ACCOUNT.email,
-            account_id: account_ids[0]
+            account_id: account_ids[0],
+            is_active: true
           }
         ]);
     })

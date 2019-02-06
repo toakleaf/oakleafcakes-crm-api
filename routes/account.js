@@ -46,7 +46,7 @@ router
   .route('/register') //private internal route
   .post([auth, admin, valCreateAccount], (req, res) => {
     if (req.body.password)
-      createAccountWithLogin(req, res, db, bcrypt, signToken, config);
+      createAccountWithLogin(req, res, db, bcrypt, signToken, config, sendMail);
     else createAccount(req, res, db);
   })
   .all((req, res) => {
@@ -56,7 +56,7 @@ router
 router
   .route('/signup') //public route
   .post([valCreateAccount], (req, res) =>
-    createAccountWithLogin(req, res, db, bcrypt, signToken, config)
+    createAccountWithLogin(req, res, db, bcrypt, signToken, config, sendMail)
   )
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');

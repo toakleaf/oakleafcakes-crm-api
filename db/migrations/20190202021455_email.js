@@ -12,6 +12,7 @@ exports.up = (knex, Promise) => {
     table
       .bigInteger('account_id')
       .notNullable()
+      .index()
       .references('id')
       .inTable('account')
       .onDelete('CASCADE');

@@ -15,6 +15,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../config');
 const handleGet = require('../controllers/account/handleGet');
 const handleLogin = require('../controllers/account/handleLogin');
+const handleSignUp = require('../controllers/account/handleSignUp');
 const createAccountWithLogin = require('../controllers/account/createAccountWithLogin');
 const createAccount = require('../controllers/account/createAccount');
 const handleDelete = require('../controllers/account/handleDelete');
@@ -56,7 +57,7 @@ router
 router
   .route('/signup') //public route
   .post([valCreateAccount], (req, res) =>
-    createAccountWithLogin(req, res, db, bcrypt, signToken, config, sendMail)
+    handleSignUp(req, res, db, bcrypt, signToken, config, sendMail)
   )
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');

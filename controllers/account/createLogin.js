@@ -1,4 +1,13 @@
-module.exports = async (req, res, db, bcrypt, signToken, config, sendMail) => {
+module.exports = async (
+  req,
+  res,
+  db,
+  bcrypt,
+  signToken,
+  config,
+  sendMail,
+  id
+) => {
   let {
     email,
     password,

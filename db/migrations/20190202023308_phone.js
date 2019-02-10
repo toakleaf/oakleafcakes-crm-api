@@ -1,10 +1,7 @@
 exports.up = (knex, Promise) => {
   return knex.schema.createTable('phone', table => {
     table.bigIncrements('id');
-    table
-      .string('phone')
-      .unique()
-      .index();
+    table.string('phone').index();
     table
       .boolean('is_primary')
       .notNullable()
@@ -12,6 +9,7 @@ exports.up = (knex, Promise) => {
     table
       .bigInteger('account_id')
       .notNullable()
+      .index()
       .references('id')
       .inTable('account')
       .onDelete('CASCADE');

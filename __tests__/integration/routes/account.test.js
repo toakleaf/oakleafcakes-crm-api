@@ -10,7 +10,7 @@ describe('account', () => {
     newAccount: {
       email: `stub@dfassdf.com`,
       password: 'abcdefghijklmnopqrstuvwxyz',
-      role: 'EMPLOYEE',
+      role: 'CUSTOMER',
       first_name: 'John',
       last_name: 'Doe',
       company_name: 'Evil Corp',
@@ -369,7 +369,7 @@ describe('account', () => {
         .set('Authorization', `Bearer gibberish`);
       expect(res.status).toBe(400);
     });
-    it('should return 403 if is_admin = false', async () => {
+    it('should return 403 if not ADMIN or EMPLOYEE', async () => {
       expect.assertions(1);
       const res = await request(server)
         .get('/account/search')
@@ -422,7 +422,7 @@ describe('account', () => {
       expect.assertions(1);
       const res = await request(server)
         .delete(`/account/${session.newAccountID}`)
-        .set('Authorization', `Bearer ${session.newAccountToken}`);
+        .set('Authorization', `Bearer ${session.initialToken}`);
       expect(res.status).toBe(200);
     });
     it('session.newAccount should have been deleted from account table', async () => {

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
+const employee = require('../middleware/employee');
 const valLogin = require('../middleware/validation/account/valLogin');
 const valCreateAccount = require('../middleware/validation/account/valCreateAccount');
 const valUpdate = require('../middleware/validation/account/valUpdate');
@@ -83,7 +84,7 @@ router
 
 router
   .route('/search')
-  .get([auth, admin, valSearch], (req, res) =>
+  .get([auth, employee, valSearch], (req, res) =>
     handleSearch(req, res, db, config)
   )
   .all((req, res) => {
@@ -92,7 +93,7 @@ router
 
 router
   .route('/:id')
-  .delete(auth, (req, res) => handleDelete(req, res, db))
+  .delete([auth, admin], (req, res) => handleDelete(req, res, db))
   .put([auth, valUpdate], (req, res) =>
     handleUpdate(req, res, db, bcrypt, config)
   )

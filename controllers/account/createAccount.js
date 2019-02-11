@@ -1,7 +1,6 @@
 module.exports = (req, res, db) => {
   let {
     email,
-    password,
     role,
     first_name,
     last_name,
@@ -32,6 +31,20 @@ module.exports = (req, res, db) => {
             account_id: accountData[0].id
           });
         }
+        await trx('account_history').insert({
+          account_id: accountData[0].id,
+          author: req.account ? req.account.account_id : accountData[0].id,
+          action: 'CREATE',
+          transaction: {
+            first_name,
+            last_name,
+            company_name,
+            email,
+            role,
+            phone,
+            phone_type
+          }
+        });
         return trx('account_role')
           .insert({
             account_id: accountData[0].id,

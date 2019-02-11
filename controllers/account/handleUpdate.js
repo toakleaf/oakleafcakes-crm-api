@@ -42,27 +42,36 @@ module.exports = async (req, res, db, bcrypt, config) => {
         .update(accountUpdates)
         .then(accountData => {
           if (accountData.length == 0) throw new Error('Invalid id');
-          return trx('login')
+          return trx('account_role')
             .where('account_id', req.params.id)
-            .update(loginUpdates)
+            .update({ role, updated_at: now })
+            .then(() => {
+              if (new_email && old_email) {
+                return trx('email')
+                  .where({ account_id: req.params.id, email: old_email })
+                  .update(emailUpdates)
+                  .then(success => {
+                    if (!success) {
+                      throw new Error('old_email not found');
+                    }
+                    return;
+                  });
+              }
+              return;
+            })
+            .then(() => {
+              if (new_email && old_email) {
+                return trx('login')
+                  .where('email', old_email)
+                  .update(loginUpdates);
+              }
+              return;
+            })
             .then(() => {
               if (password) {
                 return trx('login')
                   .where('account_id', req.params.id)
                   .update({ hash, updated_at: now });
-              }
-              return;
-            })
-            .then(() => {
-              return trx('account_role')
-                .where('account_id', req.params.id)
-                .update({ role, updated_at: now });
-            })
-            .then(() => {
-              if (new_email && old_email) {
-                return trx('email')
-                  .where({ account_id: req.params.id, email: old_email })
-                  .update(emailUpdates);
               }
               return;
             })
@@ -75,7 +84,24 @@ module.exports = async (req, res, db, bcrypt, config) => {
               return;
             })
             .then(() => {
-              res.send(`account #${req.params.id} updated successfully.`);
+              return trx('account_history').insert({
+                account_id: req.params.id,
+                author: req.account.account_id,
+                action: 'UPDATE',
+                transaction: {
+                  ...accountUpdates,
+                  ...(old_email ? { old_email } : {}),
+                  ...(new_email ? { new_email } : {}),
+                  ...(old_phone ? { old_phone } : {}),
+                  ...(new_phone ? { new_phone } : {}),
+                  ...(phone_type ? { phone_type } : {})
+                }
+              });
+            })
+            .then(() => {
+              return res.send(
+                `account #${req.params.id} updated successfully.`
+              );
             });
         })
         .then(trx.commit)

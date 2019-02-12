@@ -1,4 +1,15 @@
-module.exports = async (req, res, db, bcrypt, signToken, config, sendMail) => {
+const message = require('../email/messages/verifyAccount');
+
+module.exports = async (
+  req,
+  res,
+  db,
+  crypto,
+  bcrypt,
+  signToken,
+  config,
+  sendMail
+) => {
   let {
     email,
     password,
@@ -12,6 +23,12 @@ module.exports = async (req, res, db, bcrypt, signToken, config, sendMail) => {
 
   try {
     const hash = await bcrypt.hash(password, config.BCRYPT_COST_FACTOR);
+    const token = crypto
+      .randomBytes(24)
+      .toString('base64')
+      .replace(/\W/g, '');
+    const activation_hash = await bcrypt.hash(token, config.BCRYPT_COST_FACTOR);
+
     await db
       .transaction(trx => {
         trx('account')
@@ -75,6 +92,28 @@ module.exports = async (req, res, db, bcrypt, signToken, config, sendMail) => {
                   });
               })
               .then(() => {
+                return trx('activation_hash').insert({
+                  hash: activation_hash,
+                  account_id: accountData[0].id
+                });
+              })
+              .then(() => {
+                const verifyMessage = message(
+                  accountData[0].id,
+                  token,
+                  first_name || 'there'
+                );
+                return sendMail({
+                  ...verifyMessage,
+                  to: email,
+                  from: `${config.COMPANY_NAME} Account Verification <noreply@${
+                    config.COMPANY_SITE
+                  }>`
+                });
+              })
+              .then(() => {
+                //todo: remove token and sign it only after verification.
+                //requires test refactor.
                 const token = signToken(accountData[0].id, role);
                 return res.header('x-auth-token', token).json({
                   ...accountData[0],

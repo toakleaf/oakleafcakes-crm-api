@@ -164,7 +164,13 @@ module.exports = async (req, res, db, bcrypt, config) => {
         .then(trx.commit)
         .catch(trx.rollback);
     }).catch(err => {
-      res.status(503).send('Failed to update account. ' + err);
+      if (err.message.includes('duplicate key')) {
+        res
+          .status(503)
+          .send(
+            'Failed to update account. Account with this email address already exists.'
+          );
+      } else res.status(503).send('Failed to update account. ' + err);
     });
   };
 

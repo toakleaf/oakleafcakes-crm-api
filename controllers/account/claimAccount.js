@@ -1,7 +1,10 @@
+const message = require('../email/messages/verifyAccount');
+
 module.exports = async (
   req,
   res,
   db,
+  crypto,
   bcrypt,
   signToken,
   config,
@@ -21,6 +24,12 @@ module.exports = async (
 
   try {
     const hash = await bcrypt.hash(password, config.BCRYPT_COST_FACTOR);
+    const token = crypto
+      .randomBytes(24)
+      .toString('base64')
+      .replace(/\W/g, '');
+    const activation_hash = await bcrypt.hash(token, config.BCRYPT_COST_FACTOR);
+
     await db.transaction(trx => {
       trx('account_history')
         .insert({
@@ -56,10 +65,29 @@ module.exports = async (
             hash
           });
         })
+        .then(() => {
+          return trx('activation_hash').insert({
+            hash: activation_hash,
+            account_id: id
+          });
+        })
+        .then(() => {
+          const verifyMessage = message(id, token, first_name || 'there');
+          return sendMail({
+            ...verifyMessage,
+            to: email,
+            from: `${config.COMPANY_NAME} Account Verification <noreply@${
+              config.COMPANY_SITE
+            }>`
+          });
+        })
+        .then(() => {
+          res.send('Verification Email Sent');
+        })
         .then(trx.commit)
         .catch(trx.rollback);
     });
   } catch (err) {
-    res.status(503).send('Failed to create account.');
+    res.status(503).send('Failed to create account.' + err);
   }
 };

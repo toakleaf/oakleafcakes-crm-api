@@ -3,7 +3,7 @@ const message = require('../email/messages/passwordReset');
 module.exports = async (req, res, db, bcrypt, crypto, sendMail, config) => {
   try {
     const MINUTES_TO_EXPIRATION = 45;
-    var token = crypto
+    const token = crypto
       .randomBytes(24)
       .toString('base64')
       .replace(/\W/g, '');

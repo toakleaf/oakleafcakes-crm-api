@@ -212,9 +212,9 @@ describe('account', () => {
           first_name: 'updated_name',
           password: 'updated_password',
           new_email: '123@gg.com',
-          old_email: session.newAccount.email,
+          current_email: session.newAccount.email,
           new_phone: '987-654-3210',
-          old_phone: session.newAccount.phone,
+          current_phone: session.newAccount.phone,
           phone_type: 'home'
         });
       expect(res.status).toBe(200);

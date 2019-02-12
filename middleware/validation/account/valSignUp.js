@@ -36,11 +36,7 @@ module.exports = (req, res, next) => {
   //phone_type can be entered any-case, but always saved lowercase
   if (req.body.phone_type)
     req.body.phone_type = req.body.phone_type.toLowerCase();
-  if (
-    (req.body.role === 'ADMIN' || req.body.role === 'EMPLOYEE') &&
-    (!req.account || req.account.role !== 'ADMIN')
-  ) {
-    console.log('ho');
+  if (req.body.role === 'ADMIN' || req.body.role === 'EMPLOYEE') {
     return res.status(403).send('Not authorized to create this account role');
   }
   next();

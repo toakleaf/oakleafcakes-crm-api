@@ -5,21 +5,23 @@ const { MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH } = require('../../../config');
 module.exports = (req, res, next) => {
   if (
     !req.body.new_email &&
-    !req.body.old_email &&
+    !req.body.current_email &&
     !req.body.password &&
     !req.body.role &&
     !req.body.first_name &&
     !req.body.last_name &&
     !req.body.company_name &&
     !req.body.new_phone &&
-    !req.body.old_phone &&
+    !req.body.current_phone &&
     !req.body.phone_type
   ) {
     return res.status(400).send('No update request information given.');
   }
 
   const schema = Joi.object().keys({
-    email: Joi.string().email({ minDomainAtoms: 2 }),
+    new_email: Joi.string().email({ minDomainAtoms: 2 }),
+    current_email: Joi.string().email({ minDomainAtoms: 2 }),
+    email_is_primary: Joi.boolean(),
     password: Joi.string()
       .min(MIN_PASSWORD_LENGTH)
       .max(MAX_PASSWORD_LENGTH),
@@ -27,24 +29,28 @@ module.exports = (req, res, next) => {
     first_name: Joi.string().max(100),
     last_name: Joi.string().max(100),
     company_name: Joi.string().max(100),
-    phone: Joi.string().max(20),
+    new_phone: Joi.string().max(20),
+    current_phone: Joi.string().max(20),
     phone_type: Joi.string().max(20),
+    phone_is_primary: Joi.boolean(),
     id: Joi.number()
       .integer()
       .positive()
   });
   const { error } = Joi.validate(
     {
-      email: req.body.new_email,
-      email: req.body.old_email,
+      new_email: req.body.new_email,
+      current_email: req.body.current_email,
+      email_is_primary: req.body.email_is_primary,
       password: req.body.password,
       role: req.body.role,
       first_name: req.body.first_name,
       last_name: req.body.last_name,
       company_name: req.body.company_name,
-      phone: req.body.new_phone,
-      phone: req.body.old_phone,
+      new_phone: req.body.new_phone,
+      current_phone: req.body.current_phone,
       phone_type: req.body.phone_type,
+      phone_is_primary: req.body.phone_is_primary,
       id: req.params.id
     },
     schema

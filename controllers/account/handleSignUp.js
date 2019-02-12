@@ -1,6 +1,6 @@
 const createAccount = require('./createAccount');
 const createAccountWithLogin = require('./createAccountWithLogin');
-const createLogin = require('./createLogin');
+const claimAccount = require('./claimAccount');
 
 module.exports = async (req, res, db, bcrypt, signToken, config, sendMail) => {
   // if login exists throw error so user can later retrieve account pw.
@@ -9,8 +9,8 @@ module.exports = async (req, res, db, bcrypt, signToken, config, sendMail) => {
   try {
     const login = await db('login')
       .select('account_id')
-      .where('email', 'req.body.email');
-    then(id => id[0]);
+      .where('email', 'req.body.email')
+      .then(id => id[0]);
     if (login) {
       return res
         .status(503)
@@ -36,8 +36,20 @@ module.exports = async (req, res, db, bcrypt, signToken, config, sendMail) => {
             return idPhone;
           });
       });
+
     if (id) {
-      createLogin(req, res, db, bcrypt, signToken, config, sendMail, id);
+      const role = await db('account')
+        .select('role')
+        .where('id', id)
+        .then(role => role[0]);
+      if (role === 'ADMIN' || role === 'EMPLOYEE') {
+        return res
+          .status(503)
+          .send(
+            'Account with this email/phone already exists and cannot be overwritten'
+          );
+      }
+      claimAccount(req, res, db, bcrypt, signToken, config, sendMail, id);
     } else {
       createAccountWithLogin(req, res, db, bcrypt, signToken, config, sendMail);
     }

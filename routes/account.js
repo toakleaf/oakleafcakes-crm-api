@@ -4,7 +4,8 @@ const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 const employee = require('../middleware/employee');
 const valLogin = require('../middleware/validation/account/valLogin');
-const valCreateAccount = require('../middleware/validation/account/valCreateAccount');
+const valRegister = require('../middleware/validation/account/valRegister');
+const valSignUp = require('../middleware/validation/account/valSignUp');
 const valUpdate = require('../middleware/validation/account/valUpdate');
 const valSearch = require('../middleware/validation/account/valSearch');
 const valForgot = require('../middleware/validation/account/valForgot');
@@ -46,7 +47,7 @@ router
 
 router
   .route('/register') //private internal route
-  .post([auth, admin, valCreateAccount], (req, res) => {
+  .post([auth, admin, valRegister], (req, res) => {
     if (req.body.password)
       createAccountWithLogin(req, res, db, bcrypt, signToken, config, sendMail);
     else createAccount(req, res, db);
@@ -57,7 +58,7 @@ router
 
 router
   .route('/signup') //public route
-  .post([valCreateAccount], (req, res) =>
+  .post([valSignUp], (req, res) =>
     handleSignUp(req, res, db, bcrypt, signToken, config, sendMail)
   )
   .all((req, res) => {

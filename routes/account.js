@@ -23,6 +23,7 @@ const createAccount = require('../controllers/account/createAccount');
 const handleDelete = require('../controllers/account/handleDelete');
 const handleUpdate = require('../controllers/account/handleUpdate');
 const handleForgot = require('../controllers/account/handleForgot');
+const handleVerify = require('../controllers/account/handleVerify');
 const handleReset = require('../controllers/account/handleReset');
 const handleSearch = require('../controllers/account/handleSearch');
 const signToken = require('../controllers/account/signToken');
@@ -78,6 +79,15 @@ router
   .route('/forgot')
   .post(valForgot, (req, res) =>
     handleForgot(req, res, db, bcrypt, crypto, sendMail, config)
+  )
+  .all((req, res) => {
+    res.status(405).send('request method not supported for this page');
+  });
+
+router
+  .route('/verify/:id/:token')
+  .post(valReset, (req, res) =>
+    handleVerify(req, res, db, bcrypt, signToken, config)
   )
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');

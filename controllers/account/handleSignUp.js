@@ -24,28 +24,30 @@ module.exports = async (
       return res
         .status(503)
         .send(
-          'Failed to create new account. An account with this email or phone number already exists.'
+          'Failed to create new account. An account having a login with this email or phone number already exists.'
         );
     }
     const idEmail = await db('email')
       .select('account_id')
       .where('email', req.body.email)
       .then(id => {
-        if (id) return id[0].account_id;
+        if (id[0]) {
+          return id[0].account_id;
+        }
         return;
       });
+    let idPhone = null;
     if (req.body.phone) {
-      const idPhone = await db('phone')
+      idPhone = await db('phone')
         .select('account_id')
         .where('phone', req.body.phone)
         .then(id => {
-          if (id) return id[0].account_id;
+          if (id[0]) return id[0].account_id;
           return;
         });
     }
     let id = idEmail;
     if (!id && idPhone) id = idPhone;
-
     if (id) {
       const role = await db('account_role')
         .select('role')
@@ -70,6 +72,7 @@ module.exports = async (
         id
       );
     } else {
+      //NEED TO MODIFY THIS to stop it from sending back token until after verify
       createAccountWithLogin(
         req,
         res,

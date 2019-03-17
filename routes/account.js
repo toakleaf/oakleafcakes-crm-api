@@ -10,6 +10,7 @@ const valUpdate = require('../middleware/validation/account/valUpdate');
 const valSearch = require('../middleware/validation/account/valSearch');
 const valForgot = require('../middleware/validation/account/valForgot');
 const valReset = require('../middleware/validation/account/valReset');
+const valVerify = require('../middleware/validation/account/valVerify');
 const db = require('../db/db');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
@@ -47,7 +48,7 @@ router
   });
 
 router
-  .route('/register') //private internal route
+  .route('/register') //for accounts registering accounts
   .post([auth, admin, valRegister], (req, res) => {
     if (req.body.password)
       createAccountWithLogin(
@@ -67,7 +68,7 @@ router
   });
 
 router
-  .route('/signup') //public route
+  .route('/signup') //for general public registering themselves or claiming existing accounts (for previous non-ecommerce customers)
   .post([valSignUp], (req, res) =>
     handleSignUp(req, res, db, crypto, bcrypt, signToken, config, sendMail)
   )
@@ -86,7 +87,7 @@ router
 
 router
   .route('/verify/:id/:token')
-  .post(valReset, (req, res) =>
+  .post(valVerify, (req, res) =>
     handleVerify(req, res, db, bcrypt, signToken, config)
   )
   .all((req, res) => {

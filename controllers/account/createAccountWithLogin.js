@@ -28,7 +28,6 @@ module.exports = async (
       .toString('base64')
       .replace(/\W/g, '');
     const activation_hash = await bcrypt.hash(token, config.BCRYPT_COST_FACTOR);
-
     await db
       .transaction(trx => {
         trx('account')
@@ -45,7 +44,7 @@ module.exports = async (
                 hash
               })
               .then(loginData => {
-                if (!role) throw new Error('Account role must be specified.');
+                if (!role) role = 'CUSTOMER';
                 role = role.toUpperCase();
                 return trx('account_role')
                   .insert({

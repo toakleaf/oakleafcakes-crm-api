@@ -10,6 +10,14 @@ module.exports = async (db, id, updates) => {
 
   const now = new Date(Date.now());
 
+  // user tries to register new account, system finds matching email, saves all submitted info to transaction history
+  // user verifies account and now that history gets drug out to update account info
+  // user submitted email address should be set to primary email address. no matter what that address should already exist
+
+  // if different primary email address, we need to set is_primary to false.  Set the new_prime_email to is_prime
+  // phone numbers may or may not exist. Need to search for them.
+  // if current_prime_phone different, then need to set its is_prime to false.
+  // if new_prime_phone in db, then we need to set its is_prime to true. Otherwise we need to create new phone record.
   await db
     .transaction(trx => {
       trx('account')
@@ -24,23 +32,54 @@ module.exports = async (db, id, updates) => {
         .then(accountData => {
           if (accountData.length == 0) throw new Error('Invalid id');
           return trx('email')
-            .where({ account_id: id, is_primary: true, email })
-            .update({ email, updated_at: now })
+            .where({ account_id: id, is_primary: true })
+            .update({ is_primary: false });
+        })
+        .then(() => {
+          return trx('email')
+            .where({ account_id: id, email })
+            .update({ is_primary: true });
+        })
+        .then(() => {
+          return trx('phone')
+            .select('*')
+            .where({ account_id: id, phone })
+            .then(p => p[0]);
+        })
+        .then(p => {
+          if (p && !p.is_primary) {
+            return trx('phone')
+              .where({ account_id: id, is_primary: true })
+              .update({ is_primary: false, updated_at: now })
+              .then(() => {
+                return trx('phone')
+                  .where({ account_id: id, phone })
+                  .update({ is_primary: true, phone_type, updated_at: now });
+              });
+          }
+          if (p) return;
+          return trx('phone')
+            .where({ account_id: id, is_primary: true })
+            .update({ is_primary: false, updated_at: now })
             .then(() => {
-              return trx('phone')
-                .where({ account_id: id, is_primary: true, phone })
-                .update({ phone, phone_type, updated_at: now });
-            })
-            .then(() => {
-              return trx('account_history').insert({
+              return trx('phone').insert({
                 account_id: id,
-                author: id,
-                action: 'UPDATE',
-                transaction: {
-                  ...updates
-                }
+                phone,
+                is_primary: true,
+                phone_type,
+                updated_at: now
               });
             });
+        })
+        .then(() => {
+          return trx('account_history').insert({
+            account_id: id,
+            author: id,
+            action: 'UPDATE',
+            transaction: {
+              ...updates
+            }
+          });
         })
         .then(trx.commit)
         .catch(trx.rollback);

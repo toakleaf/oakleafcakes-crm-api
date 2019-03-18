@@ -32,7 +32,16 @@ describe('account', () => {
       phone: '555-555-5555',
       phone_type: 'home'
     },
+    newAccount2Changes: {
+      email: `stub2@ggggg.com`,
+      first_name: 'Frank',
+      last_name: 'Thompson',
+      company_name: 'Good Corp',
+      phone: '333-555-5555',
+      phone_type: 'work'
+    },
     newAccount2ID: null,
+    verifyToken2: null,
     // newAccount3 is signed up and has login.
     newAccount3: {
       email: `stub3@fffff.com`,
@@ -47,7 +56,7 @@ describe('account', () => {
     newAccount3LoginID: null,
     newAccount3ID: null,
     newAccount3Token: null,
-    pwResetToken3: null
+    verifyToken3: null
   };
 
   beforeEach(() => {
@@ -212,7 +221,18 @@ describe('account', () => {
         });
       expect(res.status).toBe(200);
       session.newAccount3ID = res.body.id;
-      session.pwResetToken3 = message.mock.calls[1][1]; // First array position important since multiple calls made
+      session.verifyToken3 = message.mock.calls[1][1]; // First array position important since multiple calls made
+    });
+    it('should return 200 with valid token and data when claiming existing account', async () => {
+      expect.assertions(1);
+      const res = await request(server)
+        .post('/account/signup')
+        .send({
+          ...session.newAccount2Changes,
+          password: 'abcdefghijklmnop'
+        });
+      expect(res.status).toBe(200);
+      session.verifyToken2 = message.mock.calls[2][1]; // First array position important since multiple calls made
     });
     it('session.newAccount3 should exist in account table, even if email case is different', async () => {
       expect.assertions(4);
@@ -231,21 +251,48 @@ describe('account', () => {
     });
   });
 
-  // POST /account/verify NEED TO WRITE!!
+  // POST /account/verify/:id/:token
   describe('POST /account/verify/:id/:token', () => {
     it('should return 405 if not POST', async () => {
       expect.assertions(1);
       const res = await request(server).get(
-        `/account/verify/${session.newAccount3ID}/${session.pwResetToken3}`
+        `/account/verify/${session.newAccount3ID}/${session.verifyToken3}`
       );
       expect(res.status).toBe(405);
     });
-    it('should return 200 if id and token are valid', async () => {
+    it('should return 401 with bad token', async () => {
       expect.assertions(1);
       const res = await request(server).post(
-        `/account/verify/${session.newAccount3ID}/${session.pwResetToken3}`
+        `/account/verify/${session.newAccount3ID}/${session.verifyToken3}wrong`
+      );
+      expect(res.status).toBe(401);
+    });
+    it('should return 200 if id and token are valid for signup account', async () => {
+      expect.assertions(1);
+      const res = await request(server).post(
+        `/account/verify/${session.newAccount3ID}/${session.verifyToken3}`
       );
       expect(res.status).toBe(200);
+    });
+    it('should return 200 if id and token are valid for claimed account', async () => {
+      expect.assertions(1);
+      const res = await request(server).post(
+        `/account/verify/${session.newAccount2ID}/${session.verifyToken2}`
+      );
+      expect(res.status).toBe(200);
+    });
+    it('session.newAccount2 should have been updated', async () => {
+      expect.assertions(2);
+      const data = await db
+        .select('*')
+        .from('account')
+        .where({ id: session.newAccount2ID });
+      expect(data[0].first_name).toBe(session.newAccount2Changes.first_name);
+      const data3 = await db
+        .select('*')
+        .from('phone')
+        .where({ account_id: session.newAccount2ID, is_primary: true });
+      expect(data3[0].phone).toBe(session.newAccount2Changes.phone);
     });
   });
 

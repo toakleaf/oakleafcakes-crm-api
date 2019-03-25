@@ -12,6 +12,7 @@ module.exports = (id, token, name = 'there') => {
   const paragraph3 = `The ${COMPANY_NAME} Team`;
   const unsubscribe_url = ``;
   const COMPANY_ADDRESS = `123 Test ST, Test, NY 012345`;
+  const preheader = `You have requested a password reset for your account.`;
 
   return {
     from: `${COMPANY_NAME} Account Management <noreply@${COMPANY_SITE}>`,
@@ -114,7 +115,7 @@ module.exports = (id, token, name = 'there') => {
               <div class="content" style="box-sizing: border-box; display: block; Margin: 0 auto; max-width: 580px; padding: 10px;">
 
                 <!-- START CENTERED WHITE CONTAINER -->
-                <span class="preheader" style="color: transparent; display: none; height: 0; max-height: 0; max-width: 0; opacity: 0; overflow: hidden; mso-hide: all; visibility: hidden; width: 0;">This is preheader text. Some clients will show this text as a preview.</span>
+                <span class="preheader" style="color: transparent; display: none; height: 0; max-height: 0; max-width: 0; opacity: 0; overflow: hidden; mso-hide: all; visibility: hidden; width: 0;">${preheader}</span>
                 <table class="main" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; background: #ffffff; border-radius: 3px;">
 
                   <!-- START MAIN CONTENT AREA -->

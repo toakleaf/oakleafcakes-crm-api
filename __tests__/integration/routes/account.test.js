@@ -267,6 +267,17 @@ describe('account', () => {
     });
   });
 
+  // Pre-verify POST /account/login
+  describe('Pre-verify POST /account/login', () => {
+    it('should return 401 if account is unverified', async () => {
+      expect.assertions(1);
+      const res = await request(server)
+        .post('/account/login')
+        .send(session.newAccount1);
+      expect(res.status).toBe(401);
+    });
+  });
+
   // POST /account/verify/:id/:token
   describe('POST /account/verify/:id/:token', () => {
     it('should return 405 if not POST', async () => {

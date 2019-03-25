@@ -111,10 +111,7 @@ module.exports = async (
                 });
               })
               .then(() => {
-                //todo: remove token and sign it only after verification.
-                //requires test refactor.
-                const token = signToken(accountData[0].id, role);
-                return res.header('x-auth-token', token).json({
+                return res.json({
                   ...accountData[0],
                   email,
                   phone,

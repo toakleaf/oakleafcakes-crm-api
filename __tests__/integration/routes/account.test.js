@@ -152,7 +152,6 @@ describe('account', () => {
         });
       expect(res.status).toBe(200);
       session.newAccount1ID = res.body.id;
-      session.newAccount1Token = res.get('x-auth-token');
     });
     it('should return 200 even when no login data given', async () => {
       expect.assertions(1);
@@ -290,6 +289,8 @@ describe('account', () => {
         `/account/verify/${session.newAccount1ID}/${session.verifyToken1}`
       );
       expect(res.status).toBe(200);
+      session.newAccount1Token = res.get('x-auth-token');
+      // console.error(res.headers['x-auth-token']);
     });
     it('should return 200 if id and token are valid for signup account', async () => {
       expect.assertions(1);

@@ -51,16 +51,7 @@ router
   .route('/register') //for accounts registering accounts
   .post([auth, admin, valRegister], (req, res) => {
     if (req.body.password)
-      createAccountWithLogin(
-        req,
-        res,
-        db,
-        crypto,
-        bcrypt,
-        signToken,
-        config,
-        sendMail
-      );
+      createAccountWithLogin(req, res, db, crypto, bcrypt, config, sendMail);
     else createAccount(req, res, db);
   })
   .all((req, res) => {
@@ -70,7 +61,7 @@ router
 router
   .route('/signup') //for general public registering themselves or claiming existing accounts (for previous non-ecommerce customers)
   .post([valSignUp], (req, res) =>
-    handleSignUp(req, res, db, crypto, bcrypt, signToken, config, sendMail)
+    handleSignUp(req, res, db, crypto, bcrypt, config, sendMail)
   )
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');

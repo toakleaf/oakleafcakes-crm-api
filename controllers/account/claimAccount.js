@@ -1,16 +1,6 @@
 const message = require('../email/messages/verifyAccount');
 
-module.exports = async (
-  req,
-  res,
-  db,
-  crypto,
-  bcrypt,
-  signToken,
-  config,
-  sendMail,
-  id
-) => {
+module.exports = async (req, res, db, crypto, bcrypt, config, sendMail, id) => {
   let {
     email,
     password,

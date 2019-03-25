@@ -22,6 +22,7 @@ describe('account', () => {
     newAccount1ID: null,
     newAccount1Token: null,
     pwResetToken1: null,
+    verifyToken1: null,
     // newAccount2 is registered by existing account and DOES NOT have login.
     newAccount2: {
       email: `stub2@ggggg.com`,
@@ -100,6 +101,21 @@ describe('account', () => {
 
   // POST /account/register
   describe('POST /account/register', () => {
+    jest.mock('../../../controllers/email/sendMail');
+    const sendMail = require('../../../controllers/email/sendMail');
+    sendMail.mockResolvedValue({
+      accepted: ['97891@google.com'],
+      rejected: [],
+      envelopeTime: 160,
+      messageTime: 553,
+      messageSize: 10782,
+      response: '250 2.0.0 OK 1547171720 y2sm44725669qtb.88 - gsmtp',
+      envelope: { from: 'noreply@test.com', to: ['97891@google.com'] },
+      messageId: '<17e409d6-958c-a77e-e63f-40358ae29266@test.com>'
+    });
+    jest.mock('../../../controllers/email/messages/verifyAccount');
+    const message = require('../../../controllers/email/messages/verifyAccount');
+
     it('should return 405 if not a POST', async () => {
       expect.assertions(1);
       const res = await request(server).get('/account/register');
@@ -148,6 +164,7 @@ describe('account', () => {
         });
       expect(res.status).toBe(200);
       session.newAccount2ID = res.body.id;
+      session.verifyToken1 = message.mock.calls[0][1]; // First array position important since multiple calls made
     });
     it('session.newAccount1 should exist in account table, even if email case is different', async () => {
       expect.assertions(5);
@@ -266,6 +283,13 @@ describe('account', () => {
         `/account/verify/${session.newAccount3ID}/${session.verifyToken3}wrong`
       );
       expect(res.status).toBe(401);
+    });
+    it('should return 200 if id and token are valid for registered account', async () => {
+      expect.assertions(1);
+      const res = await request(server).post(
+        `/account/verify/${session.newAccount1ID}/${session.verifyToken1}`
+      );
+      expect(res.status).toBe(200);
     });
     it('should return 200 if id and token are valid for signup account', async () => {
       expect.assertions(1);

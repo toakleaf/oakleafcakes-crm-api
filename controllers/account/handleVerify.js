@@ -48,6 +48,11 @@ module.exports = async (req, res, db, bcrypt, signToken, config) => {
       }
     }
 
+    //update is_active flag
+    await db('login')
+      .where('account_id', req.params.id)
+      .update({ is_active: true });
+
     //delete activation_hash
     await db('activation_hash')
       .where('account_id', req.params.id)

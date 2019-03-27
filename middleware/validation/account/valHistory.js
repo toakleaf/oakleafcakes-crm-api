@@ -2,16 +2,7 @@ const Joi = require('joi');
 
 module.exports = (req, res, next) => {
   const schema = Joi.object().keys({
-    orderby: Joi.valid([
-      'id',
-      'email',
-      'first_name',
-      'last_name',
-      'company_name',
-      'created_at',
-      'updated_at',
-      'role'
-    ]),
+    orderby: Joi.valid(['account_id', 'author', 'action', 'created_at']),
     order: Joi.valid(['asc', 'desc']),
     count: Joi.number()
       .integer()

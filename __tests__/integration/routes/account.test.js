@@ -671,13 +671,16 @@ describe('account', () => {
         .set('Authorization', `Bearer ${session.newAccount1Token}`);
       expect(res.status).toBe(403);
     });
-    it('should return 200 with valid token and current account === params.id', async () => {
-      expect.assertions(2);
+    it('should return 200 with valid token and current account === params.id, and query string working', async () => {
+      expect.assertions(3);
       const res = await request(server)
-        .get(`/account/history/${session.newAccount1ID}`)
+        .get(`/account/history/${session.newAccount1ID}?order=desc`)
         .set('Authorization', `Bearer ${session.initialToken}`);
       expect(res.status).toBe(200);
       expect(res.body.length).toBeGreaterThan(2);
+      expect(parseInt(res.body[0].id)).toBeGreaterThan(
+        parseInt(res.body[2].id)
+      );
     });
   });
 });

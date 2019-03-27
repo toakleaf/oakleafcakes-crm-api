@@ -4,8 +4,6 @@ const signToken = require('../../../controllers/account/signToken');
 const { INITIAL_ACCOUNT } = require('../../../config');
 let server;
 
-db('account').insert({ first_name: 'bob', id: 2, last_name: 'peterson' });
-
 describe('account', () => {
   const session = {
     initialToken: signToken(INITIAL_ACCOUNT.account_id, INITIAL_ACCOUNT.roll),

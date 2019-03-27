@@ -37,6 +37,7 @@ module.exports = (req, res, db) => {
     })
     .andWhere(qb => {
       if (field) {
+        if (field === 'id') return qb.where('account.id', parseInt(query));
         return qb.where(field, 'ilike', `%${query ? query : ''}%`);
       }
     })

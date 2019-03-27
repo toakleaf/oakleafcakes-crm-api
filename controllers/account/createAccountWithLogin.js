@@ -73,7 +73,6 @@ module.exports = async (req, res, db, crypto, bcrypt, config, sendMail) => {
                         last_name,
                         company_name,
                         email,
-                        hash,
                         role,
                         phone,
                         phone_type

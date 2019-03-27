@@ -649,4 +649,35 @@ describe('account', () => {
       expect(data).toHaveLength(0);
     });
   });
+
+  // GET account/history/:id
+  describe('GET /account/history/:id', () => {
+    it('should return 401 with no token', async () => {
+      expect.assertions(1);
+      const res = await request(server).get('/account/history/blah');
+      expect(res.status).toBe(401);
+    });
+    it('should return 400 with an invalid token', async () => {
+      expect.assertions(1);
+      const res = await request(server)
+        .get('/account/history/1')
+        .set('Authorization', `Bearer gibberish`);
+      expect(res.status).toBe(400);
+    });
+    it('should return 403 if role !== ADMIN or !== EMPLOYEE', async () => {
+      expect.assertions(1);
+      const res = await request(server)
+        .get('/account/history/1')
+        .set('Authorization', `Bearer ${session.newAccount1Token}`);
+      expect(res.status).toBe(403);
+    });
+    it('should return 200 with valid token and current account === params.id', async () => {
+      expect.assertions(2);
+      const res = await request(server)
+        .get(`/account/history/${session.newAccount1ID}`)
+        .set('Authorization', `Bearer ${session.initialToken}`);
+      expect(res.status).toBe(200);
+      expect(res.body.length).toBeGreaterThan(2);
+    });
+  });
 });

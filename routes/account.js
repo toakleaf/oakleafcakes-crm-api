@@ -8,6 +8,7 @@ const valRegister = require('../middleware/validation/account/valRegister');
 const valSignUp = require('../middleware/validation/account/valSignUp');
 const valUpdate = require('../middleware/validation/account/valUpdate');
 const valSearch = require('../middleware/validation/account/valSearch');
+const valHistory = require('../middleware/validation/account/valHistory');
 const valForgot = require('../middleware/validation/account/valForgot');
 const valReset = require('../middleware/validation/account/valReset');
 const valVerify = require('../middleware/validation/account/valVerify');
@@ -27,6 +28,7 @@ const handleForgot = require('../controllers/account/handleForgot');
 const handleVerify = require('../controllers/account/handleVerify');
 const handleReset = require('../controllers/account/handleReset');
 const handleSearch = require('../controllers/account/handleSearch');
+const handleHistory = require('../controllers/account/handleHistory');
 const signToken = require('../controllers/account/signToken');
 const sendMail = require('../controllers/email/sendMail');
 
@@ -98,6 +100,15 @@ router
   .route('/search')
   .get([auth, employee, valSearch], (req, res) =>
     handleSearch(req, res, db, config)
+  )
+  .all((req, res) => {
+    res.status(405).send('request method not supported for this page1');
+  });
+
+router
+  .route('/history/:id')
+  .get([auth, employee, valSearch], (req, res) =>
+    handleHistory(req, res, db, config)
   )
   .all((req, res) => {
     res.status(405).send('request method not supported for this page1');

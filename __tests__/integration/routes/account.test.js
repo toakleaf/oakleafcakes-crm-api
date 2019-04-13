@@ -588,7 +588,9 @@ describe('account', () => {
     it('should return 200 with an valid query string', async () => {
       expect.assertions(2);
       const res = await request(server)
-        .get('/account/search/?orderby=id&order=desc&field=email&query=com')
+        .get(
+          '/account/search/?orderby=id&order=desc&field=email&query=com&role=admin&role=customer'
+        )
         .set('Authorization', `Bearer ${session.initialToken}`);
       expect(res.status).toBe(200);
       expect(res.body.length).toBeGreaterThanOrEqual(2);

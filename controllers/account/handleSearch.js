@@ -41,6 +41,14 @@ module.exports = (req, res, db) => {
         return qb.where(field, 'ilike', `%${query ? query : ''}%`);
       }
     })
+    .andWhere(qb => {
+      if (role) {
+        if (Array.isArray(role)) {
+          return qb.whereIn('account_role.role', role);
+        }
+        return qb.where('account_role.role', role);
+      }
+    })
     .limit(count ? count : 100)
     .offset(offset > 0 ? offset : 0)
     .orderBy(orderby ? orderby : 'id', order ? order : 'asc')

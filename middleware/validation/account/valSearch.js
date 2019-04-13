@@ -20,6 +20,7 @@ module.exports = (req, res, next) => {
     page: Joi.number()
       .integer()
       .positive(),
+    roleArray: Joi.array().items(Joi.string().uppercase()),
     role: Joi.string().uppercase(),
     field: Joi.valid([
       'id',
@@ -38,7 +39,10 @@ module.exports = (req, res, next) => {
     ...(order ? { order: order.toLowerCase() } : {}),
     ...(count ? { count: parseInt(count) } : {}),
     ...(page ? { page: parseInt(page) } : {}),
-    ...(role ? { role: role.toUpperCase() } : {}),
+    ...(role && Array.isArray(role)
+      ? { roleArray: role.map(x => x.toUpperCase()) }
+      : {}),
+    ...(role && !Array.isArray(role) ? { role: role.toUpperCase() } : {}),
     ...(field ? { field: field.toLowerCase() } : {}),
     ...(query ? { query: query.toLowerCase() } : {})
   };
@@ -50,9 +54,13 @@ module.exports = (req, res, next) => {
   req.query.order = req.query.order ? req.query.order.toLowerCase() : null;
   req.query.count = req.query.count ? parseInt(req.query.count) : null;
   req.query.page = req.query.page ? parseInt(req.query.page) : null;
-  req.query.role = req.query.role ? req.query.role.toUpperCase() : null;
   req.query.field = req.query.field ? req.query.field.toLowerCase() : null;
   req.query.query = req.query.query ? req.query.query.toLowerCase() : null;
+  if (req.query.role) {
+    if (Array.isArray(req.query.role))
+      req.query.role = req.query.role.map(x => x.toUpperCase());
+    else req.query.role = req.query.role.toUpperCase();
+  }
 
   if (error)
     return res

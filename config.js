@@ -18,7 +18,7 @@ module.exports = {
     roll: 'ADMIN',
     first_name: 'Tyler',
     last_name: 'Oakleaf',
-    phone: '999-999-9999',
+    phone: '(617) 444-4444',
     company_name: 'Fake Corp'
   },
   TEST_EMAIL_RECIPIENT:

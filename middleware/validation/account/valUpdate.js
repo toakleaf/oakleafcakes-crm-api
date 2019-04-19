@@ -13,7 +13,8 @@ module.exports = (req, res, next) => {
     !req.body.company_name &&
     !req.body.new_phone &&
     !req.body.current_phone &&
-    !req.body.phone_type
+    !req.body.phone_type &&
+    !req.body.phone_country
   ) {
     return res.status(400).send('No update request information given.');
   }
@@ -32,6 +33,9 @@ module.exports = (req, res, next) => {
     new_phone: Joi.string().max(20),
     current_phone: Joi.string().max(20),
     phone_type: Joi.string().max(20),
+    phone_country: Joi.string()
+      .uppercase()
+      .length(2),
     phone_is_primary: Joi.boolean(),
     id: Joi.number()
       .integer()
@@ -50,6 +54,7 @@ module.exports = (req, res, next) => {
       new_phone: req.body.new_phone,
       current_phone: req.body.current_phone,
       phone_type: req.body.phone_type,
+      phone_country: req.body.phone_country,
       phone_is_primary: req.body.phone_is_primary,
       id: req.params.id
     },

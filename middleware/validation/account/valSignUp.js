@@ -12,7 +12,10 @@ module.exports = (req, res, next) => {
     last_name: Joi.string().max(100),
     company_name: Joi.string().max(100),
     phone: Joi.string().max(20),
-    phone_type: Joi.string().max(20)
+    phone_type: Joi.string().max(20),
+    phone_country: Joi.string()
+      .uppercase()
+      .length(2)
   });
   const { error } = Joi.validate(
     {
@@ -23,7 +26,8 @@ module.exports = (req, res, next) => {
       last_name: req.body.last_name,
       company_name: req.body.company_name,
       phone: req.body.phone,
-      phone_type: req.body.phone_type
+      phone_type: req.body.phone_type,
+      phone_country: req.body.phone_country
     },
     schema
   );

@@ -6,7 +6,8 @@ module.exports = (req, res, db) => {
     last_name,
     company_name,
     phone,
-    phone_type
+    phone_type,
+    phone_country
   } = req.body;
 
   db.transaction(trx => {
@@ -27,6 +28,7 @@ module.exports = (req, res, db) => {
           await trx('phone').insert({
             phone,
             phone_type,
+            phone_country,
             is_primary: true,
             account_id: accountData[0].id
           });
@@ -42,7 +44,8 @@ module.exports = (req, res, db) => {
             email,
             role,
             phone,
-            phone_type
+            phone_type,
+            phone_country
           }
         });
         return trx('account_role')
@@ -56,6 +59,7 @@ module.exports = (req, res, db) => {
               email,
               phone,
               phone_type,
+              phone_country,
               role
             });
           });

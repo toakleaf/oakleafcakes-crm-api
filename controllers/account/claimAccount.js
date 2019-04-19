@@ -9,7 +9,8 @@ module.exports = async (req, res, db, crypto, bcrypt, config, sendMail, id) => {
     last_name,
     company_name,
     phone,
-    phone_type
+    phone_type,
+    phone_country
   } = req.body;
 
   try {
@@ -44,7 +45,8 @@ module.exports = async (req, res, db, crypto, bcrypt, config, sendMail, id) => {
               email,
               role,
               phone,
-              phone_type
+              phone_type,
+              phone_country
             }
           });
         })

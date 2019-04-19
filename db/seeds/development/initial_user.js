@@ -70,6 +70,7 @@ exports.seed = function(knex, Promise) {
         {
           phone: INITIAL_ACCOUNT.phone,
           is_primary: true,
+          phone_type: 'mobile',
           account_id: accounts[0]
         }
       ]);

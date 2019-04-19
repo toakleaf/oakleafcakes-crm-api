@@ -11,7 +11,8 @@ module.exports = async (req, res, db, bcrypt, config) => {
     new_phone,
     current_phone,
     phone_is_primary,
-    phone_type
+    phone_type,
+    phone_country
   } = req.body;
 
   const now = new Date(Date.now());
@@ -30,6 +31,7 @@ module.exports = async (req, res, db, bcrypt, config) => {
   const phoneUpdates = {
     ...(new_phone ? { phone: new_phone } : {}),
     ...(phone_type ? { phone_type } : {}),
+    ...(phone_country ? { phone_country } : {}),
     ...(phone_is_primary ? { phone_is_primary } : {}),
     updated_at: now
   };
@@ -151,7 +153,8 @@ module.exports = async (req, res, db, bcrypt, config) => {
                   ...(current_phone ? { current_phone } : {}),
                   ...(new_phone ? { new_phone } : {}),
                   ...(phone_is_primary ? { phone_is_primary } : {}),
-                  ...(phone_type ? { phone_type } : {})
+                  ...(phone_type ? { phone_type } : {}),
+                  ...(phone_country ? { phone_country } : {})
                 }
               });
             })

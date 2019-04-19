@@ -10,6 +10,7 @@ module.exports = (req, res, db) => {
     'phone.phone',
     'phone.is_primary as phone_is_primary',
     'phone.phone_type',
+    'phone.phone_country',
     'account.created_at',
     'account.updated_at'
   )

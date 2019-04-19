@@ -9,7 +9,8 @@ module.exports = async (req, res, db, crypto, bcrypt, config, sendMail) => {
     last_name,
     company_name,
     phone,
-    phone_type
+    phone_type,
+    phone_country
   } = req.body;
 
   try {
@@ -55,6 +56,7 @@ module.exports = async (req, res, db, crypto, bcrypt, config, sendMail) => {
                       return trx('phone').insert({
                         phone,
                         phone_type,
+                        phone_country,
                         is_primary: true,
                         account_id: loginData[0].account_id
                       });
@@ -75,7 +77,8 @@ module.exports = async (req, res, db, crypto, bcrypt, config, sendMail) => {
                         email,
                         role,
                         phone,
-                        phone_type
+                        phone_type,
+                        phone_country
                       }
                     });
                   });
@@ -106,6 +109,7 @@ module.exports = async (req, res, db, crypto, bcrypt, config, sendMail) => {
                   email,
                   phone,
                   phone_type,
+                  phone_country,
                   role
                 });
               });

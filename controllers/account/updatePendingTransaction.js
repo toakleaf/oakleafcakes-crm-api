@@ -5,7 +5,8 @@ module.exports = async (db, id, updates) => {
     last_name,
     company_name,
     phone,
-    phone_type
+    phone_type,
+    phone_country
   } = updates;
 
   const now = new Date(Date.now());
@@ -54,7 +55,12 @@ module.exports = async (db, id, updates) => {
               .then(() => {
                 return trx('phone')
                   .where({ account_id: id, phone })
-                  .update({ is_primary: true, phone_type, updated_at: now });
+                  .update({
+                    is_primary: true,
+                    phone_type,
+                    phone_country,
+                    updated_at: now
+                  });
               });
           }
           if (p) return;
@@ -67,6 +73,7 @@ module.exports = async (db, id, updates) => {
                 phone,
                 is_primary: true,
                 phone_type,
+                phone_country,
                 updated_at: now
               });
             });

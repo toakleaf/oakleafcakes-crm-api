@@ -30,10 +30,11 @@ module.exports = (req, res, next) => {
       'company_name',
       'phone'
     ]),
-    query: Joi.string().lowercase()
+    query: Joi.string().lowercase(),
+    exact: Joi.boolean()
   });
 
-  const { orderby, order, count, page, role, field, query } = req.query;
+  const { orderby, order, count, page, role, field, query, exact } = req.query;
   const toValidate = {
     ...(orderby ? { orderby: orderby.toLowerCase() } : {}),
     ...(order ? { order: order.toLowerCase() } : {}),
@@ -44,7 +45,8 @@ module.exports = (req, res, next) => {
       : {}),
     ...(role && !Array.isArray(role) ? { role: role.toUpperCase() } : {}),
     ...(field ? { field: field.toLowerCase() } : {}),
-    ...(query ? { query: query.toLowerCase() } : {})
+    ...(query ? { query: query.toLowerCase() } : {}),
+    ...(exact ? { exact: exact } : {})
   };
   const { error, value } = Joi.validate(toValidate, schema);
 

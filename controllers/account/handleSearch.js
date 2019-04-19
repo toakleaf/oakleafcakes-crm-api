@@ -1,5 +1,5 @@
 module.exports = (req, res, db) => {
-  const { orderby, order, count, page, role, field, query } = req.query;
+  const { orderby, order, count, page, role, field, query, exact } = req.query;
   const offset = page * count - count;
   db.select(
     'account.id',
@@ -36,9 +36,10 @@ module.exports = (req, res, db) => {
         .orWhere({ 'phone.is_primary': true, 'email.is_primary': true });
     })
     .andWhere(qb => {
-      if (field) {
+      if (field && query) {
         if (field === 'id') return qb.where('account.id', parseInt(query));
-        return qb.where(field, 'ilike', `%${query ? query : ''}%`);
+        if (exact) return qb.where(field, 'ilike', query);
+        return qb.where(field, 'ilike', `%${query}%`);
       }
     })
     .andWhere(qb => {

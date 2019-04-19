@@ -1,6 +1,5 @@
 const Joi = require('joi');
 const { MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH } = require('../../../config');
-
 module.exports = (req, res, next) => {
   const schema = Joi.object().keys({
     email: Joi.string().email({ minDomainAtoms: 2 }),
@@ -10,10 +9,20 @@ module.exports = (req, res, next) => {
     role: Joi.string().max(100),
     first_name: Joi.string().max(100),
     last_name: Joi.string().max(100),
-    company_name: Joi.string().max(100),
-    phone: Joi.string().max(20),
-    phone_type: Joi.string().max(20)
+    company_name: Joi.string()
+      .max(100)
+      .allow(null)
+      .optional(),
+    phone: Joi.string()
+      .max(20)
+      .allow(null)
+      .optional(),
+    phone_type: Joi.string()
+      .max(20)
+      .allow(null)
+      .optional()
   });
+
   const { error } = Joi.validate(
     {
       email: req.body.email,
@@ -23,7 +32,7 @@ module.exports = (req, res, next) => {
       last_name: req.body.last_name,
       company_name: req.body.company_name,
       phone: req.body.phone,
-      phone_type: req.body.phone_type
+      ...(req.body.phone ? { phone_type: req.body.phone_type } : {})
     },
     schema
   );

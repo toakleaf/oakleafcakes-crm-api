@@ -36,6 +36,21 @@ module.exports = async (req, res, db, bcrypt, signToken, config) => {
         reset_token_expiration: now
       })
       .then(id => {
+        return db('account_history')
+          .returning('account_id')
+          .insert({
+            account_id: id[0],
+            author: id[0],
+            action: 'UPDATE',
+            transaction: {
+              hash,
+              reset_token_hash: '',
+              updated_at: now,
+              reset_token_expiration: now
+            }
+          });
+      })
+      .then(id => {
         return db('account_role')
           .where('account_id', id[0])
           .select(['role', 'account_id']);

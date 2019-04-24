@@ -12,7 +12,7 @@ module.exports = function(req, res, next) {
     const jwtPayload = jwt.verify(token, config.JWT_KEY);
     req.account = jwtPayload; //create a account object in the req
     next();
-  } catch (ex) {
+  } catch (err) {
     res.status(400).json('Invalid token.');
   }
 };

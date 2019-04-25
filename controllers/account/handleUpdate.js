@@ -100,10 +100,7 @@ module.exports = async (req, res, db, bcrypt, config) => {
                   .where('email', current_email)
                   .update(loginUpdates)
                   .returning('is_active')
-                  .then(active => {
-                    console.log(is_active);
-                    console.log(active);
-                  });
+                  .then(active => {});
               }
               return;
             })

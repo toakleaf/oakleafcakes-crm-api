@@ -69,6 +69,9 @@ module.exports = (req, res, next) => {
     phone_is_primary: Joi.boolean()
       .allow(null)
       .optional(),
+    is_active: Joi.boolean()
+      .allow(null)
+      .optional(),
     id: Joi.number()
       .integer()
       .positive()
@@ -97,6 +100,7 @@ module.exports = (req, res, next) => {
       phone_type: req.body.phone_type,
       phone_country: req.body.phone_country,
       phone_is_primary: req.body.phone_is_primary,
+      is_active: req.body.is_active,
       id: req.params.id
     },
     schema

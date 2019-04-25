@@ -12,7 +12,8 @@ module.exports = async (req, res, db, bcrypt, config) => {
     current_phone,
     phone_is_primary,
     phone_type,
-    phone_country
+    phone_country,
+    is_active
   } = req.body;
 
   const now = new Date(Date.now());
@@ -37,6 +38,7 @@ module.exports = async (req, res, db, bcrypt, config) => {
   };
   const loginUpdates = {
     ...(new_email ? { email: new_email } : {}),
+    ...(is_active ? { is_active } : {}),
     updated_at: now
   };
 

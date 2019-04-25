@@ -10,6 +10,7 @@ const config = require('./config');
 
 const indexRouter = require('./routes/index');
 const accountRouter = require('./routes/account');
+const systemRouter = require('./routes/system');
 const orderRouter = require('./routes/order');
 const statsRouter = require('./routes/stats');
 
@@ -37,6 +38,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/account', accountRouter);
+app.use('/system', systemRouter);
 app.use('/order', orderRouter);
 app.use('/stats', statsRouter);
 

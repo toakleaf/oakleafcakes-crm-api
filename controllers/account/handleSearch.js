@@ -76,9 +76,9 @@ module.exports = (req, res, db) => {
         return qb.where('account_role.role', role);
       }
     })
+    .orderBy(orderby ? orderby : 'id', order ? order : 'asc')
     .limit(count ? count : 100)
     .offset(offset > 0 ? offset : 0)
-    .orderBy(orderby ? orderby : 'id', order ? order : 'asc')
     .then(data => {
       res.json(data);
     })

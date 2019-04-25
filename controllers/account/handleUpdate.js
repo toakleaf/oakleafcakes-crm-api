@@ -26,19 +26,23 @@ module.exports = async (req, res, db, bcrypt, config) => {
   };
   const emailUpdates = {
     ...(new_email ? { email: new_email } : {}),
-    ...(email_is_primary ? { email: email_is_primary } : {}),
+    ...(email_is_primary || email_is_primary === false
+      ? { is_primary: email_is_primary }
+      : {}),
     updated_at: now
   };
   const phoneUpdates = {
     ...(new_phone ? { phone: new_phone } : {}),
     ...(phone_type ? { phone_type } : {}),
     ...(phone_country ? { phone_country } : {}),
-    ...(phone_is_primary ? { phone_is_primary } : {}),
+    ...(phone_is_primary || phone_is_primary === false
+      ? { is_primary: phone_is_primary }
+      : {}),
     updated_at: now
   };
   const loginUpdates = {
     ...(new_email ? { email: new_email } : {}),
-    ...(is_active ? { is_active } : {}),
+    ...(is_active || is_active === false ? { is_active } : {}),
     updated_at: now
   };
 
@@ -90,11 +94,16 @@ module.exports = async (req, res, db, bcrypt, config) => {
               return;
             })
             .then(() => {
-              if (new_email && current_email) {
+              if (current_email) {
                 //only update login if the current_email is the login email
                 return trx('login')
                   .where('email', current_email)
-                  .update(loginUpdates);
+                  .update(loginUpdates)
+                  .returning('is_active')
+                  .then(active => {
+                    console.log(is_active);
+                    console.log(active);
+                  });
               }
               return;
             })
@@ -166,12 +175,17 @@ module.exports = async (req, res, db, bcrypt, config) => {
                   ...accountUpdates,
                   ...(current_email ? { current_email } : {}),
                   ...(new_email ? { new_email } : {}),
-                  ...(email_is_primary ? { email_is_primary } : {}),
+                  ...(email_is_primary || email_is_primary === false
+                    ? { email_is_primary }
+                    : {}),
                   ...(current_phone ? { current_phone } : {}),
                   ...(new_phone ? { new_phone } : {}),
-                  ...(phone_is_primary ? { phone_is_primary } : {}),
+                  ...(phone_is_primary || phone_is_primary === false
+                    ? { phone_is_primary }
+                    : {}),
                   ...(phone_type ? { phone_type } : {}),
-                  ...(phone_country ? { phone_country } : {})
+                  ...(phone_country ? { phone_country } : {}),
+                  ...(is_active || is_active === false ? { is_active } : {})
                 }
               });
             })
@@ -190,7 +204,10 @@ module.exports = async (req, res, db, bcrypt, config) => {
           .send(
             'Failed to update account. Account with this email address already exists.'
           );
-      } else res.status(503).send('Failed to update account. ' + err);
+      } else {
+        console.error(err);
+        res.status(503).send('Failed to update account. ' + err);
+      }
     });
   };
 

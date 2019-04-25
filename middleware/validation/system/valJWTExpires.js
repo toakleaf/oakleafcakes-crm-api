@@ -1,8 +1,10 @@
 const Joi = require('joi');
 
 module.exports = (req, res, next) => {
+  console.log('yo');
   const schema = Joi.object().keys({
-    quantity: Joi.integer()
+    quantity: Joi.number()
+      .integer()
       .positive()
       .required(),
     unit: Joi.valid([
@@ -35,7 +37,10 @@ module.exports = (req, res, next) => {
     schema
   );
 
-  if (error) return res.status(400).send(error.details[0].message);
+  if (error) {
+    console.error(error.details[0]);
+    return res.status(400).send(error.details[0].message);
+  }
 
   next();
 };

@@ -20,27 +20,68 @@ module.exports = (req, res, next) => {
   }
 
   const schema = Joi.object().keys({
-    new_email: Joi.string().email({ minDomainAtoms: 2 }),
-    current_email: Joi.string().email({ minDomainAtoms: 2 }),
+    new_email: Joi.string()
+      .email({ minDomainAtoms: 2 })
+      .allow(null)
+      .optional(),
+    current_email: Joi.string()
+      .email({ minDomainAtoms: 2 })
+      .allow(null)
+      .optional(),
     email_is_primary: Joi.boolean(),
     password: Joi.string()
       .min(MIN_PASSWORD_LENGTH)
-      .max(MAX_PASSWORD_LENGTH),
-    role: Joi.string().max(20),
-    first_name: Joi.string().max(100),
-    last_name: Joi.string().max(100),
-    company_name: Joi.string().max(100),
-    new_phone: Joi.string().max(20),
-    current_phone: Joi.string().max(20),
-    phone_type: Joi.string().max(20),
+      .max(MAX_PASSWORD_LENGTH)
+      .allow(null)
+      .optional(),
+    role: Joi.valid(['ADMIN', 'EMPLOYEE', 'CUSTOMER'])
+      .allow(null)
+      .optional(),
+    first_name: Joi.string()
+      .max(100)
+      .allow(null)
+      .optional(),
+    last_name: Joi.string()
+      .max(100)
+      .allow(null)
+      .optional(),
+    company_name: Joi.string()
+      .max(100)
+      .allow(null)
+      .optional(),
+    new_phone: Joi.string()
+      .max(20)
+      .allow(null)
+      .optional(),
+    current_phone: Joi.string()
+      .max(20)
+      .allow(null)
+      .optional(),
+    phone_type: Joi.string()
+      .max(20)
+      .allow(null)
+      .optional(),
     phone_country: Joi.string()
       .uppercase()
-      .length(2),
-    phone_is_primary: Joi.boolean(),
+      .length(2)
+      .allow(null)
+      .optional(),
+    phone_is_primary: Joi.boolean()
+      .allow(null)
+      .optional(),
     id: Joi.number()
       .integer()
       .positive()
   });
+
+  //email can be entered any-case, but always saved lowercase
+  if (req.body.email) req.body.email = req.body.email.toLowerCase();
+  //email can be entered any-case, but always saved uppercase
+  if (req.body.role) req.body.role = req.body.role.toUpperCase();
+  //email can be entered any-case, but always saved lowercase
+  if (req.body.phone_type)
+    req.body.phone_type = req.body.phone_type.toLowerCase();
+
   const { error } = Joi.validate(
     {
       new_email: req.body.new_email,
@@ -60,15 +101,10 @@ module.exports = (req, res, next) => {
     },
     schema
   );
-  if (error) return res.status(400).send(error.details[0].message);
-
-  //email can be entered any-case, but always saved lowercase
-  if (req.body.email) req.body.email = req.body.email.toLowerCase();
-  //email can be entered any-case, but always saved uppercase
-  if (req.body.role) req.body.role = req.body.role.toUpperCase();
-  //email can be entered any-case, but always saved lowercase
-  if (req.body.phone_type)
-    req.body.phone_type = req.body.phone_type.toLowerCase();
+  if (error) {
+    console.error(error);
+    return res.status(400).send(error.details[0].message);
+  }
 
   if (
     req.params.id === req.account.account_id ||

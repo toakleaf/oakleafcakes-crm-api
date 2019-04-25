@@ -114,7 +114,22 @@ module.exports = async (req, res, db, bcrypt, config) => {
               return;
             })
             .then(primary_phone => {
+              if (!primary_phone && new_phone) {
+                // just add new_phone if there is no primary phone, but new_phone was submitted
+                return trx('phone')
+                  .insert({
+                    account_id: req.params.id,
+                    phone: new_phone,
+                    is_primary: true,
+                    ...(phone_type ? { phone_type } : {}),
+                    ...(phone_country ? { phone_country } : {})
+                  })
+                  .then(() => {
+                    return;
+                  });
+              }
               if (
+                primary_phone &&
                 current_phone &&
                 primary_phone !== current_phone &&
                 phone_is_primary

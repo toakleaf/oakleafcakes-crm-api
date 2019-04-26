@@ -16,7 +16,10 @@ module.exports = (req, res, next) => {
     },
     schema
   );
-  if (error) return res.status(400).send(error.details[0].message);
+  if (error) {
+    console.error(error);
+    return res.status(400).send(error.details[0].message);
+  }
 
   //email can be entered any-case, but always saved lowercase
   req.body.email = req.body.email.toLowerCase();

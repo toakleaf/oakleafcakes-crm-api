@@ -10,6 +10,7 @@ const config = require('../config');
 const signToken = require('../controllers/account/signToken');
 const jwtRefresh = require('../controllers/system/jwtRefresh');
 const jwtExpiration = require('../controllers/system/jwtExpiration');
+const getExpiration = require('../controllers/system/getExpiration');
 
 router
   .route('/jwt/refresh')
@@ -22,6 +23,7 @@ router
 
 router
   .route('/jwt/expires')
+  .get(auth, admin, (req, res) => getExpiration(req, res, config))
   .put(auth, admin, valJWTExpires, (req, res) =>
     jwtExpiration(req, res, signToken, config)
   )

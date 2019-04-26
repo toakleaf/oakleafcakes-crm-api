@@ -9,7 +9,7 @@ module.exports = {
   POSTGRES_STAGING_URL: process.env.POSTGRES_STAGING_URL,
   POSTGRES_PRODUCTION_URL: process.env.POSTGRES_PRODUCTION_URL,
   BCRYPT_COST_FACTOR: 10,
-  JWT_EXPIRATION: '12h',
+  JWT_EXPIRATION: '1d',
   INITIAL_ACCOUNT: {
     email: process.env.TEST_EMAIL_RECIPIENT || 'test@test.com',
     password: '1234567891011',

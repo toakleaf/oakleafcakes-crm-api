@@ -23,7 +23,7 @@ router
 router
   .route('/jwt/expires')
   .put(auth, admin, valJWTExpires, (req, res) =>
-    jwtExpiration(req, res, config)
+    jwtExpiration(req, res, signToken, config)
   )
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');

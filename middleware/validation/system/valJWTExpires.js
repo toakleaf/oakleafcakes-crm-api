@@ -1,7 +1,6 @@
 const Joi = require('joi');
 
 module.exports = (req, res, next) => {
-  console.log('yo');
   const schema = Joi.object().keys({
     quantity: Joi.number()
       .integer()

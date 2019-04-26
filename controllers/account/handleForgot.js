@@ -17,6 +17,22 @@ module.exports = async (req, res, db, bcrypt, crypto, sendMail, config) => {
         reset_token_hash: hash,
         reset_token_expiration: expiration.toISOString(),
         updated_at: new Date(Date.now())
+      })
+      .then(data => {
+        return db('account_history')
+          .insert({
+            account_id: data[0].account_id,
+            author: data[0].account_id,
+            action: 'UPDATE',
+            transaction: {
+              reset_token_hash: hash,
+              reset_token_expiration: expiration.toISOString(),
+              updated_at: new Date(Date.now())
+            }
+          })
+          .then(() => {
+            return data;
+          });
       });
     if (!ids[0].id) throw new Error('email not found');
     const names = await db('account')

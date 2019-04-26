@@ -598,6 +598,59 @@ describe('account', () => {
     });
   });
 
+  // DELETE account/password/
+  describe('DELETE /account/password', () => {
+    it('should return 401 with no token', async () => {
+      expect.assertions(1);
+      const res = await request(server).delete('/account/password');
+      expect(res.status).toBe(401);
+    });
+    it('should return 400 with an invalid token', async () => {
+      expect.assertions(1);
+      const res = await request(server)
+        .delete('/account/password')
+        .set('Authorization', `Bearer gibberish`);
+      expect(res.status).toBe(400);
+    });
+    it('should return 403 if role !== ADMIN and current account !== params.id', async () => {
+      expect.assertions(1);
+      const res = await request(server)
+        .delete('/account/password')
+        .set('Authorization', `Bearer ${session.newAccount1Token}`);
+      expect(res.status).toBe(403);
+    });
+    it('should return 200 with valid token and current account === params.id', async () => {
+      expect.assertions(4);
+      const res1 = await request(server)
+        .delete(`/account/password/`)
+        .set('Authorization', `Bearer ${session.initialToken}`)
+        .send({ email: session.newAccount1.email });
+      expect(res1.status).toBe(200);
+      const data = await db
+        .select('*')
+        .from('login')
+        .where('account_id', session.newAccount1ID);
+      expect(data[0].reset_token_hash).not.toBeNull();
+      expect(data[0].reset_token_expiration).not.toBeNull();
+      expect(data[0].reset_token_expiration.getTime()).toBeGreaterThan(
+        data[0].updated_at.getTime()
+      );
+    });
+    it('should return 200 with invalid token when lock === true', async () => {
+      expect.assertions(2);
+      const res1 = await request(server)
+        .delete(`/account/password/`)
+        .set('Authorization', `Bearer ${session.initialToken}`)
+        .send({ email: session.newAccount2.email, lock: true });
+      expect(res1.status).toBe(200);
+      const data = await db
+        .select('*')
+        .from('login')
+        .where('email', session.newAccount2.email);
+      expect(data[0].is_active).toBeFalsy();
+    });
+  });
+
   // DELETE account/:id
   describe('DELETE /account/:id', () => {
     it('should return 401 with no token', async () => {

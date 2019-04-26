@@ -3,11 +3,11 @@ const { COMPANY_NAME, COMPANY_SITE } = require('../../../config.js');
 module.exports = (id, token, name = 'there') => {
   const greeting = `Hi ${name},`;
   const now = new Date(Date.now());
-  const paragraph1 = `Earlier today (${now.toDateString()}) you requested to reset the password for your ${COMPANY_NAME} account. Please use the link below to create a new password.`;
+  const paragraph1 = `Earlier today an administrator requested to reset the password for your ${COMPANY_NAME} account. Please use the link below to create a new password.`;
   const button_text = `Click here to restore password`;
   // this url should point to front end, but include login id and token params. reminder that login id != account id
   const button_url = `https://${COMPANY_SITE}/account/reset/${id}/${token}`;
-  const paragraph2 = `This link will expire in 45 minutes starting from the time of your request. Alternatively, to reset your password you may copy the following link into your browser's URL line: ${button_url}`;
+  const paragraph2 = `This link will expire in 7 days starting from the time of the request.  If it has been more than 7 days since you received this email please contact the site administrator to restore access to your account.  Alternatively, to reset your password you may copy the following link into your browser's URL line: ${button_url}`;
   const salutation = `Sincerely,`;
   const paragraph3 = `The ${COMPANY_NAME} Team`;
   const unsubscribe_url = ``;

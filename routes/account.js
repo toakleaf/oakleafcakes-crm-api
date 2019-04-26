@@ -25,6 +25,7 @@ const createAccount = require('../controllers/account/createAccount');
 const handleDelete = require('../controllers/account/handleDelete');
 const handleUpdate = require('../controllers/account/handleUpdate');
 const handleForgot = require('../controllers/account/handleForgot');
+const deletePassword = require('../controllers/account/deletePassword');
 const handleVerify = require('../controllers/account/handleVerify');
 const handleReset = require('../controllers/account/handleReset');
 const handleSearch = require('../controllers/account/handleSearch');
@@ -73,6 +74,15 @@ router
   .route('/forgot')
   .post(valForgot, (req, res) =>
     handleForgot(req, res, db, bcrypt, crypto, sendMail, config)
+  )
+  .all((req, res) => {
+    res.status(405).send('request method not supported for this page');
+  });
+
+router
+  .route('/password')
+  .delete(auth, admin, valForgot, (req, res) =>
+    deletePassword(req, res, db, bcrypt, crypto, sendMail, config)
   )
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');

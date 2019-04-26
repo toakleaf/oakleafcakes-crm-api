@@ -9,6 +9,9 @@ module.exports = async (req, res, db, bcrypt, signToken, config) => {
     if (!login) {
       throw new Error('invalid id');
     }
+    if (!login.is_active) {
+      throw new Error('account not active');
+    }
 
     const expiration = new Date(login.reset_token_expiration);
     const now = new Date(Date.now());

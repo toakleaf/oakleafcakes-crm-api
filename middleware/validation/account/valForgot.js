@@ -4,11 +4,15 @@ module.exports = (req, res, next) => {
   const schema = Joi.object().keys({
     email: Joi.string()
       .email({ minDomainAtoms: 2 })
-      .required()
+      .required(),
+    lock: Joi.boolean()
+      .allow(null)
+      .optional()
   });
   const { error } = Joi.validate(
     {
-      email: req.body.email
+      email: req.body.email,
+      ...(req.body.lock ? { lock: req.body.lock } : {})
     },
     schema
   );

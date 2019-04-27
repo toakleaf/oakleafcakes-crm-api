@@ -35,24 +35,43 @@ module.exports = (req, res, next) => {
     active: Joi.boolean(),
     inactive: Joi.boolean()
   });
-
-  req.query.orderby = req.query.orderby
-    ? req.query.orderby.toLowerCase()
-    : null;
-  req.query.order = req.query.order ? req.query.order.toLowerCase() : null;
-  req.query.count = req.query.count ? parseInt(req.query.count) : null;
-  req.query.page = req.query.page ? parseInt(req.query.page) : null;
-  req.query.field = req.query.field ? req.query.field.toLowerCase() : null;
-  req.query.query = req.query.query ? req.query.query.toLowerCase() : null;
-  req.query.exact = req.query.exact
-    ? req.query.exact.toLowerCase() == 'true'
-    : null;
-  req.query.active = req.query.active
-    ? req.query.active.toLowerCase() == 'true'
-    : null;
-  req.query.inactive = req.query.inactive
-    ? req.query.inactive.toLowerCase() == 'true'
-    : null;
+  req.query.orderby =
+    req.query.orderby && req.query.orderby.toLowerCase() !== 'null'
+      ? req.query.orderby.toLowerCase()
+      : null;
+  console.log('hi');
+  req.query.order =
+    req.query.order && req.query.order.toLowerCase() !== 'null'
+      ? req.query.order.toLowerCase()
+      : null;
+  req.query.count =
+    req.query.count && req.query.count.toLowerCase() !== 'null'
+      ? parseInt(req.query.count)
+      : null;
+  req.query.page =
+    req.query.page && req.query.page.toString().toLowerCase() !== 'null'
+      ? parseInt(req.query.page)
+      : null;
+  req.query.field =
+    req.query.field && req.query.field.toLowerCase() !== 'null'
+      ? req.query.field.toLowerCase()
+      : null;
+  req.query.query =
+    req.query.query && req.query.query.toLowerCase() !== 'null'
+      ? req.query.query.toLowerCase()
+      : null;
+  req.query.exact =
+    req.query.exact && req.query.query.toLowerCase() !== 'null'
+      ? req.query.exact.toLowerCase() == 'true'
+      : null;
+  req.query.active =
+    req.query.active && req.query.query.toLowerCase() !== 'null'
+      ? req.query.active.toLowerCase() == 'true'
+      : null;
+  req.query.inactive =
+    req.query.inactive && req.query.query.toLowerCase() !== 'null'
+      ? req.query.inactive.toLowerCase() == 'true'
+      : null;
 
   const {
     orderby,

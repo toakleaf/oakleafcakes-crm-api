@@ -17,7 +17,6 @@ module.exports = (req, res, next) => {
     schema
   );
   if (error) {
-    console.error(error);
     return res.status(400).send(error.details[0].message);
   }
 

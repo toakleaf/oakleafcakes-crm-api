@@ -36,6 +36,24 @@ module.exports = (req, res, next) => {
     inactive: Joi.boolean()
   });
 
+  req.query.orderby = req.query.orderby
+    ? req.query.orderby.toLowerCase()
+    : null;
+  req.query.order = req.query.order ? req.query.order.toLowerCase() : null;
+  req.query.count = req.query.count ? parseInt(req.query.count) : null;
+  req.query.page = req.query.page ? parseInt(req.query.page) : null;
+  req.query.field = req.query.field ? req.query.field.toLowerCase() : null;
+  req.query.query = req.query.query ? req.query.query.toLowerCase() : null;
+  req.query.exact = req.query.exact
+    ? req.query.exact.toLowerCase() == 'true'
+    : null;
+  req.query.active = req.query.active
+    ? req.query.active.toLowerCase() == 'true'
+    : null;
+  req.query.inactive = req.query.inactive
+    ? req.query.inactive.toLowerCase() == 'true'
+    : null;
+
   const {
     orderby,
     order,
@@ -48,6 +66,7 @@ module.exports = (req, res, next) => {
     active,
     inactive
   } = req.query;
+
   const toValidate = {
     ...(orderby ? { orderby: orderby.toLowerCase() } : {}),
     ...(order ? { order: order.toLowerCase() } : {}),
@@ -59,23 +78,11 @@ module.exports = (req, res, next) => {
     ...(role && !Array.isArray(role) ? { role: role.toUpperCase() } : {}),
     ...(field ? { field: field.toLowerCase() } : {}),
     ...(query ? { query: query.toLowerCase() } : {}),
-    ...(exact ? { exact: exact } : {}),
-    ...(active ? { active: true } : {}),
-    ...(inactive ? { inactive: true } : {})
+    ...(exact || exact === false ? { exact } : {}),
+    ...(active || active === false ? { active } : {}),
+    ...(inactive || inactive === false ? { inactive } : {})
   };
   const { error, value } = Joi.validate(toValidate, schema);
-
-  req.query.orderby = req.query.orderby
-    ? req.query.orderby.toLowerCase()
-    : null;
-  req.query.order = req.query.order ? req.query.order.toLowerCase() : null;
-  req.query.count = req.query.count ? parseInt(req.query.count) : null;
-  req.query.page = req.query.page ? parseInt(req.query.page) : null;
-  req.query.field = req.query.field ? req.query.field.toLowerCase() : null;
-  req.query.query = req.query.query ? req.query.query.toLowerCase() : null;
-  req.query.exact = req.query.exact ? true : null;
-  req.query.active = req.query.active ? true : null;
-  req.query.inactive = req.query.inactive ? true : null;
 
   if (req.query.role) {
     if (Array.isArray(req.query.role))

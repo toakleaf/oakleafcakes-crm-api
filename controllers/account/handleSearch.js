@@ -65,7 +65,7 @@ module.exports = (req, res, db) => {
         return qb.where({ 'login.is_active': true });
       }
       if (inactive) {
-        return qb.where({ 'login.is_inactive': true });
+        return qb.where({ 'login.is_active': false });
       }
     })
     .andWhere(qb => {
@@ -83,7 +83,7 @@ module.exports = (req, res, db) => {
       res.json(data);
     })
     .catch(err => {
-      // console.log(err);
+      console.log(err);
       return res.status(401).send('search failed');
     });
 };

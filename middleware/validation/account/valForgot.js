@@ -9,6 +9,10 @@ module.exports = (req, res, next) => {
       .allow(null)
       .optional()
   });
+
+  //email can be entered any-case, but always saved lowercase
+  req.body.email = req.body.email.toLowerCase();
+
   const { error } = Joi.validate(
     {
       email: req.body.email,
@@ -19,9 +23,6 @@ module.exports = (req, res, next) => {
   if (error) {
     return res.status(400).send(error.details[0].message);
   }
-
-  //email can be entered any-case, but always saved lowercase
-  req.body.email = req.body.email.toLowerCase();
 
   next();
 };

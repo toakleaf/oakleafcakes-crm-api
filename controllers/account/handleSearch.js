@@ -53,7 +53,7 @@ module.exports = (req, res, db) => {
       if (field && query) {
         if (field === 'email') field = 'email.email'; //both login and email tables have email column
         if (field === 'id') return qb.where('account.id', parseInt(query));
-        if (exact) return qb.where(field, 'ilike', query);
+        if (exact) return qb.where(field, query);
         return qb.where(field, 'ilike', `%${query}%`);
       }
     })

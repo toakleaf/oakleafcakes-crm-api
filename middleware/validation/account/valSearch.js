@@ -39,7 +39,6 @@ module.exports = (req, res, next) => {
     req.query.orderby && req.query.orderby.toLowerCase() !== 'null'
       ? req.query.orderby.toLowerCase()
       : null;
-  console.log('hi');
   req.query.order =
     req.query.order && req.query.order.toLowerCase() !== 'null'
       ? req.query.order.toLowerCase()
@@ -61,15 +60,15 @@ module.exports = (req, res, next) => {
       ? req.query.query.toLowerCase()
       : null;
   req.query.exact =
-    req.query.exact && req.query.query.toLowerCase() !== 'null'
+    req.query.exact && req.query.exact.toLowerCase() !== 'null'
       ? req.query.exact.toLowerCase() == 'true'
       : null;
   req.query.active =
-    req.query.active && req.query.query.toLowerCase() !== 'null'
+    req.query.active && req.query.active.toLowerCase() !== 'null'
       ? req.query.active.toLowerCase() == 'true'
       : null;
   req.query.inactive =
-    req.query.inactive && req.query.query.toLowerCase() !== 'null'
+    req.query.inactive && req.query.inactive.toLowerCase() !== 'null'
       ? req.query.inactive.toLowerCase() == 'true'
       : null;
 

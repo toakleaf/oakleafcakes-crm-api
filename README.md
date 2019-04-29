@@ -273,9 +273,9 @@ Returns JSON payload of how long JWT's are valid:
 
 ```
 
-	{
-		"expiration": "string-matching-pattern (int)('s', 'm', 'h', 'd', 'w')"
-	}
+{
+	"expiration": "string-matching-pattern (int)('s', 'm', 'h', 'd', 'w')"
+}
 
 ```
 
@@ -287,10 +287,10 @@ Takes JSON payload of how long JWT's are valid:
 
 ```
 
-	{
-		"quantity": "int-required",
-		"unit": "string-required"
-	}
+{
+	"quantity": "int-required",
+	"unit": "string-required"
+}
 
 ```
 

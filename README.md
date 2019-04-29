@@ -181,6 +181,8 @@ Returns 200 status and HTTP Header: x-auth-token, which is a JWT to pass as "Aut
 
 ### GET /account/search
 
+Requires user be logged in as either ADMIN or EMPLOYEE.
+
 Takes a query string with any of the following queries (everything is optional):
 
 ```
@@ -250,3 +252,46 @@ This route is accessible by ADMIN accounts only.
 Takes an id param (int).
 
 Returns status 200 and HTTP Header 'x-deleted-account' with the account id if completed successfully.
+
+### POST /system/jwt/refresh
+
+This route is used to refresh the JWT secret key for the entire system, thereby instantly invalidating all outstanding JWT tokens, and forcing all users to re-login to continue using site. This route is in effect as a last defense against rouge accounts so logouts can assured, even before token expiration. Decided to go this route rather than setting up Redis server to verify every single authentication, as company is small and use of this route should be rare enough to not necessitate the overhead of Redis.
+
+Requires user be logged in as an ADMIN.
+
+Takes no input payload.
+
+Returns 200 status and HTTP Header: x-auth-token, which is a JWT to pass as "Authorization : Bearer" header on all protected routes.
+
+### GET /system/jwt/expires
+
+Requires user be logged in as an ADMIN.
+
+Takes no input payload.
+
+Returns JSON payload of how long JWT's are valid:
+
+```
+
+{ "expiration": "string-matching-pattern (int)('s', 'm', 'h', 'd', 'w')" }
+
+```
+
+### GET /system/jwt/expires
+
+Requires user be logged in as an ADMIN.
+
+Takes JSON payload of how long JWT's are valid:
+
+```
+
+{
+	"quantity": "int-required",
+  "unit": "string-required"
+}
+
+```
+
+Note: Unit is can be any unit of time, such as: m, min, minutes, etc... However, it is recommended to stick with a single letter abbreviation for consistency: s, m, h, d, w.
+
+Returns Status 200 if successful.

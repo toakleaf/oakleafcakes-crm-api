@@ -32,6 +32,20 @@ Beyond the account reclamation features built into the system, it has all the se
 
 ### System
 
+Allows the alteration to system-wide api settings. Currently includes ability to reset JWT secret key and expiration.
+
+### Order
+
+Still under development. Will allow various types of bakery orders, and will allow orders to be broken down into constituent tasks to be tracked through their execution by employees to allow for detailed costing of future order creations.
+
+### Payment
+
+Still under development. Will allow for acceptance and processing of payments. Will likely be integrated into current square payment processing system utilized by bakery.
+
+### Stats
+
+Still under development. Will periodically collect and organize data at off-peak-usage times so that display of statistics needn't force massive database queries every time a statistical display is called.
+
 ## Using the API
 
 ### POST /account/login

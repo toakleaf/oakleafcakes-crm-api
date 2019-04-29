@@ -54,8 +54,8 @@ Takes JSON payload:
 
 ```
 {
-	"email": "test@test.com",
-	"password": "1234567891011"
+	"email": "required",
+	"password": "required"
 }
 ```
 
@@ -96,16 +96,38 @@ Takes JSON payload:
 
 ```
 {
-	"email": "test@test.com",
-	"password": "Optional"
-	"role": "EMPLOYEE"
-	"first_name": "Optional"
-	"last_name": "Optional"
-	"company_name": "Optional"
-	"phone": "Optional"
-	"phone_type": "Optional"
-	"phone_country": "Optional"
+	"email": "required",
+	"password": "optional"
+	"role": "required"
+	"first_name": "optional"
+	"last_name": "optional"
+	"company_name": "optional"
+	"phone": "optional"
+	"phone_type": "optional"
+	"phone_country": "optional"
 }
 ```
 
 Returns JSON payload of created account's information (see GET /account/ output), and (if login credentials supplied) will send account verification email to user.
+
+### POST /account/signup
+
+General public will use this route to create their own CUSTOMER accounts w/ login credentials required.
+
+Takes JSON payload:
+
+```
+{
+	"email": "required",
+	"password": "required"
+	"role": "required"
+	"first_name": "optional"
+	"last_name": "optional"
+	"company_name": "optional"
+	"phone": "optional"
+	"phone_type": "optional"
+	"phone_country": "optional"
+}
+```
+
+Returns Status 200, and sends account verification email to user.

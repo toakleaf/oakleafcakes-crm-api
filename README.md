@@ -148,7 +148,7 @@ Note: password will not be reset until user follows link in email to /account/re
 
 ### DELETE /account/password
 
-This route is used by ADMIN or EMPLOYEE accounts to manually overwrite an account's password to a randomly generated string.
+This route is used by ADMIN or EMPLOYEE accounts to manually overwrite an account's password to a randomly generated string. ADMIN can invoke on any account, EMPLOYEE can invoke on non ADMIN or EMPLOYEE accounts.
 
 Takes JSON payload:
 

@@ -1,11 +1,13 @@
 // INSERTING A VALUE INTO AN AUTOINCREMENT (PRIMARY KEY)
 // COLUMN WILL CAUSE AUTOINCREMENTING TO CEASE!
-const { INITIAL_ACCOUNT } = require('../../../config');
+const { INITIAL_ACCOUNT, BCRYPT_COST_FACTOR } = require('../../../config');
+const bcrypt = require('bcryptjs');
 
-exports.seed = function(knex, Promise) {
+exports.seed = async function(knex, Promise) {
   let roles;
   let accounts;
   let logins;
+  let hash = await bcrypt.hash(INITIAL_ACCOUNT.password, BCRYPT_COST_FACTOR);
   return knex('account')
     .del()
     .then(() => knex('login').del())
@@ -40,7 +42,7 @@ exports.seed = function(knex, Promise) {
         .returning('account_id')
         .insert([
           {
-            hash: INITIAL_ACCOUNT.hash,
+            hash: hash,
             email: INITIAL_ACCOUNT.email,
             account_id: account_ids[0],
             is_active: true

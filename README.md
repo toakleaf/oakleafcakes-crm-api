@@ -97,13 +97,13 @@ Takes JSON payload:
 ```
 {
 	"email": "string-required",
-	"password": "string-optional"
-	"role": "string-required"
-	"first_name": "string-optional"
-	"last_name": "string-optional"
-	"company_name": "string-optional"
-	"phone": "string-optional"
-	"phone_type": "string-optional"
+	"password": "string-optional",
+	"role": "string-required",
+	"first_name": "string-optional",
+	"last_name": "string-optional",
+	"company_name": "string-optional",
+	"phone": "string-optional",
+	"phone_type": "string-optional",
 	"phone_country": "string-optional"
 }
 ```
@@ -121,13 +121,13 @@ Takes JSON payload:
 ```
 {
 	"email": "string-required",
-	"password": "string-required"
-	"role": "string-required"
-	"first_name": "string-optional"
-	"last_name": "string-optional"
-	"company_name": "string-optional"
-	"phone": "string-optional"
-	"phone_type": "string-optional"
+	"password": "string-required",
+	"role": "string-required",
+	"first_name": "string-optional",
+	"last_name": "string-optional",
+	"company_name": "string-optional",
+	"phone": "string-optional",
+	"phone_type": "string-optional",
 	"phone_country": "string-optional"
 }
 ```
@@ -179,24 +179,30 @@ Takes no payload.
 
 Returns 200 status and HTTP Header: x-auth-token, which is a JWT to pass as "Authorization : Bearer" header on all protected routes.
 
-### POST /account/search
+### GET /account/search
 
-Takes JSON payload:
+Takes a query string with any of the following queries (everything is optional):
 
 ```
-{
-	"orderby": "string-matching 'id', 'email', 'first_name', 'last_name', 'company_name', 'created_at', 'updated_at', or 'role' "
-	"order":
-	"count":
-	"page":
-	"role":
-	"field":
-	"query":
-	"exact":
-	"active":
-	"inactive":
-
-}
+	orderby= (id, email, first_name, last_name, company_name, created_at, updated_at, role)
+	order= (asc, desc)
+	count= (int)
+	page= (int)
+	role= (ADMIN, EMPLOYEE,  CUSTOMER)
+	field= (id, email, first_name, last_name, company_name, phone)
+	query= (string)
+	exact= (boolean)
+	active= (boolean)
+	inactive= (boolean)
 ```
 
-Returns Status 200 if successful, and sends account verification email to user.
+Note:
+
+1. If exact is null or false, query will be 'ilike %query%'.
+2. If active and inactive both true or both null, then will return all active and inactive records. If only one is true, then will retrieve just that.
+3. Count is number of results to return per page
+4. Page is the page number to return given a count. (requires count be present to work)
+5. Similarly, query requires field to be present to return results.
+6. Role can be expressed in query string multiple times to match multiple roles.
+
+Returns JSON where accounts match query, of given account's account information (see GET /account route for example output).

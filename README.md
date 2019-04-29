@@ -96,15 +96,15 @@ Takes JSON payload:
 
 ```
 {
-	"email": "required",
-	"password": "optional"
-	"role": "required"
-	"first_name": "optional"
-	"last_name": "optional"
-	"company_name": "optional"
-	"phone": "optional"
-	"phone_type": "optional"
-	"phone_country": "optional"
+	"email": "string-required",
+	"password": "string-optional"
+	"role": "string-required"
+	"first_name": "string-optional"
+	"last_name": "string-optional"
+	"company_name": "string-optional"
+	"phone": "string-optional"
+	"phone_type": "string-optional"
+	"phone_country": "string-optional"
 }
 ```
 
@@ -118,15 +118,15 @@ Takes JSON payload:
 
 ```
 {
-	"email": "required",
-	"password": "required"
-	"role": "required"
-	"first_name": "optional"
-	"last_name": "optional"
-	"company_name": "optional"
-	"phone": "optional"
-	"phone_type": "optional"
-	"phone_country": "optional"
+	"email": "string-required",
+	"password": "string-required"
+	"role": "string-required"
+	"first_name": "string-optional"
+	"last_name": "string-optional"
+	"company_name": "string-optional"
+	"phone": "string-optional"
+	"phone_type": "string-optional"
+	"phone_country": "string-optional"
 }
 ```
 
@@ -138,10 +138,25 @@ Takes JSON payload:
 
 ```
 {
-	"email": "required",
+	"email": "string-required",
 }
 ```
 
 Returns Status 200 no matter what, and sends account password reset email to user if account exists.
 
 Note: password will not be reset until user follows link in email to /account/reset route.
+
+### DELETE /account/password
+
+This route is used by ADMIN or EMPLOYEE accounts to manually overwrite an account's password to a randomly generated string.
+
+Takes JSON payload:
+
+```
+{
+	"email": "string-required",
+	"lock": "boolean-optional"
+}
+```
+
+Returns Status 200 if successful. If lock boolean flag is true, then no password reset email will be sent. However, if lock boolean flag is null or false, then password email will be sent.

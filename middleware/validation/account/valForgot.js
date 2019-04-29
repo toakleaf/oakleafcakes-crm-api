@@ -4,19 +4,15 @@ module.exports = (req, res, next) => {
   const schema = Joi.object().keys({
     email: Joi.string()
       .email({ minDomainAtoms: 2 })
-      .required(),
-    lock: Joi.boolean()
-      .allow(null)
-      .optional()
+      .required()
   });
 
   //email can be entered any-case, but always saved lowercase
-  req.body.email = req.body.email.toLowerCase();
+  req.body.email = req.body.email ? req.body.email.toLowerCase() : null;
 
   const { error } = Joi.validate(
     {
-      email: req.body.email,
-      ...(req.body.lock ? { lock: req.body.lock } : {})
+      email: req.body.email
     },
     schema
   );

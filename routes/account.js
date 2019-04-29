@@ -10,6 +10,7 @@ const valUpdate = require('../middleware/validation/account/valUpdate');
 const valSearch = require('../middleware/validation/account/valSearch');
 const valHistory = require('../middleware/validation/account/valHistory');
 const valForgot = require('../middleware/validation/account/valForgot');
+const valDeletePassword = require('../middleware/validation/account/valDeletePassword');
 const valReset = require('../middleware/validation/account/valReset');
 const valVerify = require('../middleware/validation/account/valVerify');
 const db = require('../db/db');
@@ -81,7 +82,7 @@ router
 
 router
   .route('/password')
-  .delete(auth, admin, valForgot, (req, res) =>
+  .delete(auth, admin, valDeletePassword, (req, res) =>
     deletePassword(req, res, db, bcrypt, crypto, sendMail, config)
   )
   .all((req, res) => {

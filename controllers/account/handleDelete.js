@@ -11,7 +11,7 @@ module.exports = (req, res, db) => {
         });
       })
       .then(() => {
-        res.header('X-Deleted-account', req.params.id).send('success');
+        res.header('x-deleted-account', req.params.id).send('success');
       })
       .then(trx.commit)
       .catch(err => {

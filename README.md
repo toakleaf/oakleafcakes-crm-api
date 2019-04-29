@@ -211,7 +211,7 @@ Returns JSON where accounts match query, of given account's account information 
 
 Requires user be logged in as either ADMIN or EMPLOYEE.
 
-Takes a param (int) and a JSON payload:
+Takes an id param (int) and a JSON payload:
 
 ```
 	"orderby": "string-matching 'account_id', 'author', 'action', 'created_at' ",
@@ -242,3 +242,11 @@ Returns JSON payload of all history regarding for a given account id (as submitt
     }
 ]
 ```
+
+### DELETE /account/:id
+
+This route is accessible by ADMIN accounts only.
+
+Takes an id param (int).
+
+Returns status 200 and HTTP Header 'x-deleted-account' with the account id if completed successfully.

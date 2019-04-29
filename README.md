@@ -287,7 +287,7 @@ Takes JSON payload of how long JWT's are valid:
 
 {
 	"quantity": "int-required",
-  "unit": "string-required"
+	"unit": "string-required"
 }
 
 ```

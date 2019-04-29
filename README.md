@@ -14,4 +14,13 @@ A Customer Relationship and Order Management API for Oakleaf Cakes Bake Shop. As
 9. Shut it down: `$ docker-compose down`
 
 ## Using the API
-### The /account/ route
+### POST /account/login
+Takes JSON payload:
+```
+{
+	"email": "test@test.com",
+	"password": "1234567891011"
+}
+```
+Note: Default login credentials are located in /config.js file. Update email and password as you need for your own testing.
+

@@ -113,7 +113,7 @@ router
     handleSearch(req, res, db, config)
   )
   .all((req, res) => {
-    res.status(405).send('request method not supported for this page1');
+    res.status(405).send('request method not supported for this page');
   });
 
 router
@@ -122,7 +122,7 @@ router
     handleHistory(req, res, db, config)
   )
   .all((req, res) => {
-    res.status(405).send('request method not supported for this page1');
+    res.status(405).send('request method not supported for this page');
   });
 
 router

@@ -112,7 +112,9 @@ Returns JSON payload of created account's information (see GET /account/ output)
 
 ### POST /account/signup
 
-General public will use this route to create their own CUSTOMER accounts w/ login credentials required.
+General public will use this route to create their own CUSTOMER accounts w/ login credentials required, or to claim an already existing account, and create new login credentials for it, if the supplied email or phone number matches an existing CUSTOMER account lacking login credentials.
+
+NOTE: If an account is being claimed, provided payload data will be stored in the account history as a normal UPDATE request with a flag indicating that request was never processed. No data will be overwritten until the point at which the account is verified by the user.
 
 Takes JSON payload:
 
@@ -131,6 +133,14 @@ Takes JSON payload:
 ```
 
 Returns Status 200 if successful, and sends account verification email to user.
+
+### POST /account/verify/:id/:token
+
+Route is active after account login credentials are created. If this route is triggered as a result of an account being claimed, it will also push an update of the account's data (stored via the account history) if the payload data supplied when account was first claimed differs from that in the account.
+
+Takes no payload.
+
+Returns 200 status and HTTP Header: x-auth-token, which is a JWT to pass as "Authorization : Bearer" header on all protected routes.
 
 ### POST /account/forgot
 
@@ -160,3 +170,11 @@ Takes JSON payload:
 ```
 
 Returns Status 200 if successful. If lock boolean flag is true, then no password reset email will be sent. However, if lock boolean flag is null or false, then password email will be sent.
+
+### POST /account/reset/:id/:token
+
+Route is active for short time after POST /account/forgot or DELETE /account/password routes are triggered (and account hasn't been inactivated).
+
+Takes no payload.
+
+Returns 200 status and HTTP Header: x-auth-token, which is a JWT to pass as "Authorization : Bearer" header on all protected routes.

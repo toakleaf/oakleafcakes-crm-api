@@ -16,7 +16,7 @@ Associated Web Interface @ (https://github.com/toakleaf/oakleafcakes-crm-ui)
 
 ## About the API
 
-The API is still under development, however, current feature set includes:
+The API is still under development, as a replacement to current system in use, a php/mysql/jquery monolith I made, and that's been running the day-to-day customer management operations of our bakery for the last 7 years.
 
 ### Accounts
 

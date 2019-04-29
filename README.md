@@ -65,11 +65,25 @@ Note: Default login credentials are located in /config.js file. Update email and
 ### GET /account/
 
 Requires user be logged in.
-Returns JSON payload:
+
+Returns JSON payload of logged in account's information:
 
 ```
-{
-	"email": "test@test.com",
-	"password": "1234567891011"
-}
+[
+    {
+        "id": "1",
+        "first_name": "Test",
+        "last_name": "Testerson",
+        "company_name": "Fake Corp",
+        "email": "test@test.com",
+        "email_is_primary": true,
+        "role": "ADMIN",
+        "phone": "(617) 444-4444",
+        "phone_is_primary": true,
+        "phone_type": "mobile",
+        "phone_country": "US",
+        "created_at": "2019-04-29T16:24:30.453Z",
+        "updated_at": "2019-04-29T16:24:30.453Z"
+    }
+]
 ```

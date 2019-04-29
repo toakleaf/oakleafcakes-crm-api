@@ -1,6 +1,5 @@
-# oakleafcakes-crm-api
-
-A Customer Relationship and Order Management API for Oakleaf Cakes Bake Shop. Associated Web Interface @ (https://github.com/toakleaf/oakleafcakes-crm-ui)
+# A Customer Relationship and Order Management API for Oakleaf Cakes Bake Shop.
+Associated Web Interface @ (https://github.com/toakleaf/oakleafcakes-crm-ui)
 
 ## Project setup via docker-compose
 1. Clone the repo

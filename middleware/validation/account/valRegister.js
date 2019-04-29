@@ -7,7 +7,9 @@ module.exports = (req, res, next) => {
       .required(),
     password: Joi.string()
       .min(MIN_PASSWORD_LENGTH)
-      .max(MAX_PASSWORD_LENGTH),
+      .max(MAX_PASSWORD_LENGTH)
+      .allow(null)
+      .optional(),
     role: Joi.string()
       .max(100)
       .required(),

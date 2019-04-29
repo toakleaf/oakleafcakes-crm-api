@@ -277,7 +277,7 @@ Returns JSON payload of how long JWT's are valid:
 
 ```
 
-### GET /system/jwt/expires
+### POST /system/jwt/expires
 
 Requires user be logged in as an ADMIN.
 

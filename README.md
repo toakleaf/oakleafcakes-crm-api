@@ -130,4 +130,18 @@ Takes JSON payload:
 }
 ```
 
-Returns Status 200, and sends account verification email to user.
+Returns Status 200 if successful, and sends account verification email to user.
+
+### POST /account/forgot
+
+Takes JSON payload:
+
+```
+{
+	"email": "required",
+}
+```
+
+Returns Status 200 no matter what, and sends account password reset email to user if account exists.
+
+Note: password will not be reset until user follows link in email to /account/reset route.

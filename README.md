@@ -87,3 +87,25 @@ Returns JSON payload of logged in account's information:
     }
 ]
 ```
+
+### POST /account/register
+
+For registering new ADMIN, EMPLOYEE, or CUSTOMER accounts, with or without login credentials. Requires user be logged in as ADMIN or EMPLOYEE. (General public will use /account/signup route to create their own CUSTOMER accounts w/ login credentials)
+
+Takes JSON payload:
+
+```
+{
+	"email": "test@test.com",
+	"password": "Optional"
+	"role": "EMPLOYEE"
+	"first_name": "Optional"
+	"last_name": "Optional"
+	"company_name": "Optional"
+	"phone": "Optional"
+	"phone_type": "Optional"
+	"phone_country": "Optional"
+}
+```
+
+Returns JSON payload of created account's information (see GET /account/ output), and (if login credentials supplied) will send account verification email to user.

@@ -52,7 +52,7 @@ router
 
 router
   .route('/register') //for accounts registering accounts
-  .post([auth, admin, valRegister], (req, res) => {
+  .post([auth, employee, valRegister], (req, res) => {
     if (req.body.password)
       createAccountWithLogin(req, res, db, crypto, bcrypt, config, sendMail);
     else createAccount(req, res, db);

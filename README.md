@@ -138,7 +138,7 @@ Returns Status 200 if successful, and sends account verification email to user.
 
 Route is active after account login credentials are created. If this route is triggered as a result of an account being claimed, it will also push an update of the account's data (stored via the account history) if the payload data supplied when account was first claimed differs from that in the account.
 
-Takes no payload.
+Takes params id (int) and token (string).
 
 Returns 200 status and HTTP Header: x-auth-token, which is a JWT to pass as "Authorization : Bearer" header on all protected routes.
 
@@ -175,7 +175,7 @@ Returns Status 200 if successful. If lock boolean flag is true, then no password
 
 Route is active for short time after POST /account/forgot or DELETE /account/password routes are triggered (and account hasn't been inactivated).
 
-Takes no payload.
+Takes params id (int) and token (string).
 
 Returns 200 status and HTTP Header: x-auth-token, which is a JWT to pass as "Authorization : Bearer" header on all protected routes.
 
@@ -206,3 +206,39 @@ Note:
 6. Role can be expressed in query string multiple times to match multiple roles.
 
 Returns JSON where accounts match query, of given account's account information (see GET /account route for example output).
+
+### GET /account/history/:id
+
+Requires user be logged in as either ADMIN or EMPLOYEE.
+
+Takes a param (int) and a JSON payload:
+
+```
+	"orderby": "string-matching 'account_id', 'author', 'action', 'created_at' ",
+	"order": "string-matching 'account_id', 'asc', 'desc' ",
+	"count": "int",
+	"page": "int"
+```
+
+Returns JSON payload of all history regarding for a given account id (as submitted in the param):
+
+```
+[
+    {
+        "id": "1",
+        "account_id": "2",
+        "author": "1",
+        "action": "CREATE",
+        "transaction": {
+            "first_name": "John",
+            "last_name": "Doe",
+            "company_name": "Evil Corp",
+            "email": "test2@test.com",
+            "role": "CUSTOMER",
+            "phone": "(123) 456-7890",
+            "phone_type": "mobile"
+        },
+        "created_at": "2019-04-29T18:35:21.552Z"
+    }
+]
+```

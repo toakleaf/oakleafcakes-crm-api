@@ -178,3 +178,25 @@ Route is active for short time after POST /account/forgot or DELETE /account/pas
 Takes no payload.
 
 Returns 200 status and HTTP Header: x-auth-token, which is a JWT to pass as "Authorization : Bearer" header on all protected routes.
+
+### POST /account/search
+
+Takes JSON payload:
+
+```
+{
+	"orderby": "string-matching 'id', 'email', 'first_name', 'last_name', 'company_name', 'created_at', 'updated_at', or 'role' "
+	"order":
+	"count":
+	"page":
+	"role":
+	"field":
+	"query":
+	"exact":
+	"active":
+	"inactive":
+
+}
+```
+
+Returns Status 200 if successful, and sends account verification email to user.

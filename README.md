@@ -208,6 +208,8 @@ Takes a query string with any of the following queries (everything is optional):
 	role= (ADMIN, EMPLOYEE,  CUSTOMER)
 	field= (id, email, first_name, last_name, company_name, phone)
 	query= (string)
+	field2= (id, email, first_name, last_name, company_name, phone)
+	query2= (string)
 	exact= (boolean)
 	active= (boolean)
 	inactive= (boolean)
@@ -222,6 +224,7 @@ Note:
 5. Similarly, query requires field to be present to return results.
 6. Role can be expressed in query string multiple times to match multiple roles.
 7. all querying of phone numbers is done the raw digits, not any formatting marks like dashes or parenthesis, so you can submit number in any format.
+8. field2 and query2 are implemented as OR queries with the original field and query
 
 Returns JSON where accounts match query, of given account's account information (see GET /account route for example output).
 

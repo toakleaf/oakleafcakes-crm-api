@@ -80,8 +80,6 @@ module.exports = (req, res, next) => {
       .positive()
   });
 
-  console.log(req.body.company_name ? 'is ok' : 'is null');
-
   //email can be entered any-case, but always saved lowercase
   if (req.body.email) req.body.email = req.body.email.toLowerCase();
   //email can be entered any-case, but always saved uppercase

@@ -7,6 +7,8 @@ module.exports = (req, res, db) => {
     role,
     field,
     query,
+    field2,
+    query2,
     exact,
     active,
     inactive
@@ -14,6 +16,8 @@ module.exports = (req, res, db) => {
   let offset = page * count - count;
   let phone_raw =
     query && field === 'phone' ? query.replace(/[^0-9]/g, '') : null;
+  let phone_raw2 =
+    query2 && field2 === 'phone' ? query2.replace(/[^0-9]/g, '') : null;
 
   db.select(
     'account.id',
@@ -63,6 +67,18 @@ module.exports = (req, res, db) => {
           return qb.where('phone.phone_raw', 'ilike', `%${phone_raw}%`);
         if (exact) return qb.where(field, '=', query);
         return qb.where(field, 'ilike', `%${query}%`);
+      }
+    })
+    .andWhere(qb => {
+      if (field2 && query2) {
+        if (field2 === 'email') field2 = 'email.email'; //both login and email tables have email column
+        if (field2 === 'id') return qb.where('account.id', parseInt(query2));
+        if (field2 === 'phone' && exact)
+          return qb.where('phone.phone_raw', '=', phone_raw2);
+        if (field2 === 'phone')
+          return qb.where('phone.phone_raw', 'ilike', `%${phone_raw2}%`);
+        if (exact) return qb.where(field2, '=', query2);
+        return qb.where(field2, 'ilike', `%${query2}%`);
       }
     })
     .andWhere(qb => {

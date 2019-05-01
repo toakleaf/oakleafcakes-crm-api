@@ -30,7 +30,16 @@ module.exports = (req, res, next) => {
       'company_name',
       'phone'
     ]),
-    query: Joi.string().lowercase(),
+    query: Joi.string(),
+    field2: Joi.valid([
+      'id',
+      'email',
+      'first_name',
+      'last_name',
+      'company_name',
+      'phone'
+    ]),
+    query2: Joi.string(),
     exact: Joi.boolean(),
     active: Joi.boolean(),
     inactive: Joi.boolean()
@@ -57,7 +66,15 @@ module.exports = (req, res, next) => {
       : null;
   req.query.query =
     req.query.query && req.query.query.toLowerCase() !== 'null'
-      ? req.query.query.toLowerCase()
+      ? req.query.query
+      : null;
+  req.query.field2 =
+    req.query.field2 && req.query.field2.toLowerCase() !== 'null'
+      ? req.query.field2.toLowerCase()
+      : null;
+  req.query.query2 =
+    req.query.query2 && req.query.query2.toLowerCase() !== 'null'
+      ? req.query.query2
       : null;
   req.query.exact =
     req.query.exact && req.query.exact.toLowerCase() !== 'null'
@@ -80,6 +97,8 @@ module.exports = (req, res, next) => {
     role,
     field,
     query,
+    field2,
+    query2,
     exact,
     active,
     inactive

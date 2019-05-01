@@ -79,6 +79,7 @@ Returns JSON payload of logged in account's information:
         "email_is_primary": true,
         "role": "ADMIN",
         "phone": "(617) 444-4444",
+        "phone_raw": "6174444444",
         "phone_is_primary": true,
         "phone_type": "mobile",
         "phone_country": "US",
@@ -108,6 +109,13 @@ Takes JSON payload:
 }
 ```
 
+Note:
+
+1. phone can be is any regional display string like "(617) 444-4444"
+2. phone_type can be any string, but most common are "work", "home", and "mobile"
+3. phone_country is a 2 letter country code like "US" which informs how regional number is displayed
+4. all querying of phone numbers is done the raw digits, not any formatting marks like dashes or parenthesis.
+
 Returns JSON payload of created account's information (see GET /account/ output), and (if login credentials supplied) will send account verification email to user.
 
 ### POST /account/signup
@@ -131,6 +139,13 @@ Takes JSON payload:
 	"phone_country": "string-optional"
 }
 ```
+
+Note:
+
+1. phone can be is any regional display string like "(617) 444-4444"
+2. phone_type can be any string, but most common are "work", "home", and "mobile"
+3. phone_country is a 2 letter country code like "US" which informs how regional number is displayed
+4. all querying of phone numbers is done the raw digits, not any formatting marks like dashes or parenthesis.
 
 Returns Status 200 if successful, and sends account verification email to user.
 
@@ -206,6 +221,7 @@ Note:
 4. Page is the page number to return given a count. (requires count be present to work)
 5. Similarly, query requires field to be present to return results.
 6. Role can be expressed in query string multiple times to match multiple roles.
+7. all querying of phone numbers is done the raw digits, not any formatting marks like dashes or parenthesis, so you can submit number in any format.
 
 Returns JSON where accounts match query, of given account's account information (see GET /account route for example output).
 

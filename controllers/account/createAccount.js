@@ -9,6 +9,7 @@ module.exports = (req, res, db) => {
     phone_type,
     phone_country
   } = req.body;
+  let phone_raw = phone ? phone.replace(/[^0-9]/g, '') : null;
 
   db.transaction(trx => {
     trx('account')
@@ -24,9 +25,9 @@ module.exports = (req, res, db) => {
           });
         }
         if (phone) {
-          phone_type = phone_type ? phone_type.toLowerCase() : null;
           await trx('phone').insert({
             phone,
+            phone_raw,
             phone_type,
             phone_country,
             is_primary: true,
@@ -44,6 +45,7 @@ module.exports = (req, res, db) => {
             email,
             role,
             phone,
+            phone_raw,
             phone_type,
             phone_country
           }
@@ -58,6 +60,7 @@ module.exports = (req, res, db) => {
               ...accountData[0],
               email,
               phone,
+              phone_raw,
               phone_type,
               phone_country,
               role

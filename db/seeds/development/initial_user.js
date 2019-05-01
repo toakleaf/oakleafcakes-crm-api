@@ -68,9 +68,11 @@ exports.seed = async function(knex, Promise) {
       ]);
     })
     .then(() => {
+      let phone_raw = INITIAL_ACCOUNT.phone.replace(/[^0-9]/g, '');
       return knex('phone').insert([
         {
           phone: INITIAL_ACCOUNT.phone,
+          phone_raw: phone_raw,
           is_primary: true,
           phone_type: 'mobile',
           account_id: accounts[0]

@@ -8,6 +8,7 @@ module.exports = async (db, id, updates) => {
     phone_type,
     phone_country
   } = updates;
+  let phone_raw = phone ? phone.replace(/[^0-9]/g, '') : null;
 
   const now = new Date(Date.now());
 
@@ -44,7 +45,7 @@ module.exports = async (db, id, updates) => {
         .then(() => {
           return trx('phone')
             .select('*')
-            .where({ account_id: id, phone })
+            .where({ account_id: id, phone_raw })
             .then(p => p[0]);
         })
         .then(p => {
@@ -54,8 +55,9 @@ module.exports = async (db, id, updates) => {
               .update({ is_primary: false, updated_at: now })
               .then(() => {
                 return trx('phone')
-                  .where({ account_id: id, phone })
+                  .where({ account_id: id, phone_raw })
                   .update({
+                    phone,
                     is_primary: true,
                     phone_type,
                     phone_country,
@@ -63,7 +65,11 @@ module.exports = async (db, id, updates) => {
                   });
               });
           }
-          if (p) return;
+          if (p) {
+            return trx('phone')
+              .where({ account_id: id, phone_raw })
+              .update({ phone, phone_type, phone_country, updated_at: now });
+          }
           return trx('phone')
             .where({ account_id: id, is_primary: true })
             .update({ is_primary: false, updated_at: now })
@@ -71,6 +77,7 @@ module.exports = async (db, id, updates) => {
               return trx('phone').insert({
                 account_id: id,
                 phone,
+                phone_raw,
                 is_primary: true,
                 phone_type,
                 phone_country,
@@ -84,7 +91,8 @@ module.exports = async (db, id, updates) => {
             author: id,
             action: 'UPDATE',
             transaction: {
-              ...updates
+              ...updates,
+              phone_raw
             }
           });
         })

@@ -15,6 +15,10 @@ module.exports = async (req, res, db, bcrypt, config) => {
     phone_country,
     is_active
   } = req.body;
+  let new_phone_raw = new_phone ? new_phone.replace(/[^0-9]/g, '') : null;
+  let current_phone_raw = current_phone
+    ? current_phone.replace(/[^0-9]/g, '')
+    : null;
 
   const now = new Date(Date.now());
 
@@ -33,6 +37,7 @@ module.exports = async (req, res, db, bcrypt, config) => {
   };
   const phoneUpdates = {
     ...(new_phone ? { phone: new_phone } : {}),
+    ...(new_phone_raw ? { phone: new_phone_raw } : {}),
     ...(phone_type ? { phone_type } : {}),
     ...(phone_country ? { phone_country } : {}),
     ...(phone_is_primary || phone_is_primary === false
@@ -115,19 +120,20 @@ module.exports = async (req, res, db, bcrypt, config) => {
             .then(() => {
               if (current_phone) {
                 return db('phone')
-                  .select('phone')
+                  .select('phone_raw')
                   .where({ account_id: req.params.id, is_primary: true })
-                  .then(primary_phone => primary_phone[0]);
+                  .then(primary_phone_raw => primary_phone_raw[0]);
               }
               return;
             })
-            .then(primary_phone => {
-              if (!primary_phone && new_phone) {
+            .then(primary_phone_raw => {
+              if (!primary_phone_raw && new_phone) {
                 // just add new_phone if there is no primary phone, but new_phone was submitted
                 return trx('phone')
                   .insert({
                     account_id: req.params.id,
                     phone: new_phone,
+                    phone_raw: new_phone_raw,
                     is_primary: true,
                     ...(phone_type ? { phone_type } : {}),
                     ...(phone_country ? { phone_country } : {})
@@ -137,14 +143,17 @@ module.exports = async (req, res, db, bcrypt, config) => {
                   });
               }
               if (
-                primary_phone &&
-                current_phone &&
-                primary_phone !== current_phone &&
+                primary_phone_raw &&
+                current_phone_raw &&
+                primary_phone_raw !== current_phone_raw &&
                 phone_is_primary
               ) {
                 // make previous primary phone not primary so current phone can become primary
                 return trx('phone')
-                  .where({ account_id: req.params.id, phone: primary_phone })
+                  .where({
+                    account_id: req.params.id,
+                    phone_raw: primary_phone_raw
+                  })
                   .update({ is_primary: false });
               }
               return;
@@ -152,7 +161,10 @@ module.exports = async (req, res, db, bcrypt, config) => {
             .then(() => {
               if (current_phone) {
                 return trx('phone')
-                  .where({ account_id: req.params.id, phone: current_phone })
+                  .where({
+                    account_id: req.params.id,
+                    phone_raw: current_phone_raw
+                  })
                   .update(phoneUpdates)
                   .then(success => {
                     if (!success) {
@@ -177,6 +189,8 @@ module.exports = async (req, res, db, bcrypt, config) => {
                     : {}),
                   ...(current_phone ? { current_phone } : {}),
                   ...(new_phone ? { new_phone } : {}),
+                  ...(current_phone_raw ? { current_phone_raw } : {}),
+                  ...(new_phone_raw ? { new_phone_raw } : {}),
                   ...(phone_is_primary || phone_is_primary === false
                     ? { phone_is_primary }
                     : {}),

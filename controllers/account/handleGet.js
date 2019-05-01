@@ -8,6 +8,7 @@ module.exports = (req, res, db) => {
     'email.is_primary as email_is_primary',
     'account_role.role',
     'phone.phone',
+    'phone.phone_raw',
     'phone.is_primary as phone_is_primary',
     'phone.phone_type',
     'phone.phone_country',

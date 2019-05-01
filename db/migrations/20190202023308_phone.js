@@ -1,7 +1,14 @@
 exports.up = (knex, Promise) => {
   return knex.schema.createTable('phone', table => {
     table.bigIncrements('id');
-    table.string('phone').index();
+    table
+      .string('phone')
+      .index()
+      .notNullable();
+    table
+      .string('phone_raw')
+      .index()
+      .notNullable();
     table
       .boolean('is_primary')
       .notNullable()

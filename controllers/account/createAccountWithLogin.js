@@ -12,6 +12,7 @@ module.exports = async (req, res, db, crypto, bcrypt, config, sendMail) => {
     phone_type,
     phone_country
   } = req.body;
+  let phone_raw = phone ? phone.replace(/[^0-9]/g, '') : null;
 
   try {
     const hash = await bcrypt.hash(password, config.BCRYPT_COST_FACTOR);
@@ -52,10 +53,10 @@ module.exports = async (req, res, db, crypto, bcrypt, config, sendMail) => {
                   })
                   .then(() => {
                     if (phone) {
-                      phone_type = phone_type ? phone_type.toLowerCase() : null;
                       return trx('phone').insert({
                         phone,
                         phone_type,
+                        phone_raw,
                         phone_country,
                         is_primary: true,
                         account_id: loginData[0].account_id
@@ -77,6 +78,7 @@ module.exports = async (req, res, db, crypto, bcrypt, config, sendMail) => {
                         email,
                         role,
                         phone,
+                        phone_raw,
                         phone_type,
                         phone_country
                       }
@@ -108,6 +110,7 @@ module.exports = async (req, res, db, crypto, bcrypt, config, sendMail) => {
                   ...accountData[0],
                   email,
                   phone,
+                  phone_raw,
                   phone_type,
                   phone_country,
                   role

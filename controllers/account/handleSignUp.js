@@ -31,7 +31,7 @@ module.exports = async (req, res, db, crypto, bcrypt, config, sendMail) => {
     if (req.body.phone) {
       idPhone = await db('phone')
         .select('account_id')
-        .where('phone', req.body.phone)
+        .where('phone_raw', req.body.phone.replace(/[^0-9]/g, ''))
         .then(id => {
           if (id[0]) return id[0].account_id;
           return;

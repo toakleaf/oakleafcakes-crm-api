@@ -12,6 +12,9 @@ module.exports = (req, res, db) => {
     inactive
   } = req.query;
   let offset = page * count - count;
+  let phone_raw =
+    query && field === 'phone' ? query.replace(/[^0-9]/g, '') : null;
+
   db.select(
     'account.id',
     'account.first_name as first_name',
@@ -21,6 +24,7 @@ module.exports = (req, res, db) => {
     'email.is_primary as email_is_primary',
     'account_role.role',
     'phone.phone as phone',
+    'phone.phone_raw',
     'phone.is_primary as phone_is_primary',
     'phone.phone_type',
     'phone.phone_country',
@@ -53,6 +57,10 @@ module.exports = (req, res, db) => {
       if (field && query) {
         if (field === 'email') field = 'email.email'; //both login and email tables have email column
         if (field === 'id') return qb.where('account.id', parseInt(query));
+        if (field === 'phone' && exact)
+          return qb.where('phone.phone_raw', '=', phone_raw);
+        if (field === 'phone')
+          return qb.where('phone.phone_raw', 'ilike', `%${phone_raw}%`);
         if (exact) return qb.where(field, '=', query);
         return qb.where(field, 'ilike', `%${query}%`);
       }

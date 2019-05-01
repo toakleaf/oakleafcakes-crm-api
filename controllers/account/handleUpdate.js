@@ -23,9 +23,9 @@ module.exports = async (req, res, db, bcrypt, config) => {
   const now = new Date(Date.now());
 
   const accountUpdates = {
-    ...(first_name ? { first_name } : {}),
-    ...(last_name ? { last_name } : {}),
-    ...(company_name ? { company_name } : {}),
+    ...(first_name || first_name === '' ? { first_name } : {}),
+    ...(last_name || last_name === '' ? { last_name } : {}),
+    ...(company_name || company_name === '' ? { company_name } : {}),
     updated_at: now
   };
   const emailUpdates = {

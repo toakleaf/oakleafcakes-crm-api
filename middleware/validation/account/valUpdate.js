@@ -40,14 +40,17 @@ module.exports = (req, res, next) => {
     first_name: Joi.string()
       .max(100)
       .allow(null)
+      .allow('')
       .optional(),
     last_name: Joi.string()
       .max(100)
       .allow(null)
+      .allow('')
       .optional(),
     company_name: Joi.string()
       .max(100)
       .allow(null)
+      .allow('')
       .optional(),
     new_phone: Joi.string()
       .max(20)
@@ -76,6 +79,8 @@ module.exports = (req, res, next) => {
       .integer()
       .positive()
   });
+
+  console.log(req.body.company_name ? 'is ok' : 'is null');
 
   //email can be entered any-case, but always saved lowercase
   if (req.body.email) req.body.email = req.body.email.toLowerCase();

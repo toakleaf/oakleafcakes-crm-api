@@ -15,14 +15,10 @@ module.exports = async (req, res, db, bcrypt, config) => {
     phone_country,
     is_active
   } = req.body;
-  console.log(new_phone);
   let new_phone_raw = new_phone ? new_phone.replace(/[^0-9]/g, '') : null;
   let current_phone_raw = current_phone
     ? current_phone.replace(/[^0-9]/g, '')
     : null;
-
-  console.log(new_phone);
-  console.log(new_phone_raw);
 
   const now = new Date(Date.now());
 

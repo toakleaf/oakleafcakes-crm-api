@@ -4,6 +4,7 @@ const { MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH } = require('../../../config');
 
 module.exports = (req, res, next) => {
   if (
+    !req.body.emails &&
     !req.body.new_email &&
     !req.body.current_email &&
     !req.body.password &&
@@ -11,6 +12,7 @@ module.exports = (req, res, next) => {
     !req.body.first_name &&
     !req.body.last_name &&
     !req.body.company_name &&
+    !req.body.phones &&
     !req.body.new_phone &&
     !req.body.current_phone &&
     !req.body.phone_type &&
@@ -20,6 +22,24 @@ module.exports = (req, res, next) => {
   }
 
   const schema = Joi.object().keys({
+    emails: Joi.array()
+      .items(
+        Joi.object().keys({
+          new_email: Joi.string()
+            .email({ minDomainAtoms: 2 })
+            .allow(null)
+            .optional(),
+          current_email: Joi.string()
+            .email({ minDomainAtoms: 2 })
+            .allow(null)
+            .optional(),
+          email_is_primary: Joi.boolean()
+            .allow(null)
+            .optional()
+        })
+      )
+      .allow(null)
+      .optional(),
     new_email: Joi.string()
       .email({ minDomainAtoms: 2 })
       .allow(null)
@@ -54,6 +74,33 @@ module.exports = (req, res, next) => {
       .allow(null)
       .allow('')
       .optional(),
+    phones: Joi.array()
+      .items(
+        Joi.object().keys({
+          new_phone: Joi.string()
+            .max(20)
+            .allow(null)
+            .optional(),
+          current_phone: Joi.string()
+            .max(20)
+            .allow(null)
+            .optional(),
+          phone_type: Joi.string()
+            .max(20)
+            .allow(null)
+            .optional(),
+          phone_country: Joi.string()
+            .uppercase()
+            .length(2)
+            .allow(null)
+            .optional(),
+          phone_is_primary: Joi.boolean()
+            .allow(null)
+            .optional()
+        })
+      )
+      .allow(null)
+      .optional(),
     new_phone: Joi.string()
       .max(20)
       .allow(null)
@@ -86,6 +133,12 @@ module.exports = (req, res, next) => {
   if (req.body.new_email) req.body.new_email = req.body.new_email.toLowerCase();
   if (req.body.current_email)
     req.body.current_email = req.body.current_email.toLowerCase();
+  if (req.body.emails && Array.isArray(req.body.emails)) {
+    for (e in req.body.emails) {
+      e.new_email = new_email.toLowerCase();
+      e.current_email = current_email.toLowerCase();
+    }
+  }
   //email can be entered any-case, but always saved uppercase
   if (req.body.role) req.body.role = req.body.role.toUpperCase();
   //phone_type can be entered any-case, but always saved lowercase
@@ -94,6 +147,7 @@ module.exports = (req, res, next) => {
 
   const { error } = Joi.validate(
     {
+      emails: req.body.emails,
       new_email: req.body.new_email,
       current_email: req.body.current_email,
       email_is_primary: req.body.email_is_primary,
@@ -102,6 +156,7 @@ module.exports = (req, res, next) => {
       first_name: req.body.first_name,
       last_name: req.body.last_name,
       company_name: req.body.company_name,
+      phones: req.body.phones,
       new_phone: req.body.new_phone,
       current_phone: req.body.current_phone,
       phone_type: req.body.phone_type,

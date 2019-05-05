@@ -22,6 +22,10 @@ module.exports = (req, res, next) => {
   }
 
   const schema = Joi.object().keys({
+    id: Joi.number()
+      .integer()
+      .positive()
+      .required(),
     emails: Joi.array()
       .items(
         Joi.object().keys({
@@ -123,10 +127,7 @@ module.exports = (req, res, next) => {
       .optional(),
     is_active: Joi.boolean()
       .allow(null)
-      .optional(),
-    id: Joi.number()
-      .integer()
-      .positive()
+      .optional()
   });
 
   //email can be entered any-case, but always saved lowercase
@@ -147,6 +148,7 @@ module.exports = (req, res, next) => {
 
   const { error } = Joi.validate(
     {
+      id: req.params.id,
       emails: req.body.emails,
       new_email: req.body.new_email,
       current_email: req.body.current_email,
@@ -162,8 +164,7 @@ module.exports = (req, res, next) => {
       phone_type: req.body.phone_type,
       phone_country: req.body.phone_country,
       phone_is_primary: req.body.phone_is_primary,
-      is_active: req.body.is_active,
-      id: req.params.id
+      is_active: req.body.is_active
     },
     schema
   );

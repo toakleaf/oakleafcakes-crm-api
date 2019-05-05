@@ -1,5 +1,6 @@
 module.exports = async (req, res, db, bcrypt, config) => {
   const {
+    emails,
     new_email,
     current_email,
     email_is_primary,
@@ -8,6 +9,7 @@ module.exports = async (req, res, db, bcrypt, config) => {
     first_name,
     last_name,
     company_name,
+    phones,
     new_phone,
     current_phone,
     phone_is_primary,
@@ -19,6 +21,15 @@ module.exports = async (req, res, db, bcrypt, config) => {
   let current_phone_raw = current_phone
     ? current_phone.replace(/[^0-9]/g, '')
     : null;
+
+  if (phones) {
+    for (p in phones) {
+      p.new_phone_raw = p.new_phone ? p.new_phone.replace(/[^0-9]/g, '') : null;
+      p.current_phone_raw = p.current_phone
+        ? p.current_phone.replace(/[^0-9]/g, '')
+        : null;
+    }
+  }
 
   const now = new Date(Date.now());
 
@@ -62,6 +73,11 @@ module.exports = async (req, res, db, bcrypt, config) => {
     .select('email')
     .where({ account_id: req.params.id, is_primary: true })
     .then(primary_email => primary_email[0]);
+
+  const primaryPhoneRaw = await db('phone')
+    .select('phone_raw')
+    .where({ account_id: req.params.id, is_primary: true })
+    .then(primary_phone_raw => primary_phone_raw[0]);
 
   const hash = password
     ? await bcrypt.hash(password, config.BCRYPT_COST_FACTOR)
@@ -124,17 +140,8 @@ module.exports = async (req, res, db, bcrypt, config) => {
         }
         return;
       })
-      .then(() => {
-        if (current_phone) {
-          return db('phone')
-            .select('phone_raw')
-            .where({ account_id: req.params.id, is_primary: true })
-            .then(primary_phone_raw => primary_phone_raw[0]);
-        }
-        return;
-      })
-      .then(primary_phone_raw => {
-        if (!primary_phone_raw && new_phone) {
+      .then(primaryPhoneRaw => {
+        if (!primaryPhoneRaw && new_phone) {
           // just add new_phone if there is no primary phone, but new_phone was submitted
           return trx('phone')
             .insert({
@@ -150,16 +157,16 @@ module.exports = async (req, res, db, bcrypt, config) => {
             });
         }
         if (
-          primary_phone_raw &&
+          primaryPhoneRaw &&
           current_phone_raw &&
-          primary_phone_raw !== current_phone_raw &&
+          primaryPhoneRaw !== current_phone_raw &&
           phone_is_primary
         ) {
           // make previous primary phone not primary so current phone can become primary
           return trx('phone')
             .where({
               account_id: req.params.id,
-              phone_raw: primary_phone_raw
+              phone_raw: primaryPhoneRaw
             })
             .update({ is_primary: false });
         }

@@ -83,7 +83,9 @@ module.exports = (req, res, next) => {
   });
 
   //email can be entered any-case, but always saved lowercase
-  if (req.body.email) req.body.email = req.body.email.toLowerCase();
+  if (req.body.new_email) req.body.new_email = req.body.new_email.toLowerCase();
+  if (req.body.current_email)
+    req.body.current_email = req.body.current_email.toLowerCase();
   //email can be entered any-case, but always saved uppercase
   if (req.body.role) req.body.role = req.body.role.toUpperCase();
   //phone_type can be entered any-case, but always saved lowercase

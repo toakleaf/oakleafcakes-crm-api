@@ -28,7 +28,9 @@ module.exports = (req, res, next) => {
       .email({ minDomainAtoms: 2 })
       .allow(null)
       .optional(),
-    email_is_primary: Joi.boolean(),
+    email_is_primary: Joi.boolean()
+      .allow(null)
+      .optional(),
     password: Joi.string()
       .min(MIN_PASSWORD_LENGTH)
       .max(MAX_PASSWORD_LENGTH)
@@ -84,7 +86,7 @@ module.exports = (req, res, next) => {
   if (req.body.email) req.body.email = req.body.email.toLowerCase();
   //email can be entered any-case, but always saved uppercase
   if (req.body.role) req.body.role = req.body.role.toUpperCase();
-  //email can be entered any-case, but always saved lowercase
+  //phone_type can be entered any-case, but always saved lowercase
   if (req.body.phone_type)
     req.body.phone_type = req.body.phone_type.toLowerCase();
 

@@ -230,6 +230,7 @@ module.exports = async (req, res, db, bcrypt, config) => {
       const hash = await bcrypt.hash(password, config.BCRYPT_COST_FACTOR);
       runUpdates(hash);
     } catch (err) {
+      console.error(err);
       return res.status(503).send('Failed to update account. ' + err);
     }
   } else runUpdates();

@@ -90,6 +90,7 @@ module.exports = async (req, res, db, bcrypt, config) => {
       .update(accountUpdates)
       .then(accountData => {
         if (accountData.length == 0) throw new Error('Invalid id');
+        if (!role) return;
         return trx('account_role')
           .where('account_id', req.params.id)
           .update(roleUpdates);
@@ -133,12 +134,10 @@ module.exports = async (req, res, db, bcrypt, config) => {
         return;
       })
       .then(() => {
-        if (password) {
-          return trx('login')
-            .where('account_id', req.params.id)
-            .update({ hash, updated_at: now });
-        }
-        return;
+        if (!password) return;
+        return trx('login')
+          .where('account_id', req.params.id)
+          .update({ hash, updated_at: now });
       })
       .then(primaryPhoneRaw => {
         if (!primaryPhoneRaw && new_phone) {

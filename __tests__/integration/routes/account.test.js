@@ -419,9 +419,13 @@ describe('account', () => {
               is_login: true
             }
           ],
-          new_phone: '987-654-3210',
-          current_phone: session.newAccount1.phone,
-          phone_type: 'home'
+          phones: [
+            {
+              new_phone: '987-654-3210',
+              current_phone: session.newAccount1.phone,
+              phone_type: 'home'
+            }
+          ]
         });
       expect(res.status).toBe(200);
     });

@@ -105,6 +105,9 @@ module.exports = async (req, res, db, bcrypt, config) => {
     ? await bcrypt.hash(password, config.BCRYPT_COST_FACTOR)
     : null;
 
+  // NEED TO ADD SUPPORT FOR ARRAY OF PHONES
+  // NEED TO DELETE NON-ARRAY VERSIONS OF UPDATES TO CLEAN UP THIS CODE
+
   db.transaction(trx => {
     trx('account')
       .where('id', req.params.id)

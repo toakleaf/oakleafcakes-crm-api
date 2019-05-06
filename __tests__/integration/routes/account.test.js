@@ -57,7 +57,8 @@ describe('account', () => {
     newAccount3LoginID: null,
     newAccount3ID: null,
     newAccount3Token: null,
-    verifyToken3: null
+    verifyToken3: null,
+    updatedEmail: 'new@test.com'
   };
 
   beforeEach(() => {
@@ -408,8 +409,16 @@ describe('account', () => {
         .send({
           first_name: 'updated_name',
           password: 'updated_password',
-          new_email: '123@gg.com',
-          current_email: session.newAccount1.email,
+          emails: [
+            {
+              new_email: '123@gg.com',
+              current_email: session.newAccount1.email
+            },
+            {
+              new_email: session.updatedEmail,
+              is_login: true
+            }
+          ],
           new_phone: '987-654-3210',
           current_phone: session.newAccount1.phone,
           phone_type: 'home'
@@ -624,7 +633,7 @@ describe('account', () => {
       const res1 = await request(server)
         .delete(`/account/password/`)
         .set('Authorization', `Bearer ${session.initialToken}`)
-        .send({ email: session.newAccount1.email });
+        .send({ email: session.updatedEmail });
       expect(res1.status).toBe(200);
       const data = await db
         .select('*')

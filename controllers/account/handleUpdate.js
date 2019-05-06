@@ -42,6 +42,7 @@ module.exports = async (req, res, db, bcrypt, config) => {
     ...(company_name === '' ? { company_name: null } : {}),
     updated_at: now
   };
+
   const emailUpdates = {
     ...(new_email ? { email: new_email } : {}),
     ...(email_is_primary || email_is_primary === false
@@ -69,11 +70,32 @@ module.exports = async (req, res, db, bcrypt, config) => {
     updated_at: now
   };
 
+  const updateLogin = emails ? emails.filter(e => e.is_login === true) : null;
+
+  const loginRecord = updateLogin
+    ? await db('login')
+        .select('*')
+        .where({
+          account_id: req.params.id,
+          ...(updateLogin.current_email
+            ? { email: updateLogin.current_email }
+            : {})
+        })
+        .then(d => d[0])
+    : null;
+
+  const updatePrimaryEmail = emails
+    ? emails.filter(e => e.is_primary === true)
+    : null;
+
   const primaryEmail = await db('email')
     .select('email')
     .where({ account_id: req.params.id, is_primary: true })
     .then(primary_email => primary_email[0]);
 
+  const updatePrimaryPhone = phones
+    ? phones.filter(p => p.is_primary === true)
+    : null;
   const primaryPhoneRaw = await db('phone')
     .select('phone_raw')
     .where({ account_id: req.params.id, is_primary: true })
@@ -94,6 +116,51 @@ module.exports = async (req, res, db, bcrypt, config) => {
         return trx('account_role')
           .where('account_id', req.params.id)
           .update(roleUpdates);
+      })
+      .then(() => {
+        //if e.is_primary, first reset ALL of account's emails to is_primary = false
+        if (!updatePrimaryEmail || updatePrimaryEmail[0] === primaryEmail)
+          return;
+        return trx('email')
+          .where({ account_id: req.params.id, is_primary: true })
+          .update({ is_primary: false });
+      })
+      .then(() => {
+        if (!emails) return;
+        const queries = [];
+
+        emails.forEach(e => {
+          const update = {
+            email: e.new_email,
+            ...(e.email_is_primary || e.email_is_primary === false
+              ? { is_primary: e.email_is_primary }
+              : {})
+          };
+          const query = e.current_email
+            ? db('email')
+                .where({ account_id: req.params.id, email: e.current_email })
+                .update({ ...update, updated_at: now })
+                .transacting(trx) // This makes every update be in the same transaction
+            : db('email')
+                .insert({ ...update, account_id: req.params.id })
+                .transacting(trx);
+
+          //only update login if is_login flag.
+          const login =
+            loginRecord && e.is_login
+              ? db('login')
+                  .where({ id: loginRecord.id })
+                  .update({
+                    email: e.new_email,
+                    is_active:
+                      e.is_active === null ? loginRecord.is_active : e.is_active
+                  })
+                  .transacting(trx)
+              : null;
+
+          queries.push(query, login);
+        });
+        return Promise.all(queries);
       })
       .then(() => {
         if (
@@ -216,10 +283,13 @@ module.exports = async (req, res, db, bcrypt, config) => {
       .then(() => {
         return res.send(`account #${req.params.id} updated successfully.`);
       })
-
       .then(trx.commit)
-      .catch(trx.rollback);
+      .catch(err => {
+        trx.rollback;
+        throw err;
+      });
   }).catch(err => {
+    console.error(err);
     if (err.message.includes('duplicate key')) {
       res
         .status(503)
@@ -227,7 +297,6 @@ module.exports = async (req, res, db, bcrypt, config) => {
           'Failed to update account. Account with this email address already exists.'
         );
     } else {
-      console.error(err);
       res.status(503).send('Failed to update account. ' + err);
     }
   });

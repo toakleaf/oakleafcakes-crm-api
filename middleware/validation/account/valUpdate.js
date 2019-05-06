@@ -31,13 +31,15 @@ module.exports = (req, res, next) => {
         Joi.object().keys({
           new_email: Joi.string()
             .email({ minDomainAtoms: 2 })
-            .allow(null)
-            .optional(),
+            .required(),
           current_email: Joi.string()
             .email({ minDomainAtoms: 2 })
             .allow(null)
             .optional(),
-          email_is_primary: Joi.boolean()
+          is_primary: Joi.boolean()
+            .allow(null)
+            .optional(),
+          is_login: Joi.boolean()
             .allow(null)
             .optional()
         })
@@ -83,8 +85,7 @@ module.exports = (req, res, next) => {
         Joi.object().keys({
           new_phone: Joi.string()
             .max(20)
-            .allow(null)
-            .optional(),
+            .required(),
           current_phone: Joi.string()
             .max(20)
             .allow(null)
@@ -98,7 +99,7 @@ module.exports = (req, res, next) => {
             .length(2)
             .allow(null)
             .optional(),
-          phone_is_primary: Joi.boolean()
+          is_primary: Joi.boolean()
             .allow(null)
             .optional()
         })
@@ -135,9 +136,11 @@ module.exports = (req, res, next) => {
   if (req.body.current_email)
     req.body.current_email = req.body.current_email.toLowerCase();
   if (req.body.emails && Array.isArray(req.body.emails)) {
-    for (e in req.body.emails) {
-      e.new_email = new_email.toLowerCase();
-      e.current_email = current_email.toLowerCase();
+    for (let i = 0; i < req.body.emails.length; i++) {
+      req.body.emails[i].new_email = req.body.emails[i].new_email.toLowerCase();
+      req.body.emails[i].current_email = req.body.emails[i].current_email
+        ? req.body.emails[i].current_email.toLowerCase()
+        : null;
     }
   }
   //email can be entered any-case, but always saved uppercase

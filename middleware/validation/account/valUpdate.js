@@ -92,7 +92,6 @@ module.exports = (req, res, next) => {
       .allow(null)
       .optional()
   });
-
   //email can be entered any-case, but always saved lowercase
   if (req.body.emails && Array.isArray(req.body.emails)) {
     for (let i = 0; i < req.body.emails.length; i++) {
@@ -105,7 +104,7 @@ module.exports = (req, res, next) => {
   //email can be entered any-case, but always saved uppercase
   if (req.body.role) req.body.role = req.body.role.toUpperCase();
   //phone_type can be entered any-case, but always saved lowercase
-  if (req.body.emails && Array.isArray(req.body.emails)) {
+  if (req.body.phones && Array.isArray(req.body.phones)) {
     for (let i = 0; i < req.body.phones.length; i++) {
       req.body.phones[i].phone_type = req.body.phones[i].phone_type
         ? req.body.phones[i].phone_type.toLowerCase()

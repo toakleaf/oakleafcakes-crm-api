@@ -10,32 +10,58 @@ module.exports = (req, res, db) => {
     phone_country
   } = req.body;
   let phone_raw = phone ? phone.replace(/[^0-9]/g, '') : null;
+  let output = {};
 
   db.transaction(trx => {
     trx('account')
       .returning('*')
       .insert({ first_name, last_name, company_name })
-      .then(async accountData => {
+      .then(accountData => {
+        output = { ...accountData[0] };
+
         if (email) {
           email = email.toLowerCase();
-          await trx('email').insert({
-            email,
-            is_primary: true,
-            account_id: accountData[0].id
-          });
+          return trx('email')
+            .returning('*')
+            .insert({
+              email,
+              is_primary: true,
+              account_id: accountData[0].id
+            });
         }
+        return;
+      })
+      .then(emailData => {
+        if (emailData) output = { ...output, emails: emailData };
         if (phone) {
-          await trx('phone').insert({
-            phone,
-            phone_raw,
-            phone_type,
-            phone_country,
-            is_primary: true,
-            account_id: accountData[0].id
-          });
+          return trx('phone')
+            .returning('*')
+            .insert({
+              phone,
+              phone_raw,
+              phone_type,
+              phone_country,
+              is_primary: true,
+              account_id: output.id
+            });
         }
-        await trx('account_history').insert({
-          account_id: accountData[0].id,
+        return;
+      })
+      .then(phoneData => {
+        if (phoneData) output = { ...output, phones: phoneData };
+        if (!role) role = 'CUSTOMER';
+        return trx('account_role')
+          .returning('*')
+          .insert({
+            account_id: output.id,
+            role
+          });
+      })
+      .then(roleData => {
+        console.log(roleData);
+        if (roleData) output = { ...output, role: roleData[0].role };
+        return trx('account_history').insert({
+          account_id: output.id,
           author: req.account ? req.account.account_id : accountData[0].id,
           action: 'CREATE',
           transaction: {
@@ -50,26 +76,18 @@ module.exports = (req, res, db) => {
             phone_country
           }
         });
-        return trx('account_role')
-          .insert({
-            account_id: accountData[0].id,
-            role
-          })
-          .then(() => {
-            res.json({
-              ...accountData[0],
-              email,
-              phone,
-              phone_raw,
-              phone_type,
-              phone_country,
-              role
-            });
-          });
+      })
+      .then(() => {
+        return res.json({
+          ...output,
+          is_active: false,
+          logins: []
+        });
       })
       .then(trx.commit)
       .catch(trx.rollback);
   }).catch(err => {
+    console.error(err);
     if (err.message.includes('duplicate key'))
       res
         .status(503)

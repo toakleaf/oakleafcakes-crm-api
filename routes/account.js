@@ -127,6 +127,7 @@ router
 
 router
   .route('/:id')
+  .get(auth, (req, res) => handleGet(req, res, db))
   .delete([auth, admin], (req, res) => handleDelete(req, res, db))
   .put([auth, valUpdate], (req, res) =>
     handleUpdate(req, res, db, bcrypt, config)

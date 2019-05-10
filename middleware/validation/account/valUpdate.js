@@ -34,6 +34,9 @@ module.exports = (req, res, next) => {
             .optional(),
           is_login: Joi.boolean()
             .allow(null)
+            .optional(),
+          is_active: Joi.boolean()
+            .allow(null)
             .optional()
         })
       )

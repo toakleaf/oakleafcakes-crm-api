@@ -38,13 +38,19 @@ module.exports = async (req, res, db, bcrypt, config) => {
 
   const updateLogin = emails ? emails.filter(e => e.is_login === true) : null;
 
+  //only allow updating of one login at a time
+  if (updateLogin && updateLogin.length > 1)
+    return res
+      .status(503)
+      .send('Failed to update account. Can only change 1 login at a time.');
+
   const loginRecord = updateLogin
     ? await db('login')
         .select('*')
         .where({
           account_id: req.params.id,
-          ...(updateLogin.current_email
-            ? { email: updateLogin.current_email }
+          ...(updateLogin[0].current_email
+            ? { email: updateLogin[0].current_email }
             : {})
         })
         .then(d => d[0])
@@ -107,6 +113,13 @@ module.exports = async (req, res, db, bcrypt, config) => {
           .update({ is_primary: false });
       })
       .then(() => {
+        // if a global is_active is set to false, make all logins inactive. Otherwise do it email by email below.
+        if (is_active === false)
+          return trx('login')
+            .where({ account_id: req.params.id, is_active: true })
+            .update({ is_active: false });
+      })
+      .then(() => {
         if (!emails) return;
         const queries = [];
 
@@ -131,12 +144,9 @@ module.exports = async (req, res, db, bcrypt, config) => {
               ? db('login')
                   .where({ id: loginRecord.id })
                   .update({
-                    email: e.new_email,
+                    ...(e.new_email ? { email: e.new_email } : {}),
                     updated_at: now,
-                    is_active:
-                      e.is_active === null
-                        ? loginRecord.is_active
-                        : e.is_active,
+                    ...(e.is_active ? { is_active: e.is_active } : {}),
                     ...(password ? { hash } : {})
                   })
                   .transacting(trx)

@@ -21,7 +21,9 @@ module.exports = (req, res, next) => {
       .integer()
       .positive(),
     roleArray: Joi.array().items(Joi.string().uppercase()),
-    role: Joi.string().uppercase(),
+    role: Joi.valid(['ADMIN', 'EMPLOYEE', 'CUSTOMER'])
+      .allow(null)
+      .optional(),
     field: Joi.valid([
       'id',
       'email',
@@ -88,6 +90,12 @@ module.exports = (req, res, next) => {
     req.query.inactive && req.query.inactive.toLowerCase() !== 'null'
       ? req.query.inactive.toLowerCase() == 'true'
       : null;
+  if (req.query.role) {
+    req.query.role = Array.isArray(req.query.role)
+      ? req.query.role.map(r => r.toUpperCase())
+      : req.query.role.toUpperCase();
+    req.query.role = req.query.role == 'NULL' ? null : req.query.role;
+  }
 
   const {
     orderby,
@@ -120,6 +128,8 @@ module.exports = (req, res, next) => {
     ...(inactive || inactive === false ? { inactive } : {})
   };
   const { error, value } = Joi.validate(toValidate, schema);
+
+  if (active === false && inactive === false) return res.json([]);
 
   if (req.query.role) {
     if (Array.isArray(req.query.role))

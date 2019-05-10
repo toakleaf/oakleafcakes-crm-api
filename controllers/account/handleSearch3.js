@@ -18,34 +18,10 @@ module.exports = async (req, res, db) => {
     query && field === 'phone' ? query.replace(/[^0-9]/g, '') : null;
   let phone_raw2 =
     query2 && field2 === 'phone' ? query2.replace(/[^0-9]/g, '') : null;
-  const groupByArgs = ['account.id', 'account_role.role'];
-  if (field && field === 'email') {
-    groupByArgs.push('email.email');
-    field = 'email.email'; //both login and email tables have email column
-  }
-  if (field2 && field2 === 'email') {
-    groupByArgs.push('email.email');
-    field2 = 'email.email'; //both login and email tables have email column
-  }
-  if (field === 'phone' || field2 === 'phone') {
-    groupByArgs.push(
-      'phone.phone',
-      'phone.phone_raw',
-      'phone.phone_country',
-      'phone.phone_type'
-    );
-  }
-  let status = '';
-  if (active) status = 'bool_or(login.is_active) = true';
-  if (inactive) status = 'bool_or(login.is_active) = false';
-  if (active && inactive) status = '';
-
+  if (field && field === 'email') field = 'email.email'; //both login and email tables have email column
+  if (field2 && field2 === 'email') field2 = 'email.email'; //both login and email tables have email column
   try {
     const accounts = await db('account')
-      .leftJoin('account_role', 'account.id', 'account_role.account_id')
-      .leftJoin('email', 'email.account_id', 'account.id')
-      .leftJoin('phone', 'account.id', 'phone.account_id')
-      .leftJoin('login', 'account.id', 'login.account_id')
       .select({
         id: 'account.id',
         first_name: 'account.first_name',
@@ -54,17 +30,9 @@ module.exports = async (req, res, db) => {
         created_at: 'account.created_at',
         updated_at: 'account.updated_at',
         role: 'account_role.role',
-        emails: db.raw(
-          "ARRAY_AGG(distinct(jsonb_build_object('is_primary', email.is_primary, 'id', email.id, 'email', email.email, 'created_at', email.created_at, 'updated_at', email.updated_at)))"
-        ),
-        phones: db.raw(
-          "ARRAY_AGG(distinct(jsonb_build_object('is_primary', phone.is_primary, 'id', phone.id, 'phone', phone.phone, 'phone_raw', phone.phone_raw, 'phone_country', phone.phone_country, 'phone_type', phone.phone_type, 'created_at', phone.created_at, 'updated_at', phone.updated_at)))"
-        ),
-        logins: db.raw(
-          "ARRAY_AGG(distinct(jsonb_build_object('is_active', login.is_active, 'id', login.id, 'email', login.email, 'created_at', login.created_at, 'updated_at', login.updated_at)))"
-        ),
-        is_active: db.raw('bool_or(login.is_active)'),
-        // return multiple results (duplicate accounts) if field being queried has multiple results.
+        // returns 2 results if account has both active and inactive logins
+        is_active: 'login.is_active',
+        // return multiple results if field being queried has multiple results.
         ...(field === 'email.email' || field2 === 'email.email'
           ? { email: 'email.email' }
           : {}),
@@ -77,9 +45,22 @@ module.exports = async (req, res, db) => {
             }
           : {})
       })
-      .groupBy(groupByArgs)
-      .havingRaw(status)
+      .leftJoin('account_role', 'account.id', 'account_role.account_id')
+      .leftJoin('email', 'email.account_id', 'account.id')
+      .leftJoin('phone', 'account.id', 'phone.account_id')
+      .leftJoin('login', 'account.id', 'login.account_id')
       .where(qb => {
+        if (active && inactive) {
+          return; //default to return all
+        }
+        if (active) {
+          return qb.where({ 'login.is_active': true });
+        }
+        if (inactive) {
+          return qb.where({ 'login.is_active': false });
+        }
+      })
+      .andWhere(qb => {
         if (role) {
           if (Array.isArray(role)) {
             return qb.whereIn('account_role.role', role);
@@ -118,8 +99,38 @@ module.exports = async (req, res, db) => {
       .offset(offset > 0 ? offset : 0)
       .then(data => data);
 
-    // console.log(accounts);
-    res.json(accounts);
+    const output = [];
+
+    for (let i = 0; i < accounts.length; i++) {
+      const additions = {};
+      await db('email')
+        .select('*')
+        .where('account_id', accounts[i].id)
+        .orderBy([
+          //primary email will come first, followed by most recently updated, followed by alphabetical
+          { column: 'is_primary', order: 'desc' },
+          { column: 'updated_at', order: 'desc' },
+          { column: 'email', order: 'asc' }
+        ])
+        .then(data => (additions.emails = data));
+      await db('phone')
+        .select('*')
+        .where('account_id', accounts[i].id)
+        .orderBy([
+          //primary phone will come first, followed by most recently updated
+          { column: 'is_primary', order: 'desc' },
+          { column: 'updated_at', order: 'desc' }
+        ])
+        .then(data => (additions.phones = data));
+
+      output.push({
+        result: i,
+        ...accounts[i],
+        ...additions
+      });
+    }
+    // console.log(output);
+    res.json(output);
   } catch (err) {
     console.error(err);
     return res.status(401).send('search failed');

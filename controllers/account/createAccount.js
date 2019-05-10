@@ -58,7 +58,6 @@ module.exports = (req, res, db) => {
           });
       })
       .then(roleData => {
-        console.log(roleData);
         if (roleData) output = { ...output, role: roleData[0].role };
         return trx('account_history').insert({
           account_id: output.id,

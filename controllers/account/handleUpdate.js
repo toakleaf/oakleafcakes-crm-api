@@ -89,7 +89,6 @@ module.exports = async (req, res, db, bcrypt, config) => {
     ? await bcrypt.hash(password, config.BCRYPT_COST_FACTOR)
     : null;
 
-  // NEED TO ADD SUPPORT FOR ARRAY OF PHONES
   // MAKE VALIDATION ENSURING ONLY 1 PRIMARY EMAIL OR PHONE PER REQ
 
   db.transaction(trx => {

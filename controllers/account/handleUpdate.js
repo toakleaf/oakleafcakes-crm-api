@@ -250,13 +250,13 @@ module.exports = async (req, res, db, bcrypt, config) => {
         });
       })
       .then(() => {
+        trx.commit();
         return res.send(`account #${req.params.id} updated successfully.`);
       })
-      .then(trx.commit)
       .catch(err => {
-        trx.rollback;
+        trx.rollback();
         console.error(err);
-        return res.status(503).send('Failed to update account. ' + err);
+        return res.status(503).send('Failed to update account. ');
       });
   }).catch(err => {
     console.error(err);
@@ -267,7 +267,7 @@ module.exports = async (req, res, db, bcrypt, config) => {
           'Failed to update account. Account with this email address already exists.'
         );
     } else {
-      res.status(503).send('Failed to update account. ' + err);
+      res.status(503).send('Failed to update account. ');
     }
   });
 };

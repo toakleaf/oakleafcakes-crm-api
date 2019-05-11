@@ -11,11 +11,11 @@ module.exports = (req, res, db) => {
         });
       })
       .then(() => {
+        trx.commit();
         res.header('x-deleted-account', req.params.id).send('success');
       })
-      .then(trx.commit)
       .catch(err => {
-        trx.rollback;
+        trx.rollback();
         res.status(503).send('Failed to delete account. ' + err);
       });
   });

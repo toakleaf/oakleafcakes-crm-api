@@ -137,9 +137,11 @@ module.exports = (req, res, next) => {
     else req.query.role = req.query.role.toUpperCase();
   }
 
-  if (error)
+  if (error) {
+    console.error(error);
     return res
       .status(400)
       .send(`Query string invalid: ${error.details[0].message}`);
+  }
   next();
 };

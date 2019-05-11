@@ -11,6 +11,8 @@ const valSearch = require('../middleware/validation/account/valSearch');
 const valHistory = require('../middleware/validation/account/valHistory');
 const valForgot = require('../middleware/validation/account/valForgot');
 const valDeletePassword = require('../middleware/validation/account/valDeletePassword');
+const valDeleteEmail = require('../middleware/validation/account/valDeleteEmail');
+const valDeletePhone = require('../middleware/validation/account/valDeletePhone');
 const valReset = require('../middleware/validation/account/valReset');
 const valVerify = require('../middleware/validation/account/valVerify');
 const db = require('../db/db');
@@ -27,6 +29,8 @@ const handleDelete = require('../controllers/account/handleDelete');
 const handleUpdate = require('../controllers/account/handleUpdate');
 const handleForgot = require('../controllers/account/handleForgot');
 const deletePassword = require('../controllers/account/deletePassword');
+const deleteEmail = require('../controllers/account/deleteEmail');
+const deletePhone = require('../controllers/account/deletePhone');
 const handleVerify = require('../controllers/account/handleVerify');
 const handleReset = require('../controllers/account/handleReset');
 const handleSearch = require('../controllers/account/handleSearch');
@@ -85,6 +89,20 @@ router
   .delete(auth, admin, valDeletePassword, (req, res) =>
     deletePassword(req, res, db, bcrypt, crypto, sendMail, config)
   )
+  .all((req, res) => {
+    res.status(405).send('request method not supported for this page');
+  });
+
+router
+  .route('/email/:id')
+  .delete(auth, valDeleteEmail, (req, res) => deleteEmail(req, res, db))
+  .all((req, res) => {
+    res.status(405).send('request method not supported for this page');
+  });
+
+router
+  .route('/phone/:id')
+  .delete(auth, valDeletePhone, (req, res) => deletePhone(req, res, db))
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');
   });

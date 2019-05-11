@@ -118,7 +118,15 @@ module.exports = async (req, res, db) => {
       .offset(offset > 0 ? offset : 0)
       .then(data => data);
 
-    // console.log(accounts);
+    //remove null value if no email or phone
+    if (accounts.length && accounts[0].emails.length === 1) {
+      accounts[0].emails = accounts[0].emails.filter(a => a.id);
+    }
+    if (accounts.length && accounts[0].phones.length === 1) {
+      accounts[0].phones = accounts[0].phones.filter(a => a.id);
+    }
+
+    // console.log(accounts[0].emails);
     res.json(accounts);
   } catch (err) {
     console.error(err);

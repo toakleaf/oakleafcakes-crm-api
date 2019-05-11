@@ -44,28 +44,30 @@ module.exports = async (req, res, db, bcrypt, config) => {
       .status(503)
       .send('Failed to update account. Can only change 1 login at a time.');
 
-  const loginRecord = updateLogin
-    ? await db('login')
-        .select('*')
-        .where({
-          account_id: req.params.id,
-          ...(updateLogin[0].current_email
-            ? { email: updateLogin[0].current_email }
-            : {})
-        })
-        .then(d => d[0])
-    : null;
+  const loginRecord =
+    updateLogin && updateLogin.length > 0
+      ? await db('login')
+          .select('*')
+          .where({
+            account_id: req.params.id,
+            ...(updateLogin[0].current_email
+              ? { email: updateLogin[0].current_email }
+              : {})
+          })
+          .then(d => d[0])
+      : null;
 
   const updatePrimaryEmail = emails
     ? emails.filter(e => e.is_primary === true)
     : null;
 
-  const primaryEmail = updatePrimaryEmail
-    ? await db('email')
-        .select('email')
-        .where({ account_id: req.params.id, is_primary: true })
-        .then(primary_email => primary_email[0])
-    : null;
+  const primaryEmail =
+    !updatePrimaryEmail || updatePrimaryEmail.length > 0
+      ? await db('email')
+          .select('email')
+          .where({ account_id: req.params.id, is_primary: true })
+          .then(primary_email => primary_email[0])
+      : null;
 
   const existingPhones = phones
     ? await db('phone')
@@ -81,7 +83,10 @@ module.exports = async (req, res, db, bcrypt, config) => {
     ? phones.filter(p => p.is_primary === true)
     : null;
   const primaryPhone =
-    updatePrimaryPhone && existingPhones && phones.current_phone_raw
+    updatePrimaryPhone &&
+    updatePrimaryPhone.length > 0 &&
+    existingPhones &&
+    phones.current_phone_raw
       ? existingPhones.filter(p => p.is_primary === true)
       : null;
 
@@ -105,7 +110,11 @@ module.exports = async (req, res, db, bcrypt, config) => {
       })
       .then(() => {
         //if e.is_primary, first reset ALL of account's emails to is_primary = false
-        if (!updatePrimaryEmail || updatePrimaryEmail[0] === primaryEmail)
+        if (
+          !primaryEmail ||
+          !updatePrimaryEmail ||
+          updatePrimaryEmail[0] === primaryEmail
+        )
           return;
         return trx('email')
           .where({ account_id: req.params.id, is_primary: true })
@@ -183,8 +192,9 @@ module.exports = async (req, res, db, bcrypt, config) => {
               : {})
           };
           const queryPhone =
-            existingPhonesRaw.includes(p.current_phone_raw) ||
-            existingPhonesRaw.includes(p.new_phone_raw)
+            existingPhonesRaw &&
+            (existingPhonesRaw.includes(p.current_phone_raw) ||
+              existingPhonesRaw.includes(p.new_phone_raw))
               ? db('phone')
                   .where(qb => {
                     if (p.current_phone) {

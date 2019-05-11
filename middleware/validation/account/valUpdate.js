@@ -24,7 +24,8 @@ module.exports = (req, res, next) => {
         Joi.object().keys({
           new_email: Joi.string()
             .email({ minDomainAtoms: 2 })
-            .required(),
+            .allow(null)
+            .optional(),
           current_email: Joi.string()
             .email({ minDomainAtoms: 2 })
             .allow(null)
@@ -70,7 +71,8 @@ module.exports = (req, res, next) => {
         Joi.object().keys({
           new_phone: Joi.string()
             .max(20)
-            .required(),
+            .allow(null)
+            .optional(),
           current_phone: Joi.string()
             .max(20)
             .allow(null)
@@ -98,17 +100,27 @@ module.exports = (req, res, next) => {
   //email can be entered any-case, but always saved lowercase
   if (req.body.emails && Array.isArray(req.body.emails)) {
     for (let i = 0; i < req.body.emails.length; i++) {
-      req.body.emails[i].new_email = req.body.emails[i].new_email.toLowerCase();
+      if (!req.body.emails[i].new_email && !req.body.emails[i].current_email)
+        return res
+          .status(400)
+          .send('Emails must contain new_email or current_email field');
+      req.body.emails[i].new_email = req.body.emails[i].new_email
+        ? req.body.emails[i].new_email.toLowerCase()
+        : null;
       req.body.emails[i].current_email = req.body.emails[i].current_email
         ? req.body.emails[i].current_email.toLowerCase()
         : null;
     }
   }
-  //email can be entered any-case, but always saved uppercase
+  //role can be entered any-case, but always saved uppercase
   if (req.body.role) req.body.role = req.body.role.toUpperCase();
   //phone_type can be entered any-case, but always saved lowercase
   if (req.body.phones && Array.isArray(req.body.phones)) {
     for (let i = 0; i < req.body.phones.length; i++) {
+      if (!req.body.phones[i].new_phone && !req.body.phones[i].current_phone)
+        return res
+          .status(400)
+          .send('Phones must contain new_phone or current_phone field');
       req.body.phones[i].phone_type = req.body.phones[i].phone_type
         ? req.body.phones[i].phone_type.toLowerCase()
         : null;

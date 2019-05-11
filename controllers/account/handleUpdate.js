@@ -83,10 +83,7 @@ module.exports = async (req, res, db, bcrypt, config) => {
     ? phones.filter(p => p.is_primary === true)
     : null;
   const primaryPhone =
-    updatePrimaryPhone &&
-    updatePrimaryPhone.length > 0 &&
-    existingPhones &&
-    phones.current_phone_raw
+    updatePrimaryPhone && updatePrimaryPhone.length > 0 && existingPhones
       ? existingPhones.filter(p => p.is_primary === true)
       : null;
 
@@ -121,6 +118,18 @@ module.exports = async (req, res, db, bcrypt, config) => {
           .update({ is_primary: false });
       })
       .then(() => {
+        //if e.is_primary, first reset ALL of account's emails to is_primary = false
+        if (
+          !primaryPhone ||
+          !updatePrimaryPhone ||
+          updatePrimaryPhone[0] === primaryPhone
+        )
+          return;
+        return trx('phone')
+          .where({ account_id: req.params.id, is_primary: true })
+          .update({ is_primary: false });
+      })
+      .then(() => {
         // if a global is_active is set to false, make all logins inactive. Otherwise do it email by email below.
         if (is_active === false)
           return trx('login')
@@ -133,7 +142,10 @@ module.exports = async (req, res, db, bcrypt, config) => {
 
         emails.forEach(e => {
           const update = {
-            email: e.new_email,
+            ...(e.new_email ? { email: e.new_email } : {}),
+            ...(!e.new_email && e.current_email
+              ? { email: e.current_email }
+              : {}),
             ...(e.is_primary || e.is_primary === false
               ? { is_primary: e.is_primary }
               : {})
@@ -181,8 +193,14 @@ module.exports = async (req, res, db, bcrypt, config) => {
 
         phones.forEach(p => {
           const update = {
-            phone: p.new_phone,
-            phone_raw: p.new_phone_raw,
+            ...(p.new_phone ? { phone: p.new_phone } : {}),
+            ...(!p.new_phone && p.current_phone
+              ? { phone: p.current_phone }
+              : {}),
+            ...(p.new_phone ? { phone_raw: p.new_phone_raw } : {}),
+            ...(!p.new_phone && p.current_phone
+              ? { phone_raw: p.current_phone_raw }
+              : {}),
             ...(p.phone_type ? { phone_type: p.phone_type } : {}),
             ...(p.phone_country
               ? { phone_country: p.phone_country }

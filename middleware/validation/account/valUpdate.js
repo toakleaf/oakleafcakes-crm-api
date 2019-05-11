@@ -3,7 +3,6 @@ const db = require('../../../db/db');
 const { MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH } = require('../../../config');
 
 module.exports = (req, res, next) => {
-  console.log(req.body);
   if (
     !req.body.emails &&
     !req.body.password &&

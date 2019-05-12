@@ -138,7 +138,6 @@ module.exports = (req, res, next) => {
   }
 
   if (error) {
-    console.error(error);
     return res
       .status(400)
       .send(`Query string invalid: ${error.details[0].message}`);

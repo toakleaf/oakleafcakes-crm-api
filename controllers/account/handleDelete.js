@@ -12,7 +12,7 @@ module.exports = (req, res, db) => {
       })
       .then(() => {
         trx.commit();
-        res.header('x-deleted-account', req.params.id).send('success');
+        return res.header('x-deleted-account', req.params.id).send('success');
       })
       .catch(err => {
         trx.rollback();

@@ -102,8 +102,6 @@ module.exports = async (req, res, db, bcrypt, config) => {
           .update(roleUpdates);
       })
       .then(() => {
-        console.log(primaryEmail);
-        console.log(updatePrimaryEmail);
         //if e.is_primary, first reset ALL of account's emails to is_primary = false
         if (
           !primaryEmail ||

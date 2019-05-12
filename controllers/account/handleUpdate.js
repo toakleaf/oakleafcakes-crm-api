@@ -57,14 +57,17 @@ module.exports = async (req, res, db, bcrypt, config) => {
           .then(d => d[0])
       : null;
 
-  const updatePrimaryEmail = emails
-    ? emails.filter(e => e.is_primary === true)
+  const existingEmails = emails
+    ? await db('email')
+        .select('*')
+        .where({ account_id: req.params.id })
+        .then(e => e)
     : null;
 
-  const primaryEmail = await db('email')
-    .select('email')
-    .where({ account_id: req.params.id, is_primary: true })
-    .then(primary_email => primary_email);
+  const updatePrimaryEmail = emails ? emails.filter(e => e.is_primary) : null;
+  const primaryEmail = existingEmails
+    ? existingEmails.filter(e => e.is_primary)
+    : null;
 
   const existingPhones = phones
     ? await db('phone')
@@ -72,15 +75,15 @@ module.exports = async (req, res, db, bcrypt, config) => {
         .where({ account_id: req.params.id })
         .then(p => p)
     : null;
-
   const existingPhonesRaw = existingPhones
     ? existingPhones.map(p => p.phone_raw)
     : null;
+
   const updatePrimaryPhone = phones
     ? phones.filter(p => p.is_primary === true)
     : null;
   const primaryPhone = existingPhones
-    ? existingPhones.filter(p => p.is_primary === true)
+    ? existingPhones.filter(p => p.is_primary)
     : null;
 
   const hash = password
@@ -109,8 +112,9 @@ module.exports = async (req, res, db, bcrypt, config) => {
           !primaryEmail.length ||
           !updatePrimaryEmail.length ||
           updatePrimaryEmail[0].email === primaryEmail[0].email
-        )
+        ) {
           return;
+        }
         return trx('email')
           .where({ account_id: req.params.id, is_primary: true })
           .update({ is_primary: false });
@@ -123,8 +127,9 @@ module.exports = async (req, res, db, bcrypt, config) => {
           !primaryPhone.length ||
           !updatePrimaryPhone.length ||
           updatePrimaryPhone[0].phone_raw === primaryPhone[0].phone_raw
-        )
+        ) {
           return;
+        }
         return trx('phone')
           .where({ account_id: req.params.id, is_primary: true })
           .update({ is_primary: false });
@@ -148,7 +153,8 @@ module.exports = async (req, res, db, bcrypt, config) => {
               : {}),
             ...(e.is_primary || e.is_primary === false
               ? { is_primary: e.is_primary }
-              : {})
+              : {}),
+            ...(!existingEmails.length ? { is_primary: true } : {})
           };
           const queryEmail = e.current_email
             ? db('email')
@@ -196,9 +202,7 @@ module.exports = async (req, res, db, bcrypt, config) => {
             ...(p.is_primary || p.is_primary === false
               ? { is_primary: p.is_primary }
               : {}),
-            ...(!(primaryPhone.length && updatePrimaryPhone.length)
-              ? { is_primary: true }
-              : {})
+            ...(!existingPhones.length ? { is_primary: true } : {})
           };
           const queryPhone =
             existingPhonesRaw &&

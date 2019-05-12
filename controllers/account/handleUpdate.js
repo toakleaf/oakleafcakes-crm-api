@@ -61,13 +61,10 @@ module.exports = async (req, res, db, bcrypt, config) => {
     ? emails.filter(e => e.is_primary === true)
     : null;
 
-  const primaryEmail =
-    !updatePrimaryEmail || updatePrimaryEmail.length > 0
-      ? await db('email')
-          .select('email')
-          .where({ account_id: req.params.id, is_primary: true })
-          .then(primary_email => primary_email[0])
-      : null;
+  const primaryEmail = await db('email')
+    .select('email')
+    .where({ account_id: req.params.id, is_primary: true })
+    .then(primary_email => primary_email);
 
   const existingPhones = phones
     ? await db('phone')
@@ -82,10 +79,9 @@ module.exports = async (req, res, db, bcrypt, config) => {
   const updatePrimaryPhone = phones
     ? phones.filter(p => p.is_primary === true)
     : null;
-  const primaryPhone =
-    updatePrimaryPhone && updatePrimaryPhone.length > 0 && existingPhones
-      ? existingPhones.filter(p => p.is_primary === true)
-      : null;
+  const primaryPhone = existingPhones
+    ? existingPhones.filter(p => p.is_primary === true)
+    : null;
 
   const hash = password
     ? await bcrypt.hash(password, config.BCRYPT_COST_FACTOR)
@@ -106,11 +102,15 @@ module.exports = async (req, res, db, bcrypt, config) => {
           .update(roleUpdates);
       })
       .then(() => {
+        console.log(primaryEmail);
+        console.log(updatePrimaryEmail);
         //if e.is_primary, first reset ALL of account's emails to is_primary = false
         if (
           !primaryEmail ||
           !updatePrimaryEmail ||
-          updatePrimaryEmail[0] === primaryEmail
+          !primaryEmail.length ||
+          !updatePrimaryEmail.length ||
+          updatePrimaryEmail[0].email === primaryEmail[0].email
         )
           return;
         return trx('email')
@@ -122,7 +122,9 @@ module.exports = async (req, res, db, bcrypt, config) => {
         if (
           !primaryPhone ||
           !updatePrimaryPhone ||
-          updatePrimaryPhone[0] === primaryPhone
+          !primaryPhone.length ||
+          !updatePrimaryPhone.length ||
+          updatePrimaryPhone[0].phone_raw === primaryPhone[0].phone_raw
         )
           return;
         return trx('phone')
@@ -176,18 +178,6 @@ module.exports = async (req, res, db, bcrypt, config) => {
         return Promise.all(queries);
       })
       .then(() => {
-        //if p.is_primary, first reset ALL of account's phones to is_primary = false
-        if (
-          !updatePrimaryPhone ||
-          !primaryPhone ||
-          updatePrimaryPhone[0].phone_raw === primaryPhone.phone_raw
-        )
-          return;
-        return trx('phone')
-          .where({ account_id: req.params.id, is_primary: true })
-          .update({ is_primary: false });
-      })
-      .then(() => {
         if (!phones) return;
         const queries = [];
 
@@ -207,6 +197,9 @@ module.exports = async (req, res, db, bcrypt, config) => {
               : { phone_country: 'US' }),
             ...(p.is_primary || p.is_primary === false
               ? { is_primary: p.is_primary }
+              : {}),
+            ...(!(primaryPhone.length && updatePrimaryPhone.length)
+              ? { is_primary: true }
               : {})
           };
           const queryPhone =

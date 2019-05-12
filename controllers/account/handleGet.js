@@ -24,7 +24,7 @@ module.exports = async (req, res, db) => {
       .from('phone')
       .where('account_id', account.id);
     const logins = await db
-      .select('id', 'email', 'is_active')
+      .select('id', 'email', 'is_active', 'created_at', 'updated_at')
       .from('login')
       .where('account_id', account.id);
 

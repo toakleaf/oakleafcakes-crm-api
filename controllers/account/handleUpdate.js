@@ -36,27 +36,6 @@ module.exports = async (req, res, db, bcrypt, config) => {
     updated_at: now
   };
 
-  const updateLogin = emails ? emails.filter(e => e.is_login === true) : null;
-
-  //only allow updating of one login at a time
-  if (updateLogin && updateLogin.length > 1)
-    return res
-      .status(503)
-      .send('Failed to update account. Can only change 1 login at a time.');
-
-  const loginRecord =
-    updateLogin && updateLogin.length > 0
-      ? await db('login')
-          .select('*')
-          .where({
-            account_id: req.params.id,
-            ...(updateLogin[0].current_email
-              ? { email: updateLogin[0].current_email }
-              : {})
-          })
-          .then(d => d[0])
-      : null;
-
   const existingEmails = emails
     ? await db('email')
         .select('*')
@@ -135,11 +114,13 @@ module.exports = async (req, res, db, bcrypt, config) => {
           .update({ is_primary: false });
       })
       .then(() => {
-        // if a global is_active is set to false, make all logins inactive. Otherwise do it email by email below.
-        if (is_active === false)
+        // if a global is_active is set to false, make all logins inactive.
+        // is_active === true does nothing. must instead reactivate logins individually.
+        if (is_active === false) {
           return trx('login')
             .where({ account_id: req.params.id, is_active: true })
             .update({ is_active: false });
+        }
       })
       .then(() => {
         if (!emails) return;
@@ -164,19 +145,20 @@ module.exports = async (req, res, db, bcrypt, config) => {
             : db('email')
                 .insert({ ...update, account_id: req.params.id })
                 .transacting(trx);
-          //only update login if is_login flag.
-          const queryLogin =
-            loginRecord && e.is_login
-              ? db('login')
-                  .where({ id: loginRecord.id })
-                  .update({
-                    ...(e.new_email ? { email: e.new_email } : {}),
-                    updated_at: now,
-                    ...(e.is_active ? { is_active: e.is_active } : {}),
-                    ...(password ? { hash } : {})
-                  })
-                  .transacting(trx)
-              : null;
+
+          const queryLogin = e.current_email
+            ? db('login')
+                .where({ email: e.current_email })
+                .update({
+                  ...(e.new_email ? { email: e.new_email } : {}),
+                  updated_at: now,
+                  ...(e.is_active === true || e.is_active === false
+                    ? { is_active: e.is_active }
+                    : {}),
+                  ...(password ? { hash } : {})
+                })
+                .transacting(trx)
+            : null;
           queries.push(queryEmail, queryLogin);
         });
         return Promise.all(queries);

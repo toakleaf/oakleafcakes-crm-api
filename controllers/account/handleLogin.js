@@ -1,6 +1,6 @@
 module.exports = (req, res, db, bcrypt, jwt, signToken, config) => {
-  db.select('email', 'hash', 'account_id', 'is_active')
-    .from('login')
+  db('login')
+    .select('email', 'hash', 'account_id', 'is_active')
     .where('email', '=', req.body.email)
     .then(data => {
       if (!data[0].is_active) return res.status(401).json('unverified account');

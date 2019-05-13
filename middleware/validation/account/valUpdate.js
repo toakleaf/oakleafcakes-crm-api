@@ -3,6 +3,7 @@ const db = require('../../../db/db');
 const { MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH } = require('../../../config');
 
 module.exports = (req, res, next) => {
+  console.log(req.body);
   if (
     !req.body.emails &&
     !req.body.password &&
@@ -31,9 +32,6 @@ module.exports = (req, res, next) => {
             .allow(null)
             .optional(),
           is_primary: Joi.boolean()
-            .allow(null)
-            .optional(),
-          is_login: Joi.boolean()
             .allow(null)
             .optional(),
           is_active: Joi.boolean()

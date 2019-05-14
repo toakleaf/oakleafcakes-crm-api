@@ -15,6 +15,7 @@ module.exports = (req, res, next) => {
   ) {
     return res.status(400).send('No update request information given.');
   }
+  console.log('ho');
   const schema = Joi.object().keys({
     id: Joi.number()
       .integer()
@@ -95,6 +96,7 @@ module.exports = (req, res, next) => {
       .allow(null)
       .optional()
   });
+
   //email can be entered any-case, but always saved lowercase
   if (req.body.emails && Array.isArray(req.body.emails)) {
     for (let i = 0; i < req.body.emails.length; i++) {

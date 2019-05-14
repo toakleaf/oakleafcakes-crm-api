@@ -10,6 +10,11 @@ module.exports = (req, res, db) => {
         transaction: req.body
       })
       .then(() => {
+        return db('login')
+          .select('email')
+          .where({ account_id: req.params.id });
+      })
+      .then(logins => {
         const queries = [];
 
         req.body.emails.forEach(e => {
@@ -24,12 +29,13 @@ module.exports = (req, res, db) => {
               }
             });
 
-          const deleteLogin = e.is_login
-            ? db('login')
-                .where({ account_id: req.params.id, email: e.email })
-                .del()
-                .transacting(trx)
-            : null;
+          const deleteLogin =
+            logins.length && logins.some(l => l.email === e.email)
+              ? db('login')
+                  .where({ account_id: req.params.id, email: e.email })
+                  .del()
+                  .transacting(trx)
+              : null;
 
           queries.push(deleteEmail, deleteLogin);
         });

@@ -12,10 +12,7 @@ module.exports = (req, res, next) => {
         Joi.object().keys({
           email: Joi.string()
             .email({ minDomainAtoms: 2 })
-            .required(),
-          is_login: Joi.boolean()
-            .allow(null)
-            .optional()
+            .required()
         })
       )
       .required()

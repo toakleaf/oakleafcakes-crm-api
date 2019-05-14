@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const fs = require('fs');
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 const valJWTExpires = require('../middleware/validation/system/valJWTExpires');
@@ -25,7 +26,7 @@ router
   .route('/jwt/expires')
   .get(auth, admin, (req, res) => getExpiration(req, res, config))
   .put(auth, admin, valJWTExpires, (req, res) =>
-    jwtExpiration(req, res, signToken, config)
+    jwtExpiration(req, res, signToken, fs)
   )
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');

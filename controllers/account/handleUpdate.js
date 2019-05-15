@@ -69,18 +69,19 @@ module.exports = async (req, res, db, crypto, bcrypt, config) => {
     ? await bcrypt.hash(password, config.BCRYPT_COST_FACTOR)
     : null;
   // if is_login flag but no password, generate a dummy password hash
-  const dummyHashes = !password
-    ? await emails
-        .filter(e => e.is_login)
-        .map(async e => {
-          const token = crypto
-            .randomBytes(24)
-            .toString('base64')
-            .replace(/\W/g, '');
-          const hash = await bcrypt.hash(token, config.BCRYPT_COST_FACTOR);
-          return hash;
-        })
-    : [];
+  const dummyHashes =
+    emails && !password
+      ? await emails
+          .filter(e => e.is_login)
+          .map(async e => {
+            const token = crypto
+              .randomBytes(24)
+              .toString('base64')
+              .replace(/\W/g, '');
+            const hash = await bcrypt.hash(token, config.BCRYPT_COST_FACTOR);
+            return hash;
+          })
+      : [];
 
   // VALIDATION ENSURING ONLY 1 PRIMARY EMAIL OR PHONE PER REQ
   if (

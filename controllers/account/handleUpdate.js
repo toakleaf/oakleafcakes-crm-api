@@ -1,4 +1,4 @@
-module.exports = async (req, res, db, bcrypt, config) => {
+module.exports = async (req, res, db, crypto, bcrypt, config) => {
   const {
     emails,
     password,
@@ -10,18 +10,7 @@ module.exports = async (req, res, db, bcrypt, config) => {
     is_active
   } = req.body;
 
-  if (phones) {
-    for (let i = 0; i < phones.length; i++) {
-      phones[i].new_phone_raw = phones[i].new_phone
-        ? phones[i].new_phone.replace(/[^0-9]/g, '')
-        : null;
-      phones[i].current_phone_raw = phones[i].current_phone
-        ? phones[i].current_phone.replace(/[^0-9]/g, '')
-        : null;
-    }
-  }
   const now = new Date(Date.now());
-
   const accountUpdates = {
     ...(first_name ? { first_name } : {}),
     ...(first_name === '' ? { first_name: null } : {}),
@@ -36,18 +25,29 @@ module.exports = async (req, res, db, bcrypt, config) => {
     updated_at: now
   };
 
+  // EMAILS
   const existingEmails = emails
     ? await db('email')
         .select('*')
         .where({ account_id: req.params.id })
         .then(e => e)
     : null;
-
-  const updatePrimaryEmail = emails ? emails.filter(e => e.is_primary) : null;
-  const primaryEmail = existingEmails
+  const existingPrimaryEmails = existingEmails
     ? existingEmails.filter(e => e.is_primary)
     : null;
+  const reqPrimaryEmails = emails ? emails.filter(e => e.is_primary) : null;
 
+  // PHONES
+  if (phones) {
+    for (let i = 0; i < phones.length; i++) {
+      phones[i].new_phone_raw = phones[i].new_phone
+        ? phones[i].new_phone.replace(/[^0-9]/g, '')
+        : null;
+      phones[i].current_phone_raw = phones[i].current_phone
+        ? phones[i].current_phone.replace(/[^0-9]/g, '')
+        : null;
+    }
+  }
   const existingPhones = phones
     ? await db('phone')
         .select('*')
@@ -57,19 +57,44 @@ module.exports = async (req, res, db, bcrypt, config) => {
   const existingPhonesRaw = existingPhones
     ? existingPhones.map(p => p.phone_raw)
     : null;
-
-  const updatePrimaryPhone = phones
-    ? phones.filter(p => p.is_primary === true)
-    : null;
-  const primaryPhone = existingPhones
+  const existingPrimaryPhones = existingPhones
     ? existingPhones.filter(p => p.is_primary)
     : null;
+  const reqPrimaryPhones = phones
+    ? phones.filter(p => p.is_primary === true)
+    : null;
 
+  // PASSWORDS
   const hash = password
     ? await bcrypt.hash(password, config.BCRYPT_COST_FACTOR)
     : null;
+  // if is_login flag but no password, generate a dummy password hash
+  const dummyHashes = !password
+    ? await emails
+        .filter(e => e.is_login)
+        .map(async e => {
+          const token = crypto
+            .randomBytes(24)
+            .toString('base64')
+            .replace(/\W/g, '');
+          const hash = await bcrypt.hash(token, config.BCRYPT_COST_FACTOR);
+          return hash;
+        })
+    : [];
 
-  // MAKE VALIDATION ENSURING ONLY 1 PRIMARY EMAIL OR PHONE PER REQ
+  // VALIDATION ENSURING ONLY 1 PRIMARY EMAIL OR PHONE PER REQ
+  if (
+    (reqPrimaryEmails && reqPrimaryEmails.length > 1) ||
+    (reqPrimaryPhones && reqPrimaryPhones.length > 1)
+  ) {
+    res
+      .status(503)
+      .send(
+        'Failed to update account. Account can not contain more than 1 primary email or phone number'
+      );
+  }
+
+  // IS_LOGIN fiasco
 
   db.transaction(trx => {
     trx('account')
@@ -86,11 +111,11 @@ module.exports = async (req, res, db, bcrypt, config) => {
       .then(() => {
         //if e.is_primary, first reset ALL of account's emails to is_primary = false
         if (
-          !primaryEmail ||
-          !updatePrimaryEmail ||
-          !primaryEmail.length ||
-          !updatePrimaryEmail.length ||
-          updatePrimaryEmail[0].email === primaryEmail[0].email
+          !existingPrimaryEmails ||
+          !reqPrimaryEmails ||
+          !existingPrimaryEmails.length ||
+          !reqPrimaryEmails.length ||
+          reqPrimaryEmails[0].email === existingPrimaryEmails[0].email
         ) {
           return;
         }
@@ -101,11 +126,11 @@ module.exports = async (req, res, db, bcrypt, config) => {
       .then(() => {
         //if e.is_primary, first reset ALL of account's emails to is_primary = false
         if (
-          !primaryPhone ||
-          !updatePrimaryPhone ||
-          !primaryPhone.length ||
-          !updatePrimaryPhone.length ||
-          updatePrimaryPhone[0].phone_raw === primaryPhone[0].phone_raw
+          !existingPrimaryPhones ||
+          !reqPrimaryPhones ||
+          !existingPrimaryPhones.length ||
+          !reqPrimaryPhones.length ||
+          reqPrimaryPhones[0].phone_raw === existingPrimaryPhones[0].phone_raw
         ) {
           return;
         }
@@ -137,18 +162,36 @@ module.exports = async (req, res, db, bcrypt, config) => {
               : {}),
             ...(!existingEmails.length ? { is_primary: true } : {})
           };
-          const queryEmail = e.current_email
+          const emailQuery = e.current_email
             ? db('email')
+                .transacting(trx)
                 .where({ account_id: req.params.id, email: e.current_email })
                 .update({ ...update, updated_at: now })
-                .transacting(trx)
             : db('email')
-                .insert({ ...update, account_id: req.params.id })
-                .transacting(trx);
+                .transacting(trx)
+                .insert({ ...update, account_id: req.params.id });
 
-          const queryLogin = e.current_email
+          //  is_login new current
+          //      -add new login if none exists
+          //      -update if exists
+          //        x updated handled bellow by default path
+          //  is_login new
+          //      -add new login always (none will ever exist)
+          //  is_login current
+          //      -add new login if none exists
+          //      -update if exists
+          //        x updated handled bellow by default path
+          //
+          // const addLoginQuery = e.is_login === true
+          //   ? db('login')
+          //     .insert()
+
+          // if email to update is also a login, update login too.
+          const loginQuery = e.current_email
             ? db('login')
+                .transacting(trx)
                 .where({ email: e.current_email })
+                .returning('id')
                 .update({
                   ...(e.new_email ? { email: e.new_email } : {}),
                   updated_at: now,
@@ -157,9 +200,37 @@ module.exports = async (req, res, db, bcrypt, config) => {
                     : {}),
                   ...(password ? { hash } : {})
                 })
+                .then(login => {
+                  // only insert new login if none exists and is_login flag is set to true
+                  if (login.length || e.is_login !== true) return;
+                  return db('login')
+                    .transacting(trx)
+                    .insert({
+                      account_id: req.params.id,
+                      ...(e.new_email
+                        ? { email: e.new_email }
+                        : { email: e.current_email }),
+                      ...(e.is_active === true || e.is_active === false
+                        ? { is_active: e.is_active }
+                        : { is_active: false }), // is_active defaults to false if left null
+                      ...(password ? { hash } : { hash: dummyHashes.pop() })
+                    });
+                })
+            : e.is_login
+            ? // just insert login if new_email only and is_login flag is set to true
+              db('login')
                 .transacting(trx)
+                .insert({
+                  account_id: req.params.id,
+                  email: e.new_email,
+                  ...(e.is_active === true || e.is_active === false
+                    ? { is_active: e.is_active }
+                    : { is_active: false }), // is_active defaults to false if left null
+                  ...(password ? { hash } : { hash: dummyHashes.pop() })
+                })
             : null;
-          queries.push(queryEmail, queryLogin);
+
+          queries.push(emailQuery, loginQuery);
         });
         return Promise.all(queries);
       })

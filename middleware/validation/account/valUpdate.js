@@ -3,7 +3,6 @@ const db = require('../../../db/db');
 const { MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH } = require('../../../config');
 
 module.exports = (req, res, next) => {
-  console.log(req.body);
   if (
     !req.body.emails &&
     !req.body.password &&
@@ -15,7 +14,6 @@ module.exports = (req, res, next) => {
   ) {
     return res.status(400).send('No update request information given.');
   }
-  console.log('ho');
   const schema = Joi.object().keys({
     id: Joi.number()
       .integer()
@@ -36,6 +34,9 @@ module.exports = (req, res, next) => {
             .allow(null)
             .optional(),
           is_active: Joi.boolean()
+            .allow(null)
+            .optional(),
+          is_login: Joi.boolean()
             .allow(null)
             .optional()
         })
@@ -101,6 +102,7 @@ module.exports = (req, res, next) => {
   if (req.body.emails && Array.isArray(req.body.emails)) {
     for (let i = 0; i < req.body.emails.length; i++) {
       if (!req.body.emails[i].new_email && !req.body.emails[i].current_email)
+        //every email object must have either new_email or current_email field
         return res
           .status(400)
           .send('Emails must contain new_email or current_email field');

@@ -148,7 +148,7 @@ router
   .get(auth, (req, res) => handleGet(req, res, db))
   .delete([auth, admin], (req, res) => handleDelete(req, res, db))
   .put([auth, valUpdate], (req, res) =>
-    handleUpdate(req, res, db, bcrypt, config)
+    handleUpdate(req, res, db, crypto, bcrypt, config)
   )
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');

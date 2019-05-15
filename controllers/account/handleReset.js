@@ -1,10 +1,13 @@
 module.exports = async (req, res, db, bcrypt, signToken, config) => {
   try {
+    // Resetting via the LOGIN ID and NOT the account_id!
     const login = await db
       .select('*')
       .from('login')
       .where('id', req.params.id)
-      .then(data => data[0]);
+      .then(data => {
+        return data[0];
+      });
 
     if (!login) {
       throw new Error('invalid id');
@@ -64,7 +67,9 @@ module.exports = async (req, res, db, bcrypt, signToken, config) => {
 
     const token = signToken(data.account_id, data.role);
     return res.header('x-auth-token', token).json('success');
+    return res.json('success');
   } catch (err) {
+    // console.error(err);
     res.status(401).json('bad credentials ');
   }
 };

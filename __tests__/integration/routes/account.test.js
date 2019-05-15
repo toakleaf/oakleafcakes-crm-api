@@ -302,7 +302,6 @@ describe('account', () => {
       );
       expect(res.status).toBe(200);
       session.newAccount1Token = res.get('x-auth-token');
-      // console.error(res.headers['x-auth-token']);
     });
     it('should return 200 if id and token are valid for signup account', async () => {
       expect.assertions(1);
@@ -411,11 +410,11 @@ describe('account', () => {
           password: 'updated_password',
           emails: [
             {
-              new_email: '123@gg.com',
+              new_email: session.updatedEmail,
               current_email: session.newAccount1.email
             },
             {
-              new_email: session.updatedEmail,
+              new_email: '123@gg.com',
               is_login: true
             }
           ],
@@ -502,18 +501,25 @@ describe('account', () => {
       expect.assertions(4);
       const res = await request(server)
         .post('/account/forgot')
-        .send({ email: session.newAccount1.email });
+        .send({ email: session.updatedEmail });
       expect(res.status).toBe(200);
+
+      session.newAccount1LoginID = message.mock.calls[0][0];
       session.pwResetToken1 = message.mock.calls[0][1];
       const data = await db
         .select('*')
         .from('login')
         .where('account_id', session.newAccount1ID);
-      expect(data[0].reset_token_hash).not.toBeNull();
-      expect(data[0].reset_token_expiration).not.toBeNull();
-      expect(data[0].reset_token_expiration.getTime()).toBeGreaterThan(
-        data[0].updated_at.getTime()
-      );
+
+      expect(data.some(d => d.reset_token_hash !== null)).toBeTruthy();
+      expect(data.some(d => d.reset_token_expiration !== null)).toBeTruthy();
+      expect(
+        data.some(
+          d =>
+            d.reset_token_expiration &&
+            d.reset_token_expiration.getTime() > d.updated_at.getTime()
+        )
+      ).toBeTruthy();
     });
   });
 
@@ -557,13 +563,12 @@ describe('account', () => {
       expect(res.status).toBe(200);
     });
     it('should clear token hash from login table after first call', async () => {
-      expect.assertions(2);
+      expect.assertions(1);
       const data = await db
         .select('*')
         .from('login')
         .where('account_id', session.newAccount1ID);
-      expect(data[0].reset_token_hash).toBe('');
-      expect(data[0].reset_token_expiration).toEqual(data[0].updated_at);
+      expect(data.some(d => d.reset_token_hash === '')).toBeTruthy();
     });
   });
 
@@ -643,11 +648,15 @@ describe('account', () => {
         .select('*')
         .from('login')
         .where('account_id', session.newAccount1ID);
-      expect(data[0].reset_token_hash).not.toBeNull();
-      expect(data[0].reset_token_expiration).not.toBeNull();
-      expect(data[0].reset_token_expiration.getTime()).toBeGreaterThan(
-        data[0].updated_at.getTime()
-      );
+      expect(data.some(d => d.reset_token_hash !== null)).toBeTruthy();
+      expect(data.some(d => d.reset_token_expiration !== null)).toBeTruthy();
+      expect(
+        data.some(
+          d =>
+            d.reset_token_expiration &&
+            d.reset_token_expiration.getTime() > d.updated_at.getTime()
+        )
+      ).toBeTruthy();
     });
     it('should return 200 with invalid token when lock === true', async () => {
       expect.assertions(2);

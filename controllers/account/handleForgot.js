@@ -8,15 +8,16 @@ module.exports = async (req, res, db, bcrypt, crypto, sendMail, config) => {
       .toString('base64')
       .replace(/\W/g, '');
     const hash = await bcrypt.hash(token, config.BCRYPT_COST_FACTOR);
-    const expiration = new Date(Date.now());
+    const now = new Date();
+    let expiration = new Date();
     expiration.setMinutes(expiration.getMinutes() + MINUTES_TO_EXPIRATION);
     const ids = await db('login')
       .where('email', req.body.email)
-      .returning(['id', 'account_id'])
+      .returning('*')
       .update({
         reset_token_hash: hash,
         reset_token_expiration: expiration.toISOString(),
-        updated_at: new Date(Date.now())
+        updated_at: now
       })
       .then(data => {
         return db('account_history')
@@ -27,13 +28,14 @@ module.exports = async (req, res, db, bcrypt, crypto, sendMail, config) => {
             transaction: {
               reset_token_hash: hash,
               reset_token_expiration: expiration.toISOString(),
-              updated_at: new Date(Date.now())
+              updated_at: now
             }
           })
           .then(() => {
             return data;
           });
       });
+    // Resetting via the LOGIN ID and NOT the account_id!
     if (!ids[0].id) throw new Error('email not found');
     const names = await db('account')
       .select(['first_name', 'last_name', 'company_name'])

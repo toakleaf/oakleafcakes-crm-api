@@ -170,21 +170,6 @@ module.exports = async (req, res, db, crypto, bcrypt, config) => {
                 .transacting(trx)
                 .insert({ ...update, account_id: req.params.id });
 
-          //  is_login new current
-          //      -add new login if none exists
-          //      -update if exists
-          //        x updated handled bellow by default path
-          //  is_login new
-          //      -add new login always (none will ever exist)
-          //  is_login current
-          //      -add new login if none exists
-          //      -update if exists
-          //        x updated handled bellow by default path
-          //
-          // const addLoginQuery = e.is_login === true
-          //   ? db('login')
-          //     .insert()
-
           // if email to update is also a login, update login too.
           const loginQuery = e.current_email
             ? db('login')

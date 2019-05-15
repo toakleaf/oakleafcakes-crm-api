@@ -94,8 +94,6 @@ module.exports = async (req, res, db, crypto, bcrypt, config) => {
       );
   }
 
-  // IS_LOGIN fiasco
-
   db.transaction(trx => {
     trx('account')
       .where('id', req.params.id)

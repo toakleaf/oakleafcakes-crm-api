@@ -20,7 +20,7 @@ module.exports = async (req, res, db, bcrypt, crypto, sendMail, config) => {
       .returning(['id', 'account_id'])
       .update({
         hash: token2,
-        updated_at: new Date(Date.now()),
+        updated_at: new Date(),
         ...(req.body.lock
           ? { is_active: false }
           : {
@@ -36,7 +36,7 @@ module.exports = async (req, res, db, bcrypt, crypto, sendMail, config) => {
             action: 'DELETE',
             transaction: {
               hash: 'RANDOM',
-              updated_at: new Date(Date.now()),
+              updated_at: new Date(),
               ...(req.body.lock
                 ? { is_active: false }
                 : {

@@ -184,9 +184,9 @@ module.exports = async (req, res, db, crypto, bcrypt, config) => {
                     : {}),
                   ...(password ? { hash } : {})
                 })
-                .then(login => {
+                .then(data => {
                   // only insert new login if none exists and is_login flag is set to true
-                  if (login.length || e.is_login !== true) return;
+                  if (data.length || e.is_login !== true) return;
                   return db('login')
                     .transacting(trx)
                     .insert({

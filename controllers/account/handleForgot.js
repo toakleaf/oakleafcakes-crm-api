@@ -45,16 +45,17 @@ module.exports = async (
         // });
       });
 
+    // Resetting via the LOGIN ID and NOT the account_id!
+    if (!ids.length) throw new Error('email not found');
+
     const history = await saveHistorySnapshot(
       req,
       db,
-      data[0].account_id,
-      req.account.account_id,
+      ids[0].account_id,
+      ids[0].account_id,
       'DELETE'
     );
 
-    // Resetting via the LOGIN ID and NOT the account_id!
-    if (!ids[0].id) throw new Error('email not found');
     const names = await db('account')
       .select(['first_name', 'last_name', 'company_name'])
       .where('id', ids[0].account_id);

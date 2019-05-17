@@ -58,7 +58,6 @@ module.exports = async (
         return data[0];
         // });
       });
-
     if (!ids.id) throw new Error('email not found');
 
     const history = await saveHistorySnapshot(

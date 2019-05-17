@@ -32,23 +32,11 @@ module.exports = async (
     const activation_hash = await bcrypt.hash(token, config.BCRYPT_COST_FACTOR);
 
     await db.transaction(trx => {
-      trx('account_history')
+      trx('login')
         .insert({
           account_id: id,
-          author: id,
-          action: 'CREATE',
-          transaction: {
-            email,
-            hash
-          }
-        })
-
-        .then(() => {
-          return trx('login').insert({
-            account_id: id,
-            email,
-            hash
-          });
+          email,
+          hash
         })
         .then(() => {
           return trx('activation_hash').insert({
@@ -92,6 +80,7 @@ module.exports = async (
         .catch(trx.rollback);
     });
   } catch (err) {
+    console.error(err);
     res.status(503).send('Failed to create account.' + err);
   }
 };

@@ -1,4 +1,4 @@
-module.exports = (req, res, db) => {
+module.exports = (req, res, db, saveHistorySnapshot) => {
   db.transaction(trx => {
     trx('account')
       .where('id', req.params.id)
@@ -23,6 +23,7 @@ module.exports = (req, res, db) => {
         return res.header('x-deleted-account', req.params.id).send('success');
       })
       .catch(err => {
+        console.error(err);
         trx.rollback();
         res.status(503).send('Failed to delete account. ' + err);
       });

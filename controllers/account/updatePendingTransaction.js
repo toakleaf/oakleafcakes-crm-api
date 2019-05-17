@@ -8,7 +8,7 @@ module.exports = async (db, id, request, saveHistorySnapshot) => {
     phone_type,
     phone_country
   } = request;
-  let phone_raw = phone ? phone.replace(/[^0-9]/g, '') : null;
+  if (phone) request.phone_raw = phone.replace(/[^0-9]/g, '');
 
   const now = new Date(Date.now());
 
@@ -45,7 +45,7 @@ module.exports = async (db, id, request, saveHistorySnapshot) => {
         .then(() => {
           return trx('phone')
             .select('*')
-            .where({ account_id: id, phone_raw })
+            .where({ account_id: id, phone_raw: request.phone_raw })
             .then(p => p[0]);
         })
         .then(p => {
@@ -55,7 +55,7 @@ module.exports = async (db, id, request, saveHistorySnapshot) => {
               .update({ is_primary: false, updated_at: now })
               .then(() => {
                 return trx('phone')
-                  .where({ account_id: id, phone_raw })
+                  .where({ account_id: id, phone_raw: request.phone_raw })
                   .update({
                     phone,
                     is_primary: true,
@@ -67,7 +67,7 @@ module.exports = async (db, id, request, saveHistorySnapshot) => {
           }
           if (p) {
             return trx('phone')
-              .where({ account_id: id, phone_raw })
+              .where({ account_id: id, phone_raw: request.phone_raw })
               .update({ phone, phone_type, phone_country, updated_at: now });
           }
           return trx('phone')
@@ -77,7 +77,7 @@ module.exports = async (db, id, request, saveHistorySnapshot) => {
               return trx('phone').insert({
                 account_id: id,
                 phone,
-                phone_raw,
+                phone_raw: request.phone_raw,
                 is_primary: true,
                 phone_type,
                 phone_country,
@@ -86,13 +86,7 @@ module.exports = async (db, id, request, saveHistorySnapshot) => {
             });
         })
         .then(() => {
-          return saveHistorySnapshot(
-            { ...request, ...(phone_raw ? { phone_raw } : {}) },
-            db,
-            id,
-            id,
-            'UPDATE'
-          );
+          return saveHistorySnapshot({ body: request }, db, id, id, 'UPDATE');
           // return trx('account_history').insert({
           //   account_id: id,
           //   author: id,

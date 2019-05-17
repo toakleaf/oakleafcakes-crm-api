@@ -1,22 +1,16 @@
-module.exports = (req, res, db, saveHistorySnapshot) => {
+module.exports = (req, res, db, snapshot) => {
   db.transaction(trx => {
     trx('account')
       .where('id', req.params.id)
       .del()
       .then(() => {
-        return saveHistorySnapshot(
+        return snapshot(
           req,
           db,
           req.params.id,
           req.account.account_id,
           'DELETE'
         );
-
-        // return trx('account_history').insert({
-        //   account_id: req.params.id,
-        //   author: req.account.account_id,
-        //   action: 'DELETE'
-        // });
       })
       .then(() => {
         trx.commit();

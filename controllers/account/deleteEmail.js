@@ -1,4 +1,4 @@
-module.exports = (req, res, db, saveHistorySnapshot) => {
+module.exports = (req, res, db, snapshot) => {
   let deletedPrimary = null;
 
   db.transaction(trx => {
@@ -47,7 +47,7 @@ module.exports = (req, res, db, saveHistorySnapshot) => {
         }
       })
       .then(() => {
-        return saveHistorySnapshot(
+        return snapshot(
           req,
           db,
           req.params.id,

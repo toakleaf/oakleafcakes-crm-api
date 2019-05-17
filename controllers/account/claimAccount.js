@@ -9,7 +9,7 @@ module.exports = async (
   config,
   sendMail,
   id,
-  saveHistorySnapshot
+  snapshot
 ) => {
   let {
     email,
@@ -55,23 +55,7 @@ module.exports = async (
           });
         })
         .then(() => {
-          return saveHistorySnapshot(req, db, id, id, 'UPDATE', 'PENDING');
-          // return trx('account_history').insert({
-          //   account_id: id,
-          //   author: id,
-          //   action: 'UPDATE',
-          //   transaction: {
-          //     pending: true,
-          //     first_name,
-          //     last_name,
-          //     company_name,
-          //     email,
-          //     role,
-          //     phone,
-          //     phone_type,
-          //     phone_country
-          //   }
-          // });
+          return snapshot(req, db, id, id, 'UPDATE', 'PENDING');
         })
         .then(() => {
           res.send('Verification Email Sent');

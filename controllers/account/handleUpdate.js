@@ -1,12 +1,4 @@
-module.exports = async (
-  req,
-  res,
-  db,
-  crypto,
-  bcrypt,
-  config,
-  saveHistorySnapshot
-) => {
+module.exports = async (req, res, db, crypto, bcrypt, config, snapshot) => {
   const {
     emails,
     password,
@@ -282,7 +274,7 @@ module.exports = async (
         return Promise.all(queries);
       })
       .then(() => {
-        return saveHistorySnapshot(
+        return snapshot(
           req,
           db,
           req.params.id,

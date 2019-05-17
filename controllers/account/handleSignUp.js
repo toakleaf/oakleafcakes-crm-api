@@ -10,7 +10,7 @@ module.exports = async (
   bcrypt,
   config,
   sendMail,
-  saveHistorySnapshot
+  snapshot
 ) => {
   // if login exists throw error so user can later retrieve account pw.
   // if email or phone exists then allow user to claim account by creating
@@ -69,7 +69,7 @@ module.exports = async (
         config,
         sendMail,
         id,
-        saveHistorySnapshot
+        snapshot
       );
     } else {
       createAccountWithLogin(
@@ -80,7 +80,7 @@ module.exports = async (
         bcrypt,
         config,
         sendMail,
-        saveHistorySnapshot
+        snapshot
       );
     }
   } catch (err) {

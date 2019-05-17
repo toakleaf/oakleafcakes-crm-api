@@ -1,12 +1,4 @@
-module.exports = async (
-  req,
-  res,
-  db,
-  bcrypt,
-  signToken,
-  config,
-  saveHistorySnapshot
-) => {
+module.exports = async (req, res, db, bcrypt, signToken, config, snapshot) => {
   try {
     // Resetting via the LOGIN ID and NOT the account_id!
     const login = await db
@@ -49,22 +41,6 @@ module.exports = async (
         updated_at: now,
         reset_token_expiration: now
       })
-      // .then(id => {
-      //   return saveHistorySnapshot(req, db, id[0], id[0], 'UPDATE');
-      //   // return db('account_history')
-      //   //   .returning('account_id')
-      //   //   .insert({
-      //   //     account_id: id[0],
-      //   //     author: id[0],
-      //   //     action: 'UPDATE',
-      //   //     transaction: {
-      //   //       hash,
-      //   //       reset_token_hash: '',
-      //   //       updated_at: now,
-      //   //       reset_token_expiration: now
-      //   //     }
-      //   //   });
-      // })
       .then(id => {
         return db('account_role')
           .where('account_id', id[0])
@@ -74,7 +50,7 @@ module.exports = async (
 
     if (!data.account_id) throw new Error('failed to update login');
 
-    const history = await saveHistorySnapshot(
+    const history = await snapshot(
       req,
       db,
       data.account_id,

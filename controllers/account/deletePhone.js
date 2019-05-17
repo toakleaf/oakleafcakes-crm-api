@@ -1,4 +1,4 @@
-module.exports = (req, res, db, saveHistorySnapshot) => {
+module.exports = (req, res, db, snapshot) => {
   if (req.body.phones.length) {
     for (let i = 0; i < req.body.phones.length; i++) {
       req.body.phones[i].phone_raw = req.body.phones[i].phone
@@ -10,27 +10,18 @@ module.exports = (req, res, db, saveHistorySnapshot) => {
   let deletedPrimary = null;
 
   db.transaction(trx => {
-    trx('account_history')
-      .insert({
-        account_id: req.params.id,
-        author: req.account.account_id,
-        action: 'DELETE',
-        transaction: req.body
-      })
-      .then(() => {
+    trx('phone')
+      .select('*')
+      .where({ account_id: req.params.id, is_primary: true })
+      .then(primary => {
+        deletedPrimary = primary.length ? true : false;
         const queries = [];
 
         req.body.phones.forEach(p => {
           const deletePhone = db('phone')
             .where({ account_id: req.params.id, phone_raw: p.phone_raw })
-            .returning('*')
             .del()
-            .transacting(trx)
-            .then(data => {
-              if (data[0].is_primary) {
-                deletedPrimary = true;
-              }
-            });
+            .transacting(trx);
 
           queries.push(deletePhone);
         });
@@ -49,6 +40,15 @@ module.exports = (req, res, db, saveHistorySnapshot) => {
                 .update('is_primary', true);
             });
         }
+      })
+      .then(() => {
+        return snapshot(
+          req,
+          db,
+          req.params.id,
+          req.account.account_id,
+          'DELETE'
+        );
       })
       .then(() => {
         trx.commit();

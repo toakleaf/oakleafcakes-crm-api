@@ -1,14 +1,6 @@
 const updatePendingTransaction = require('./updatePendingTransaction');
 
-module.exports = async (
-  req,
-  res,
-  db,
-  bcrypt,
-  signToken,
-  config,
-  saveHistorySnapshot
-) => {
+module.exports = async (req, res, db, bcrypt, signToken, config, snapshot) => {
   try {
     const activation_hash = await db
       .select('*')
@@ -46,13 +38,8 @@ module.exports = async (
           db,
           req.params.id,
           lastTransaction.request,
-          saveHistorySnapshot
+          snapshot
         );
-        // await db('account_history')
-        //   .where('id', lastTransaction.id)
-        //   .update({
-        //     status: 'PENDING'
-        //   });
       } catch (err) {
         console.error(err);
       }
@@ -72,7 +59,7 @@ module.exports = async (
       .select('role')
       .where('account_id', req.params.id);
 
-    const history = await saveHistorySnapshot(
+    const history = await snapshot(
       req,
       db,
       req.params.id,

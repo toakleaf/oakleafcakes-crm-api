@@ -1,4 +1,4 @@
-module.exports = (req, res, db, saveHistorySnapshot) => {
+module.exports = (req, res, db, snapshot) => {
   let {
     email,
     role,
@@ -60,23 +60,7 @@ module.exports = (req, res, db, saveHistorySnapshot) => {
       .then(roleData => {
         if (roleData) output = { ...output, role: roleData[0].role };
         const author_id = req.account ? req.account.account_id : output.id;
-        return saveHistorySnapshot(req, db, output.id, author_id, 'CREATE');
-        // return trx('account_history').insert({
-        //   account_id: output.id,
-        //   author: req.account ? req.account.account_id : accountData[0].id,
-        //   action: 'CREATE',
-        //   transaction: {
-        //     first_name,
-        //     last_name,
-        //     company_name,
-        //     email,
-        //     role,
-        //     phone,
-        //     phone_raw,
-        //     phone_type,
-        //     phone_country
-        //   }
-        // });
+        return snapshot(req, db, output.id, author_id, 'CREATE');
       })
       .then(() => {
         return res.json({

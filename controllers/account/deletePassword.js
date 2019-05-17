@@ -8,7 +8,7 @@ module.exports = async (
   crypto,
   sendMail,
   config,
-  saveHistorySnapshot
+  snapshot
 ) => {
   //if req.body.lock === true then don't send the reset email, so user gets locked out of account.
   try {
@@ -37,30 +37,11 @@ module.exports = async (
               reset_token_expiration: expiration.toISOString()
             })
       })
-      .then(data => {
-        // return db('account_history')
-        //   .insert({
-        //     account_id: data[0].account_id,
-        //     author: req.account.account_id,
-        //     action: 'DELETE',
-        //     transaction: {
-        //       hash: 'RANDOM',
-        //       updated_at: new Date(),
-        //       ...(req.body.lock
-        //         ? { is_active: false }
-        //         : {
-        //             reset_token_hash: hash,
-        //             reset_token_expiration: expiration.toISOString()
-        //           })
-        //     }
-        //   })
-        // .then(() => {
-        return data[0];
-        // });
-      });
+      .then(data => data[0]);
+
     if (!ids.id) throw new Error('email not found');
 
-    const history = await saveHistorySnapshot(
+    const history = await snapshot(
       req,
       db,
       ids.account_id,

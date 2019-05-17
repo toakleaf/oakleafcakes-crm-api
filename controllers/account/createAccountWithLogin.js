@@ -8,7 +8,7 @@ module.exports = async (
   bcrypt,
   config,
   sendMail,
-  saveHistorySnapshot
+  snapshot
 ) => {
   let {
     email,
@@ -95,23 +95,7 @@ module.exports = async (
           .then(phoneData => {
             if (phoneData) output = { ...output, phones: phoneData };
             const author_id = req.account ? req.account.account_id : output.id;
-            return saveHistorySnapshot(req, db, output.id, author_id, 'CREATE');
-            // return trx('account_history').insert({
-            //   account_id: output.id,
-            //   author: req.account ? req.account.account_id : output.id,
-            //   action: 'CREATE',
-            //   transaction: {
-            //     first_name,
-            //     last_name,
-            //     company_name,
-            //     email,
-            //     role,
-            //     phone,
-            //     phone_raw,
-            //     phone_type,
-            //     phone_country
-            //   }
-            // });
+            return snapshot(req, db, output.id, author_id, 'CREATE');
           })
           .then(() => {
             return trx('activation_hash').insert({

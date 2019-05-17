@@ -1,4 +1,4 @@
-module.exports = async (db, id, request, saveHistorySnapshot) => {
+module.exports = async (db, id, request, snapshot) => {
   const {
     email,
     first_name,
@@ -86,16 +86,7 @@ module.exports = async (db, id, request, saveHistorySnapshot) => {
             });
         })
         .then(() => {
-          return saveHistorySnapshot({ body: request }, db, id, id, 'UPDATE');
-          // return trx('account_history').insert({
-          //   account_id: id,
-          //   author: id,
-          //   action: 'UPDATE',
-          //   transaction: {
-          //     ...request,
-          //     phone_raw
-          //   }
-          // });
+          return snapshot({ body: request }, db, id, id, 'UPDATE');
         })
         .then(trx.commit)
         .catch(trx.rollback);

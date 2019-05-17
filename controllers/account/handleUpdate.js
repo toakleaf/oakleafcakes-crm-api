@@ -1,4 +1,12 @@
-module.exports = async (req, res, db, crypto, bcrypt, config) => {
+module.exports = async (
+  req,
+  res,
+  db,
+  crypto,
+  bcrypt,
+  config,
+  saveHistorySnapshot
+) => {
   const {
     emails,
     password,
@@ -274,12 +282,13 @@ module.exports = async (req, res, db, crypto, bcrypt, config) => {
         return Promise.all(queries);
       })
       .then(() => {
-        return trx('account_history').insert({
-          account_id: req.params.id,
-          author: req.account.account_id,
-          action: 'UPDATE',
-          transaction: req.body
-        });
+        return saveHistorySnapshot(
+          req,
+          db,
+          req.params.id,
+          req.account.account_id,
+          'UPDATE'
+        );
       })
       .then(() => {
         trx.commit();
@@ -288,7 +297,7 @@ module.exports = async (req, res, db, crypto, bcrypt, config) => {
       .catch(err => {
         trx.rollback();
         console.error(err);
-        return res.status(503).send('Failed to update account. ');
+        // return res.status(503).send('Failed to update account. ');
       });
   }).catch(err => {
     console.error(err);

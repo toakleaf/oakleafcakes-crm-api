@@ -4,11 +4,19 @@ module.exports = (req, res, db) => {
       .where('id', req.params.id)
       .del()
       .then(() => {
-        return trx('account_history').insert({
-          account_id: req.params.id,
-          author: req.account.account_id,
-          action: 'DELETE'
-        });
+        return saveHistorySnapshot(
+          req,
+          db,
+          req.params.id,
+          req.account.account_id,
+          'DELETE'
+        );
+
+        // return trx('account_history').insert({
+        //   account_id: req.params.id,
+        //   author: req.account.account_id,
+        //   action: 'DELETE'
+        // });
       })
       .then(() => {
         trx.commit();

@@ -1,6 +1,15 @@
 const message = require('../email/messages/verifyAccount');
 
-module.exports = async (req, res, db, crypto, bcrypt, config, sendMail) => {
+module.exports = async (
+  req,
+  res,
+  db,
+  crypto,
+  bcrypt,
+  config,
+  sendMail,
+  saveHistorySnapshot
+) => {
   let {
     email,
     password,
@@ -85,22 +94,24 @@ module.exports = async (req, res, db, crypto, bcrypt, config, sendMail) => {
           })
           .then(phoneData => {
             if (phoneData) output = { ...output, phones: phoneData };
-            return trx('account_history').insert({
-              account_id: output.id,
-              author: req.account ? req.account.account_id : output.id,
-              action: 'CREATE',
-              transaction: {
-                first_name,
-                last_name,
-                company_name,
-                email,
-                role,
-                phone,
-                phone_raw,
-                phone_type,
-                phone_country
-              }
-            });
+            const author_id = req.account ? req.account.account_id : output.id;
+            return saveHistorySnapshot(req, db, output.id, author_id, 'CREATE');
+            // return trx('account_history').insert({
+            //   account_id: output.id,
+            //   author: req.account ? req.account.account_id : output.id,
+            //   action: 'CREATE',
+            //   transaction: {
+            //     first_name,
+            //     last_name,
+            //     company_name,
+            //     email,
+            //     role,
+            //     phone,
+            //     phone_raw,
+            //     phone_type,
+            //     phone_country
+            //   }
+            // });
           })
           .then(() => {
             return trx('activation_hash').insert({

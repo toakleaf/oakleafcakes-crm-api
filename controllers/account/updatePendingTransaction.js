@@ -1,4 +1,4 @@
-module.exports = async (db, id, updates) => {
+module.exports = async (db, id, request, saveHistorySnapshot) => {
   const {
     email,
     first_name,
@@ -7,7 +7,7 @@ module.exports = async (db, id, updates) => {
     phone,
     phone_type,
     phone_country
-  } = updates;
+  } = request;
   let phone_raw = phone ? phone.replace(/[^0-9]/g, '') : null;
 
   const now = new Date(Date.now());
@@ -86,15 +86,22 @@ module.exports = async (db, id, updates) => {
             });
         })
         .then(() => {
-          return trx('account_history').insert({
-            account_id: id,
-            author: id,
-            action: 'UPDATE',
-            transaction: {
-              ...updates,
-              phone_raw
-            }
-          });
+          return saveHistorySnapshot(
+            { ...request, ...(phone_raw ? { phone_raw } : {}) },
+            db,
+            id,
+            id,
+            'UPDATE'
+          );
+          // return trx('account_history').insert({
+          //   account_id: id,
+          //   author: id,
+          //   action: 'UPDATE',
+          //   transaction: {
+          //     ...request,
+          //     phone_raw
+          //   }
+          // });
         })
         .then(trx.commit)
         .catch(trx.rollback);

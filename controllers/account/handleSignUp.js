@@ -2,7 +2,16 @@ const createAccount = require('./createAccount');
 const createAccountWithLogin = require('./createAccountWithLogin');
 const claimAccount = require('./claimAccount');
 
-module.exports = async (req, res, db, crypto, bcrypt, config, sendMail) => {
+module.exports = async (
+  req,
+  res,
+  db,
+  crypto,
+  bcrypt,
+  config,
+  sendMail,
+  saveHistorySnapshot
+) => {
   // if login exists throw error so user can later retrieve account pw.
   // if email or phone exists then allow user to claim account by creating
   // a new login.
@@ -51,9 +60,28 @@ module.exports = async (req, res, db, crypto, bcrypt, config, sendMail) => {
             'Account with this email/phone already exists and cannot be overwritten'
           );
       }
-      claimAccount(req, res, db, crypto, bcrypt, config, sendMail, id);
+      claimAccount(
+        req,
+        res,
+        db,
+        crypto,
+        bcrypt,
+        config,
+        sendMail,
+        id,
+        saveHistorySnapshot
+      );
     } else {
-      createAccountWithLogin(req, res, db, crypto, bcrypt, config, sendMail);
+      createAccountWithLogin(
+        req,
+        res,
+        db,
+        crypto,
+        bcrypt,
+        config,
+        sendMail,
+        saveHistorySnapshot
+      );
     }
   } catch (err) {
     console.error(err);

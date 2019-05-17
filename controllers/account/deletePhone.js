@@ -1,4 +1,4 @@
-module.exports = (req, res, db) => {
+module.exports = (req, res, db, saveHistorySnapshot) => {
   if (req.body.phones.length) {
     for (let i = 0; i < req.body.phones.length; i++) {
       req.body.phones[i].phone_raw = req.body.phones[i].phone

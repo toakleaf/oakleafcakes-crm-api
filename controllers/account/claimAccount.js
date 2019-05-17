@@ -1,6 +1,16 @@
 const message = require('../email/messages/verifyAccount');
 
-module.exports = async (req, res, db, crypto, bcrypt, config, sendMail, id) => {
+module.exports = async (
+  req,
+  res,
+  db,
+  crypto,
+  bcrypt,
+  config,
+  sendMail,
+  id,
+  saveHistorySnapshot
+) => {
   let {
     email,
     password,
@@ -32,24 +42,7 @@ module.exports = async (req, res, db, crypto, bcrypt, config, sendMail, id) => {
             hash
           }
         })
-        .then(() => {
-          return trx('account_history').insert({
-            account_id: id,
-            author: id,
-            action: 'UPDATE',
-            transaction: {
-              pending: true,
-              first_name,
-              last_name,
-              company_name,
-              email,
-              role,
-              phone,
-              phone_type,
-              phone_country
-            }
-          });
-        })
+
         .then(() => {
           return trx('login').insert({
             account_id: id,
@@ -72,6 +65,25 @@ module.exports = async (req, res, db, crypto, bcrypt, config, sendMail, id) => {
               config.COMPANY_SITE
             }>`
           });
+        })
+        .then(() => {
+          return saveHistorySnapshot(req, db, id, id, 'UPDATE', 'PENDING');
+          // return trx('account_history').insert({
+          //   account_id: id,
+          //   author: id,
+          //   action: 'UPDATE',
+          //   transaction: {
+          //     pending: true,
+          //     first_name,
+          //     last_name,
+          //     company_name,
+          //     email,
+          //     role,
+          //     phone,
+          //     phone_type,
+          //     phone_country
+          //   }
+          // });
         })
         .then(() => {
           res.send('Verification Email Sent');

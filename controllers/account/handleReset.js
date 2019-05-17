@@ -1,4 +1,12 @@
-module.exports = async (req, res, db, bcrypt, signToken, config) => {
+module.exports = async (
+  req,
+  res,
+  db,
+  bcrypt,
+  signToken,
+  config,
+  saveHistorySnapshot
+) => {
   try {
     // Resetting via the LOGIN ID and NOT the account_id!
     const login = await db
@@ -42,19 +50,20 @@ module.exports = async (req, res, db, bcrypt, signToken, config) => {
         reset_token_expiration: now
       })
       .then(id => {
-        return db('account_history')
-          .returning('account_id')
-          .insert({
-            account_id: id[0],
-            author: id[0],
-            action: 'UPDATE',
-            transaction: {
-              hash,
-              reset_token_hash: '',
-              updated_at: now,
-              reset_token_expiration: now
-            }
-          });
+        return saveHistorySnapshot(req, db, id[0], id[0], 'UPDATE');
+        // return db('account_history')
+        //   .returning('account_id')
+        //   .insert({
+        //     account_id: id[0],
+        //     author: id[0],
+        //     action: 'UPDATE',
+        //     transaction: {
+        //       hash,
+        //       reset_token_hash: '',
+        //       updated_at: now,
+        //       reset_token_expiration: now
+        //     }
+        //   });
       })
       .then(id => {
         return db('account_role')

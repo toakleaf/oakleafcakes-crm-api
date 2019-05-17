@@ -7,11 +7,13 @@ exports.up = function(knex, Promise) {
       .notNullable()
       .index();
     table
-      .bigInteger('author')
+      .bigInteger('author_id')
       .notNullable()
       .index();
     table.enu('action', ['CREATE', 'UPDATE', 'DELETE']).notNullable();
-    table.json('transaction');
+    table.enu('status', ['SUCCESS', 'ERROR', 'PENDING']).notNullable();
+    table.json('request');
+    table.json('state');
     table.timestamp('created_at').defaultTo(knex.fn.now());
   });
 };

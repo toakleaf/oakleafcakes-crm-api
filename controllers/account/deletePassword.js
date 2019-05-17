@@ -1,6 +1,15 @@
 const message = require('../email/messages/deletePassword');
 
-module.exports = async (req, res, db, bcrypt, crypto, sendMail, config) => {
+module.exports = async (
+  req,
+  res,
+  db,
+  bcrypt,
+  crypto,
+  sendMail,
+  config,
+  saveHistorySnapshot
+) => {
   //if req.body.lock === true then don't send the reset email, so user gets locked out of account.
   try {
     const DAYS_TO_EXPIRATION = 7;
@@ -29,27 +38,36 @@ module.exports = async (req, res, db, bcrypt, crypto, sendMail, config) => {
             })
       })
       .then(data => {
-        return db('account_history')
-          .insert({
-            account_id: data[0].account_id,
-            author: req.account.account_id,
-            action: 'DELETE',
-            transaction: {
-              hash: 'RANDOM',
-              updated_at: new Date(),
-              ...(req.body.lock
-                ? { is_active: false }
-                : {
-                    reset_token_hash: hash,
-                    reset_token_expiration: expiration.toISOString()
-                  })
-            }
-          })
-          .then(() => {
-            return data[0];
-          });
+        // return db('account_history')
+        //   .insert({
+        //     account_id: data[0].account_id,
+        //     author: req.account.account_id,
+        //     action: 'DELETE',
+        //     transaction: {
+        //       hash: 'RANDOM',
+        //       updated_at: new Date(),
+        //       ...(req.body.lock
+        //         ? { is_active: false }
+        //         : {
+        //             reset_token_hash: hash,
+        //             reset_token_expiration: expiration.toISOString()
+        //           })
+        //     }
+        //   })
+        // .then(() => {
+        return data[0];
+        // });
       });
+
     if (!ids.id) throw new Error('email not found');
+
+    const history = await saveHistorySnapshot(
+      req,
+      db,
+      ids.account_id,
+      req.account.account_id,
+      'DELETE'
+    );
 
     if (!req.body.lock) {
       const names = await db('account')

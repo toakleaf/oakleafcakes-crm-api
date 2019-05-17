@@ -1,6 +1,15 @@
 const message = require('../email/messages/passwordReset');
 
-module.exports = async (req, res, db, bcrypt, crypto, sendMail, config) => {
+module.exports = async (
+  req,
+  res,
+  db,
+  bcrypt,
+  crypto,
+  sendMail,
+  config,
+  saveHistorySnapshot
+) => {
   try {
     const MINUTES_TO_EXPIRATION = 45;
     const token = crypto
@@ -20,21 +29,30 @@ module.exports = async (req, res, db, bcrypt, crypto, sendMail, config) => {
         updated_at: now
       })
       .then(data => {
-        return db('account_history')
-          .insert({
-            account_id: data[0].account_id,
-            author: data[0].account_id,
-            action: 'UPDATE',
-            transaction: {
-              reset_token_hash: hash,
-              reset_token_expiration: expiration.toISOString(),
-              updated_at: now
-            }
-          })
-          .then(() => {
-            return data;
-          });
+        // return db('account_history')
+        //   .insert({
+        //     account_id: data[0].account_id,
+        //     author: data[0].account_id,
+        //     action: 'UPDATE',
+        //     transaction: {
+        //       reset_token_hash: hash,
+        //       reset_token_expiration: expiration.toISOString(),
+        //       updated_at: now
+        //     }
+        //   })
+        //   .then(() => {
+        return data;
+        // });
       });
+
+    const history = await saveHistorySnapshot(
+      req,
+      db,
+      data[0].account_id,
+      req.account.account_id,
+      'DELETE'
+    );
+
     // Resetting via the LOGIN ID and NOT the account_id!
     if (!ids[0].id) throw new Error('email not found');
     const names = await db('account')

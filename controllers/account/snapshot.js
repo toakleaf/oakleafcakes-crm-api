@@ -1,3 +1,4 @@
+//take a snapshot of state prior to every request that will alter it.
 module.exports = async (
   req,
   db,

@@ -41,13 +41,19 @@ module.exports = async (
       is_active: logins.some(l => l.is_active)
     };
 
-    return await db('account_history').insert({
-      account_id,
-      author_id,
-      action,
-      status,
-      request: req.body,
-      state
+    return new Promise((resolve, reject) => {
+      db('account_history')
+        .insert({
+          account_id,
+          author_id,
+          action,
+          status,
+          request: req.body,
+          state
+        })
+        .then(() => {
+          return resolve(state);
+        });
     });
   } catch (err) {
     console.error(err);

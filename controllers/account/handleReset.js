@@ -1,4 +1,4 @@
-module.exports = async (req, res, db, bcrypt, signToken, config) => {
+module.exports = async (req, res, db, bcrypt, signToken, config, snapshot) => {
   try {
     // Resetting via the LOGIN ID and NOT the account_id!
     const login = await db
@@ -42,21 +42,6 @@ module.exports = async (req, res, db, bcrypt, signToken, config) => {
         reset_token_expiration: now
       })
       .then(id => {
-        return db('account_history')
-          .returning('account_id')
-          .insert({
-            account_id: id[0],
-            author: id[0],
-            action: 'UPDATE',
-            transaction: {
-              hash,
-              reset_token_hash: '',
-              updated_at: now,
-              reset_token_expiration: now
-            }
-          });
-      })
-      .then(id => {
         return db('account_role')
           .where('account_id', id[0])
           .select(['role', 'account_id']);
@@ -64,6 +49,14 @@ module.exports = async (req, res, db, bcrypt, signToken, config) => {
       .then(data => data[0]);
 
     if (!data.account_id) throw new Error('failed to update login');
+
+    const history = await snapshot(
+      req,
+      db,
+      data.account_id,
+      data.account_id,
+      'UPDATE'
+    );
 
     const token = signToken(data.account_id, data.role);
     return res.header('x-auth-token', token).json('success');

@@ -1,19 +1,10 @@
-module.exports = (req, res, db) => {
+module.exports = (req, res, db, snapshot) => {
   let deletedPrimary = null;
 
   db.transaction(trx => {
-    trx('account_history')
-      .insert({
-        account_id: req.params.id,
-        author: req.account.account_id,
-        action: 'DELETE',
-        transaction: req.body
-      })
-      .then(() => {
-        return db('login')
-          .select('email')
-          .where({ account_id: req.params.id });
-      })
+    trx('login')
+      .select('email')
+      .where({ account_id: req.params.id })
       .then(logins => {
         const queries = [];
 
@@ -54,6 +45,15 @@ module.exports = (req, res, db) => {
                 .update('is_primary', true);
             });
         }
+      })
+      .then(() => {
+        return snapshot(
+          req,
+          db,
+          req.params.id,
+          req.account.account_id,
+          'DELETE'
+        );
       })
       .then(() => {
         trx.commit();

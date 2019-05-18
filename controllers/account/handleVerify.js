@@ -1,6 +1,6 @@
 const updatePendingTransaction = require('./updatePendingTransaction');
 
-module.exports = async (req, res, db, bcrypt, signToken, config) => {
+module.exports = async (req, res, db, bcrypt, signToken, config, snapshot) => {
   try {
     const activation_hash = await db
       .select('*')
@@ -24,11 +24,12 @@ module.exports = async (req, res, db, bcrypt, signToken, config) => {
       .select('*')
       .where({
         account_id: req.params.id,
-        action: 'UPDATE'
+        action: 'UPDATE',
+        status: 'PENDING'
       })
-      .then(data => data[data.length - 1]);
+      .then(data => data[data.length ? data.length - 1 : 0]);
 
-    if (lastTransaction && lastTransaction.transaction.pending) {
+    if (lastTransaction && lastTransaction.status === 'PENDING') {
       //if account has edit since user claimed, edits made during
       //account claiming process will be ignored.  Otherwise will update account.
 
@@ -36,13 +37,9 @@ module.exports = async (req, res, db, bcrypt, signToken, config) => {
         await updatePendingTransaction(
           db,
           req.params.id,
-          lastTransaction.transaction
+          lastTransaction.request,
+          snapshot
         );
-        await db('account_history')
-          .where('id', lastTransaction.id)
-          .update({
-            transaction: { ...lastTransaction.transaction, pending: false }
-          });
       } catch (err) {
         console.error(err);
       }
@@ -61,6 +58,14 @@ module.exports = async (req, res, db, bcrypt, signToken, config) => {
     const role = await db('account_role')
       .select('role')
       .where('account_id', req.params.id);
+
+    const history = await snapshot(
+      req,
+      db,
+      req.params.id,
+      req.params.id,
+      'UPDATE'
+    );
 
     const token = signToken(req.params.id, role[0].role);
     return res.header('x-auth-token', token).json('success');

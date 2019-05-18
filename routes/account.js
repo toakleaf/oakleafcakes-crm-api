@@ -36,6 +36,7 @@ const handleReset = require('../controllers/account/handleReset');
 const handleSearch = require('../controllers/account/handleSearch');
 const handleHistory = require('../controllers/account/handleHistory');
 const signToken = require('../controllers/account/signToken');
+const snapshot = require('../controllers/account/snapshot');
 const sendMail = require('../controllers/email/sendMail');
 
 //Try to use dependency injection where possible.
@@ -59,8 +60,17 @@ router
   .route('/register') //for accounts registering accounts
   .post([auth, employee, valRegister], (req, res) => {
     if (req.body.password)
-      createAccountWithLogin(req, res, db, crypto, bcrypt, config, sendMail);
-    else createAccount(req, res, db);
+      createAccountWithLogin(
+        req,
+        res,
+        db,
+        crypto,
+        bcrypt,
+        config,
+        sendMail,
+        snapshot
+      );
+    else createAccount(req, res, db, snapshot);
   })
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');
@@ -69,7 +79,7 @@ router
 router
   .route('/signup') //for general public registering themselves or claiming existing accounts (for previous non-ecommerce customers)
   .post([valSignUp], (req, res) =>
-    handleSignUp(req, res, db, crypto, bcrypt, config, sendMail)
+    handleSignUp(req, res, db, crypto, bcrypt, config, sendMail, snapshot)
   )
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');
@@ -78,7 +88,7 @@ router
 router
   .route('/forgot')
   .post(valForgot, (req, res) =>
-    handleForgot(req, res, db, bcrypt, crypto, sendMail, config)
+    handleForgot(req, res, db, bcrypt, crypto, sendMail, config, snapshot)
   )
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');
@@ -87,7 +97,7 @@ router
 router
   .route('/password')
   .delete(auth, admin, valDeletePassword, (req, res) =>
-    deletePassword(req, res, db, bcrypt, crypto, sendMail, config)
+    deletePassword(req, res, db, bcrypt, crypto, sendMail, config, snapshot)
   )
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');
@@ -95,14 +105,18 @@ router
 
 router
   .route('/email/:id')
-  .delete(auth, valDeleteEmail, (req, res) => deleteEmail(req, res, db))
+  .delete(auth, valDeleteEmail, (req, res) =>
+    deleteEmail(req, res, db, snapshot)
+  )
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');
   });
 
 router
   .route('/phone/:id')
-  .delete(auth, valDeletePhone, (req, res) => deletePhone(req, res, db))
+  .delete(auth, valDeletePhone, (req, res) =>
+    deletePhone(req, res, db, snapshot)
+  )
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');
   });
@@ -110,7 +124,7 @@ router
 router
   .route('/verify/:id/:token')
   .post(valVerify, (req, res) =>
-    handleVerify(req, res, db, bcrypt, signToken, config)
+    handleVerify(req, res, db, bcrypt, signToken, config, snapshot)
   )
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');
@@ -119,7 +133,7 @@ router
 router
   .route('/reset/:id/:token')
   .post(valReset, (req, res) =>
-    handleReset(req, res, db, bcrypt, signToken, config)
+    handleReset(req, res, db, bcrypt, signToken, config, snapshot)
   )
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');
@@ -146,9 +160,9 @@ router
 router
   .route('/:id')
   .get(auth, (req, res) => handleGet(req, res, db))
-  .delete([auth, admin], (req, res) => handleDelete(req, res, db))
+  .delete([auth, admin], (req, res) => handleDelete(req, res, db, snapshot))
   .put([auth, valUpdate], (req, res) =>
-    handleUpdate(req, res, db, crypto, bcrypt, config)
+    handleUpdate(req, res, db, crypto, bcrypt, config, snapshot)
   )
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');

@@ -1,6 +1,16 @@
 const message = require('../email/messages/verifyAccount');
 
-module.exports = async (req, res, db, crypto, bcrypt, config, sendMail, id) => {
+module.exports = async (
+  req,
+  res,
+  db,
+  crypto,
+  bcrypt,
+  config,
+  sendMail,
+  id,
+  snapshot
+) => {
   let {
     email,
     password,
@@ -22,40 +32,11 @@ module.exports = async (req, res, db, crypto, bcrypt, config, sendMail, id) => {
     const activation_hash = await bcrypt.hash(token, config.BCRYPT_COST_FACTOR);
 
     await db.transaction(trx => {
-      trx('account_history')
+      trx('login')
         .insert({
           account_id: id,
-          author: id,
-          action: 'CREATE',
-          transaction: {
-            email,
-            hash
-          }
-        })
-        .then(() => {
-          return trx('account_history').insert({
-            account_id: id,
-            author: id,
-            action: 'UPDATE',
-            transaction: {
-              pending: true,
-              first_name,
-              last_name,
-              company_name,
-              email,
-              role,
-              phone,
-              phone_type,
-              phone_country
-            }
-          });
-        })
-        .then(() => {
-          return trx('login').insert({
-            account_id: id,
-            email,
-            hash
-          });
+          email,
+          hash
         })
         .then(() => {
           return trx('activation_hash').insert({
@@ -74,12 +55,16 @@ module.exports = async (req, res, db, crypto, bcrypt, config, sendMail, id) => {
           });
         })
         .then(() => {
+          return snapshot(req, db, id, id, 'UPDATE', 'PENDING');
+        })
+        .then(() => {
           res.send('Verification Email Sent');
         })
         .then(trx.commit)
         .catch(trx.rollback);
     });
   } catch (err) {
+    console.error(err);
     res.status(503).send('Failed to create account.' + err);
   }
 };

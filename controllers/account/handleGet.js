@@ -1,7 +1,7 @@
 module.exports = async (req, res, db) => {
   const id = req.params.id ? req.params.id : req.account.account_id;
   try {
-    const account = await db
+    const account = await db('account')
       .select(
         'account.id',
         'account.first_name',
@@ -11,21 +11,17 @@ module.exports = async (req, res, db) => {
         'account.updated_at',
         'account_role.role'
       )
-      .from('account')
       .where('id', id)
       .leftJoin('account_role', 'account.id', 'account_role.account_id')
       .then(data => data[0]);
-    const emails = await db
+    const emails = await db('email')
       .select('*')
-      .from('email')
       .where('account_id', account.id);
-    const phones = await db
+    const phones = await db('phone')
       .select('*')
-      .from('phone')
       .where('account_id', account.id);
-    const logins = await db
+    const logins = await db('login')
       .select('id', 'email', 'is_active', 'created_at', 'updated_at')
-      .from('login')
       .where('account_id', account.id);
 
     res.json({

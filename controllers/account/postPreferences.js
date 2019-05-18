@@ -11,7 +11,7 @@ module.exports = async (req, res, db) => {
     .then(data => data[0])
     .catch(err => res.status(401).json('bad credentials' + err));
 
-  if (preferences.id) {
+  if (preferences) {
     return db('preferences')
       .update({
         preferences: {

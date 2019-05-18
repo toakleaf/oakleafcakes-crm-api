@@ -9,6 +9,7 @@ const valSignUp = require('../middleware/validation/account/valSignUp');
 const valUpdate = require('../middleware/validation/account/valUpdate');
 const valSearch = require('../middleware/validation/account/valSearch');
 const valHistory = require('../middleware/validation/account/valHistory');
+const valPreferences = require('../middleware/validation/account/valPreferences');
 const valForgot = require('../middleware/validation/account/valForgot');
 const valDeletePassword = require('../middleware/validation/account/valDeletePassword');
 const valDeleteEmail = require('../middleware/validation/account/valDeleteEmail');
@@ -35,6 +36,8 @@ const handleVerify = require('../controllers/account/handleVerify');
 const handleReset = require('../controllers/account/handleReset');
 const handleSearch = require('../controllers/account/handleSearch');
 const handleHistory = require('../controllers/account/handleHistory');
+const getPreferences = require('../controllers/account/getPreferences');
+const postPreferences = require('../controllers/account/postPreferences');
 const signToken = require('../controllers/account/signToken');
 const snapshot = require('../controllers/account/snapshot');
 const sendMail = require('../controllers/email/sendMail');
@@ -150,9 +153,15 @@ router
 
 router
   .route('/history/:id')
-  .get([auth, employee, valSearch], (req, res) =>
-    handleHistory(req, res, db, config)
-  )
+  .get([auth, employee, valSearch], (req, res) => handleHistory(req, res, db))
+  .all((req, res) => {
+    res.status(405).send('request method not supported for this page');
+  });
+
+router
+  .route('/preferences/')
+  .get([auth], (req, res) => getPreferences(req, res, db))
+  .post([auth, valPreferences], (req, res) => postPreferences(req, res, db))
   .all((req, res) => {
     res.status(405).send('request method not supported for this page');
   });

@@ -6,7 +6,7 @@ module.exports = (req, res, db) => {
     .where('account_id', req.params.id)
     .limit(count ? count : 100)
     .offset(offset > 0 ? offset : 0)
-    .orderBy(orderby ? orderby : 'created_at', order ? order : 'asc')
+    .orderBy(orderby ? orderby : 'created_at', order ? order : 'desc')
     .then(data => {
       res.json(data);
     })

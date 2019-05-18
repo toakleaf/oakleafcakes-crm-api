@@ -24,6 +24,10 @@ module.exports = async (
       .where('id', account_id)
       .leftJoin('account_role', 'account.id', 'account_role.account_id')
       .then(data => data[0]);
+    const author = await db('account')
+      .select('id', 'first_name', 'last_name')
+      .where('id', author_id)
+      .then(data => data[0]);
     const emails = await db('email')
       .select('*')
       .where('account_id', account_id);
@@ -41,12 +45,14 @@ module.exports = async (
       logins,
       is_active: logins.some(l => l.is_active)
     };
-
     return new Promise((resolve, reject) => {
       db('account_history')
         .insert({
           account_id,
           author_id,
+          ...(author
+            ? { author_name: author.first_name + ' ' + author.last_name }
+            : {}),
           action,
           status,
           request: req.body,

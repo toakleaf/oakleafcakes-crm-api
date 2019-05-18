@@ -10,6 +10,7 @@ exports.up = function(knex, Promise) {
       .bigInteger('author_id')
       .notNullable()
       .index();
+    table.string('author_name').nullable();
     table.enu('action', ['CREATE', 'UPDATE', 'DELETE']).notNullable();
     table.enu('status', ['SUCCESS', 'ERROR', 'PENDING']).notNullable();
     table.json('request');

@@ -1,7 +1,7 @@
 module.exports = (req, res, db) => {
   db('preferences')
-    .select('preferences')
-    .where('account_id', req.params.id)
+    .select('*')
+    .where('account_id', req.account.account_id)
     .then(data => {
       res.json(data[0]);
     })

@@ -159,7 +159,7 @@ router
   });
 
 router
-  .route('/preferences/:id')
+  .route('/preferences/')
   .get([auth], (req, res) => getPreferences(req, res, db))
   .post([auth, valPreferences], (req, res) => postPreferences(req, res, db))
   .all((req, res) => {

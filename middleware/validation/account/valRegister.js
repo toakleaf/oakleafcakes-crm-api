@@ -1,10 +1,13 @@
 const Joi = require('joi');
 const { MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH } = require('../../../config');
+
 module.exports = (req, res, next) => {
+  console.log(req.body);
   const schema = Joi.object().keys({
     email: Joi.string()
       .email({ minDomainAtoms: 2 })
-      .required(),
+      .allow(null)
+      .optional(),
     password: Joi.string()
       .min(MIN_PASSWORD_LENGTH)
       .max(MAX_PASSWORD_LENGTH)
@@ -32,6 +35,10 @@ module.exports = (req, res, next) => {
     phone_type: Joi.string()
       .max(20)
       .allow(null)
+      .optional(),
+    phone_country: Joi.string()
+      .max(20)
+      .allow(null)
       .optional()
   });
 
@@ -44,14 +51,15 @@ module.exports = (req, res, next) => {
       last_name: req.body.last_name,
       company_name: req.body.company_name,
       phone: req.body.phone,
-      ...(req.body.phone ? { phone_type: req.body.phone_type } : {})
+      ...(req.body.phone ? { phone_type: req.body.phone_type } : {}),
+      ...(req.body.phone ? { phone_country: req.body.phone_country } : {})
     },
     schema
   );
   if (error) return res.status(400).send(error.details[0].message);
 
   //email can be entered any-case, but always saved lowercase
-  req.body.email = req.body.email ? req.body.email.toLowerCase() : null;
+  if (req.body.email) req.body.email = req.body.email.toLowerCase();
   //role can be entered any-case, but always saved uppercase
   if (req.body.role) req.body.role = req.body.role.toUpperCase();
   //phone_type can be entered any-case, but always saved lowercase

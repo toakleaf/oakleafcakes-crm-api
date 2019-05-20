@@ -119,11 +119,18 @@ module.exports = async (req, res, db) => {
       .then(data => data);
 
     //remove null value if no email or phone
-    if (accounts.length && accounts[0].emails.length === 1) {
-      accounts[0].emails = accounts[0].emails.filter(a => a.id);
-    }
-    if (accounts.length && accounts[0].phones.length === 1) {
-      accounts[0].phones = accounts[0].phones.filter(a => a.id);
+    if (accounts.length) {
+      accounts.forEach((a, i) => {
+        if (a.emails.length === 1) {
+          accounts[i].emails = accounts[i].emails.filter(e => e.id);
+        }
+        if (a.phones.length === 1) {
+          accounts[i].phones = accounts[i].phones.filter(p => p.id);
+        }
+        if (a.logins.length === 1) {
+          accounts[i].logins = accounts[i].logins.filter(l => l.id);
+        }
+      });
     }
 
     // console.log(accounts[0].emails);

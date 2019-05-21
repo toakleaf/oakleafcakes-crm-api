@@ -1,4 +1,4 @@
-FROM node:11.13
+FROM node:12.2
 
 WORKDIR /usr/src/oakleafcakes-crm-api
 

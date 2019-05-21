@@ -2,7 +2,6 @@ const Joi = require('joi');
 const { MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH } = require('../../../config');
 
 module.exports = (req, res, next) => {
-  console.log(req.body);
   const schema = Joi.object().keys({
     email: Joi.string()
       .email({ minDomainAtoms: 2 })

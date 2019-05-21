@@ -30,6 +30,7 @@ module.exports = {
     refresh_token: process.env.GMAIL_REFRESH_TOKEN,
     access_token: process.env.GMAIL_ACCESS_TOKEN //this might expire?
   },
+  GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
   MIN_PASSWORD_LENGTH: 12,
   MAX_PASSWORD_LENGTH: 64
 };

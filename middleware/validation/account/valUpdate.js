@@ -70,11 +70,11 @@ module.exports = (req, res, next) => {
       .items(
         Joi.object().keys({
           new_phone: Joi.string()
-            .max(20)
+            .max(30)
             .allow(null)
             .optional(),
           current_phone: Joi.string()
-            .max(20)
+            .max(30)
             .allow(null)
             .optional(),
           phone_type: Joi.string()
